@@ -1,0 +1,13 @@
+{
+  "start": {
+    "treasury": 500000,
+    "division": "D3",
+    "stadiumLevel": 0,
+    "population": 20000,
+    "supporterShare": 0.2,
+    "residentSatisfaction": 70,
+    "formation": "4-4-2",
+    "style": "balanced",
+    "clubColors": ["#15803d", "#ffffff"]
+  }
+}
