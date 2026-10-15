@@ -404,6 +404,12 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Faillite après 4 semaines de suite dans le rouge ; le bilan de la partie est gardé à part (parties précédentes, onglet Club).
 - L'aide municipale contre la spirale négative est reportée à M7.
 
+**Équilibrage et finitions (M7)**
+- `npm run simulate` fait jouer 3 joueurs automatiques (équilibré, tout sur le stade, tout sur les joueurs) sur 100 parties de 5 saisons ; le rapport est dans `docs/EQUILIBRAGE.md`.
+- Valeurs modifiées : salaires plus raides avec la note (exposant 3, 7 000 €/mois pour une note de 10 ; masse de départ toujours ≈ 40 000 €/sem.) ; contrats de départ de 2 à 4 saisons ; joueurs du marché de ±4 autour du niveau de la division ; concurrent direct = 3 points au plus et rang voisin, à partir de la 6e journée ; montée ou maintien « en jeu » = 3 points au plus de la ligne, dans les 3 dernières journées.
+- Résultat : faillite dans 2 % des parties pour la stratégie équilibrée, 11 % pour « tout sur le stade » (qui plafonne en Division 3), 20 % pour « tout sur les joueurs » (avec moins d'argent). L'aide municipale n'est pas nécessaire.
+- Création du club (nom et 2 couleurs), aide à l'installation dans Safari, icônes définitives, rappel d'export toutes les 5 semaines de jeu, temps de jeu affiché dans l'onglet Club.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**
