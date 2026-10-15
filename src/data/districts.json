@@ -1,0 +1,34 @@
+[
+  {
+    "id": "stade",
+    "slots": 4,
+    "unlock": {},
+    "commerceFactor": 1,
+    "transportFactor": 1,
+    "nuisance": true
+  },
+  {
+    "id": "faubourg",
+    "slots": 5,
+    "unlock": { "population": 26000 },
+    "commerceFactor": 0.5,
+    "transportFactor": 1,
+    "nuisance": false
+  },
+  {
+    "id": "gare",
+    "slots": 4,
+    "unlock": { "division": "D2" },
+    "commerceFactor": 0.5,
+    "transportFactor": 2,
+    "nuisance": false
+  },
+  {
+    "id": "nouveau",
+    "slots": 6,
+    "unlock": { "division": "D1", "population": 40000 },
+    "commerceFactor": 0.5,
+    "transportFactor": 1,
+    "nuisance": false
+  }
+]

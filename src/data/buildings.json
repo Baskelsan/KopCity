@@ -1,0 +1,49 @@
+{
+  "stadium": {
+    "cost": 400000,
+    "upkeep": 5000,
+    "weeks": 6,
+    "maxLevel": 3,
+    "capacity": 2000,
+    "satisfaction": -5
+  },
+  "bar": {
+    "cost": 60000,
+    "upkeep": 800,
+    "weeks": 2,
+    "maxLevel": 1,
+    "revenuePerSpectator": 1.5,
+    "nextBarFactor": 0.6,
+    "nuisance": -2
+  },
+  "shop": {
+    "cost": 90000,
+    "upkeep": 1200,
+    "weeks": 3,
+    "maxLevel": 1,
+    "revenuePerSupporter": 1
+  },
+  "housing": {
+    "cost": 150000,
+    "upkeep": 1500,
+    "weeks": 4,
+    "maxLevel": 1,
+    "population": 2000,
+    "nuisance": -2
+  },
+  "transport": {
+    "cost": 200000,
+    "upkeep": 2000,
+    "weeks": 4,
+    "maxLevel": 1,
+    "accessCap": 2500,
+    "satisfaction": 5
+  },
+  "academy": {
+    "cost": 250000,
+    "upkeep": 3000,
+    "weeks": 6,
+    "maxLevel": 3,
+    "unique": true
+  }
+}

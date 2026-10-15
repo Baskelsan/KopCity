@@ -8,46 +8,123 @@
     "residentSatisfaction": 70,
     "formation": "4-4-2",
     "style": "balanced",
-    "clubColors": ["#15803d", "#ffffff"]
+    "clubColors": [
+      "#15803d",
+      "#ffffff"
+    ]
   },
   "players": {
-    "squadComposition": { "GAR": 2, "DEF": 6, "MIL": 6, "ATT": 4 },
-    "divisionLevel": { "D3": 10, "D2": 13, "D1": 16 },
+    "squadComposition": {
+      "GAR": 2,
+      "DEF": 6,
+      "MIL": 6,
+      "ATT": 4
+    },
+    "divisionLevel": {
+      "D3": 10,
+      "D2": 13,
+      "D1": 16
+    },
     "levelSpread": 2,
     "statNoise": 1.5,
     "positionProfile": {
-      "GAR": { "att": 2, "def": 0, "pas": -3, "phy": 0 },
-      "DEF": { "att": -3, "def": 2, "pas": -1, "phy": 1 },
-      "MIL": { "att": -1, "def": -1, "pas": 2, "phy": 0 },
-      "ATT": { "att": 2, "def": -3, "pas": 0, "phy": 1 }
+      "GAR": {
+        "att": 2,
+        "def": 0,
+        "pas": -3,
+        "phy": 0
+      },
+      "DEF": {
+        "att": -3,
+        "def": 2,
+        "pas": -1,
+        "phy": 1
+      },
+      "MIL": {
+        "att": -1,
+        "def": -1,
+        "pas": 2,
+        "phy": 0
+      },
+      "ATT": {
+        "att": 2,
+        "def": -3,
+        "pas": 0,
+        "phy": 1
+      }
     },
     "ageMin": 17,
     "ageMax": 34,
     "potentialGapByAge": [
-      { "maxAge": 20, "gap": 7 },
-      { "maxAge": 23, "gap": 5 },
-      { "maxAge": 26, "gap": 2 },
-      { "maxAge": 99, "gap": 0 }
+      {
+        "maxAge": 20,
+        "gap": 7
+      },
+      {
+        "maxAge": 23,
+        "gap": 5
+      },
+      {
+        "maxAge": 26,
+        "gap": 2
+      },
+      {
+        "maxAge": 99,
+        "gap": 0
+      }
     ],
     "starsDivisor": 4,
     "starsError": 1,
     "startMorale": 70,
     "contractYearsMin": 1,
     "contractYearsMax": 3,
-    "salary": { "monthlyAtReference": 7700, "referenceRating": 10, "exponent": 2, "rounding": 100 }
+    "salary": {
+      "monthlyAtReference": 7700,
+      "referenceRating": 10,
+      "exponent": 2,
+      "rounding": 100
+    }
   },
   "strength": {
     "lineWeights": {
-      "GAR": { "att": 0.7, "def": 0.1, "pas": 0.1, "phy": 0.1 },
-      "DEF": { "att": 0, "def": 0.6, "pas": 0.15, "phy": 0.25 },
-      "MIL": { "att": 0.15, "def": 0.15, "pas": 0.5, "phy": 0.2 },
-      "ATT": { "att": 0.6, "def": 0, "pas": 0.2, "phy": 0.2 }
+      "GAR": {
+        "att": 0.7,
+        "def": 0.1,
+        "pas": 0.1,
+        "phy": 0.1
+      },
+      "DEF": {
+        "att": 0,
+        "def": 0.6,
+        "pas": 0.15,
+        "phy": 0.25
+      },
+      "MIL": {
+        "att": 0.15,
+        "def": 0.15,
+        "pas": 0.5,
+        "phy": 0.2
+      },
+      "ATT": {
+        "att": 0.6,
+        "def": 0,
+        "pas": 0.2,
+        "phy": 0.2
+      }
     },
     "outOfPositionFactor": 0.8,
     "outOfPositionGoalkeeperFactor": 0.4,
     "midfieldSupport": 0.3,
-    "styleShift": { "offensive": 0.1, "balanced": 0, "defensive": -0.1 },
-    "lateShift": { "keep": 0, "force": 0.2, "manage": -0.2 },
+    "styleShift": {
+      "offensive": 0.1,
+      "balanced": 0,
+      "defensive": -0.1
+    },
+    "lateShift": {
+      "keep": 0,
+      "force": 0.2,
+      "manage": -0.2
+    },
     "moraleEffect": 0.1,
     "homeAdvantage": 0.05,
     "opponentLevelSpread": 1.5
@@ -70,7 +147,12 @@
     "halftimeMinute": 45,
     "lateDecisionMinute": 70,
     "fullTimeMinute": 90,
-    "scorerWeights": { "GAR": 0, "DEF": 0.5, "MIL": 1.5, "ATT": 3 }
+    "scorerWeights": {
+      "GAR": 0,
+      "DEF": 0.5,
+      "MIL": 1.5,
+      "ATT": 3
+    }
   },
   "morale": {
     "win": 5,
@@ -79,5 +161,14 @@
     "notPlayed": -3,
     "min": 0,
     "max": 100
+  },
+  "city": {
+    "baseCapacity": 6000,
+    "baseAccessCap": 7000,
+    "stadiumBaseUpkeep": 4000,
+    "baseSatisfaction": 70,
+    "stadiumExtensionMinSatisfaction": 40,
+    "maxConstructions": 2,
+    "demolitionRefund": 0.25
   }
 }
