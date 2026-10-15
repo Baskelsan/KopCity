@@ -395,6 +395,15 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Mercato : 6 à 8 joueurs à l'intersaison et en semaine 9 (fenêtre d'hiver, qui se referme en repartant). Valeur selon la note et l'âge (note 10 à 25 ans : 150 000 €) ; une vente rapporte 80 % de la valeur, tout de suite.
 - À l'intersaison, les blessés sont guéris et le moral se rapproche de 70.
 
+**Événements, objectifs et fin de partie (M6)**
+- Un tirage par semaine à partir de la 3e, 1 chance sur 3, jamais deux fois de suite le même événement. L'événement arrête « Avancer » ; un choix qui coûte plus que la trésorerie est refusé.
+- Chiffres des 12 événements : star blessée (jouer : 40 % de risque de 3 à 5 semaines ; reposer : 1 semaine) ; voisins excédés (mur −30 000 €, +10 ; ignorer −10) ; subvention (+80 000 € avec engagement de construire un transport dans la saison, sinon remboursement et riverains −10) ; offre pour un joueur noté au moins 2 de plus que le niveau de la division (vendre à 120 % de sa valeur ; refuser : moral +15) ; sponsor maillot après 4 victoires (+6 000 €/sem. pendant 8 sem. ou +3 000 €/sem. pendant 25 sem.) ; jeune prodige (centre ≥ 1) ; dispute au vestiaire si moral moyen < 50 (réunion +10 ; sanction +20 000 €, moral −5) ; pelouse abîmée (−20 000 € ou −5 % de force à domicile pendant 2 matchs) ; match amical rémunéré (+30 000 €, 25 % de risque de blessure de 1 à 3 sem.) ; grève des transports (affluence −30 % un match ou navettes −15 000 €) ; inspection si capacité > 8 000 (−40 000 € ou 50 % de risque d'amende de 80 000 €) ; série de 3 défaites (défendre l'équipe : moral +10 ; s'excuser : supporters +1 point).
+- Les comptes ont une ligne « Transferts et événements » en recettes et en dépenses, pour que le récapitulatif colle à la trésorerie.
+- Objectifs : un sportif (top 5, top 3 ou invaincu à domicile 5 matchs de suite), un financier (300 000 € en caisse ou résultat positif), un urbain (riverains à 60 ou 2 bâtiments livrés). 50 000 € par objectif atteint (×1,5 en D2, ×2 en Élite) ; les trois atteints donnent +10 % de sponsors la saison suivante.
+- Un titre = finir premier de sa division, quelle qu'elle soit.
+- Faillite après 4 semaines de suite dans le rouge ; le bilan de la partie est gardé à part (parties précédentes, onglet Club).
+- L'aide municipale contre la spirale négative est reportée à M7.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**
