@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { texts } from './i18n';
+import { describeLog } from './logText';
+import { CityScreen } from './screens/CityScreen';
 import { ClubScreen } from './screens/ClubScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MatchScreen } from './screens/MatchScreen';
@@ -7,8 +9,8 @@ import { SquadScreen } from './screens/SquadScreen';
 import { UpdateBanner } from './UpdateBanner';
 import { createGame, useGame } from './useGame';
 
-type Tab = 'home' | 'squad' | 'matches' | 'club';
-const TABS: Tab[] = ['home', 'squad', 'matches', 'club'];
+type Tab = 'home' | 'squad' | 'city' | 'matches' | 'club';
+const TABS: Tab[] = ['home', 'squad', 'city', 'matches', 'club'];
 
 export function App() {
   const [tab, setTab] = useState<Tab>('home');
@@ -21,6 +23,17 @@ export function App() {
   useEffect(() => {
     if (matchInProgress) setTab('matches');
   }, [matchInProgress]);
+
+  // Les nouvelles entrées du journal (chantier livré, quartier débloqué) s'affichent en message.
+  const logLength = state?.log.length;
+  const previousLogLength = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (logLength === undefined) return;
+    const previous = previousLogLength.current;
+    previousLogLength.current = logLength;
+    if (previous === undefined || logLength <= previous || !state) return;
+    setMessage(state.log.slice(previous).map(describeLog).join(' '));
+  }, [logLength]);
 
   useEffect(() => {
     if (!message) return;
@@ -40,7 +53,8 @@ export function App() {
             </button>
           </div>
         )}
-        {state && tab === 'home' && <HomeScreen state={state} />}
+        {state && tab === 'home' && <HomeScreen state={state} dispatch={dispatch} />}
+        {state && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
         {state && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}
         {state && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} />}
         {state && tab === 'club' && (

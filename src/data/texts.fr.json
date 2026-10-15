@@ -13,6 +13,7 @@
   "tabs": {
     "home": "Accueil",
     "squad": "Effectif",
+    "city": "Ville",
     "matches": "Matchs",
     "club": "Club"
   },
@@ -152,5 +153,94 @@
     "later": "Plus tard",
     "offlineReady": "Prêt à jouer hors ligne.",
     "close": "OK"
+  },
+  "divisions": {
+    "D3": "Division 3",
+    "D2": "Division 2",
+    "D1": "Élite"
+  },
+  "week": {
+    "next": "Semaine suivante",
+    "journal": "Journal",
+    "emptyJournal": "Rien pour l'instant.",
+    "matchInProgress": "Termine d'abord le match en cours (onglet Matchs)."
+  },
+  "log": {
+    "constructionDelivered": "Chantier livré : {building} (niveau {level}).",
+    "districtUnlocked": "Nouveau quartier débloqué : {district} !"
+  },
+  "buildings": {
+    "stadium": "Stade",
+    "bar": "Bar / brasserie",
+    "shop": "Boutique du club",
+    "housing": "Logements",
+    "transport": "Parking / arrêt de transport",
+    "academy": "Centre de formation"
+  },
+  "city": {
+    "summary": "La ville",
+    "population": "Habitants",
+    "supporters": "Supporters",
+    "capacity": "Capacité du stade",
+    "accessCap": "Plafond d'accès",
+    "satisfaction": "Satisfaction des riverains",
+    "satisfactionValue": "{current} (cible {target})",
+    "upkeep": "Entretien",
+    "constructions": "Chantiers en cours",
+    "constructionsValue": "{count} / {max}",
+    "stadium": "Stade",
+    "stadiumLevel": "Palier {level} / {max} · {seats} places",
+    "extendStadium": "Agrandir le stade",
+    "districts": {
+      "stade": "Quartier du stade",
+      "faubourg": "Faubourg",
+      "gare": "Quartier de la gare",
+      "nouveau": "Nouveau quartier"
+    },
+    "traits": {
+      "stade": "Bars et boutique à plein effet. Bars et logements y gênent les riverains.",
+      "faubourg": "Aucune nuisance pour les riverains : idéal pour les logements.",
+      "gare": "Un parking ou arrêt de transport y compte double.",
+      "nouveau": "Le plus grand quartier, pour la fin de partie."
+    },
+    "locked": "Verrouillé : {condition}",
+    "unlockPopulation": "{population} habitants",
+    "unlockDivision": "montée en {division}",
+    "unlockJoin": " et ",
+    "emptySlot": "Libre",
+    "underConstruction": "Chantier · {weeks} sem.",
+    "level": "Niveau {level}",
+    "buildTitle": "Construire",
+    "cost": "Coût",
+    "duration": "Durée",
+    "weeks": "{weeks} sem.",
+    "perWeek": "{amount} / sem.",
+    "launch": "Lancer le chantier · {cost}",
+    "upgrade": "Passer au niveau {level} · {cost}",
+    "demolish": "Démolir (+{refund})",
+    "confirmDemolish": "Démolir « {name} » ? Tu récupères {refund}.",
+    "inProgress": "Chantier en cours : livraison dans {weeks} sem.",
+    "close": "Fermer",
+    "effects": {
+      "population": "Habitants : {before} → {after}",
+      "capacity": "Capacité : {before} → {after} places",
+      "accessCap": "Plafond d'accès : {before} → {after}",
+      "satisfaction": "Satisfaction cible : {before} → {after}",
+      "barRate": "{rate} par spectateur à chaque match à domicile",
+      "shopRevenue": "Boutique : {amount} par semaine",
+      "academy": "Centre de formation niveau {level} : meilleurs jeunes, progression plus rapide",
+      "upkeep": "Entretien : {before} → {after} / sem."
+    },
+    "refusals": {
+      "districtLocked": "Ce quartier n'est pas encore débloqué.",
+      "slotOccupied": "Cet emplacement est déjà occupé.",
+      "underConstruction": "Un chantier est déjà en cours ici.",
+      "maxConstructions": "Déjà 2 chantiers en cours.",
+      "notEnoughMoney": "Trésorerie insuffisante.",
+      "uniqueBuilding": "Un seul centre de formation par ville.",
+      "maxLevel": "Niveau maximum atteint.",
+      "lowSatisfaction": "Riverains trop mécontents (moins de 40) pour agrandir le stade.",
+      "unknownSlot": "Emplacement introuvable."
+    }
   }
 }
