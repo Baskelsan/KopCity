@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -147,9 +147,14 @@ export interface Division {
   table: TableRow[];
 }
 
+/** Identifiant du club du joueur dans les calendriers et classements. */
+export const MY_TEAM_ID = 'me';
+
 export interface League {
   myDivision: DivisionId;
   divisions: Division[];
+  /** Adversaire du derby dans la division du club (ajouté en v4). */
+  rivalId: string | null;
 }
 
 export interface MarketOffer {
@@ -197,6 +202,34 @@ export interface LogEntry {
   params?: Record<string, string | number>;
 }
 
+/** Comptes d'une semaine (ou cumul de la saison), en euros. */
+export interface FinanceReport {
+  income: { tickets: number; bars: number; shop: number; sponsors: number };
+  expenses: { wages: number; upkeep: number; running: number; fines: number };
+  /** Affluence du match à domicile (cumul pour la saison), null sans match à domicile. */
+  attendance: number | null;
+}
+
+export interface Finance {
+  lastWeek: FinanceReport | null;
+  season: FinanceReport;
+}
+
+export type AlertKey =
+  | 'keyMatch'
+  | 'constructionDelivered'
+  | 'districtUnlocked'
+  | 'starterInjured'
+  | 'treasuryNegative'
+  | 'lowSatisfaction'
+  | 'seasonOver';
+
+/** Raison pour laquelle « Avancer » s'est arrêté. Texte dans texts.fr.json (alerts). */
+export interface Alert {
+  key: AlertKey;
+  params?: Record<string, string | number>;
+}
+
 export interface GameState {
   schemaVersion: number;
   meta: Meta;
@@ -213,4 +246,8 @@ export interface GameState {
   log: LogEntry[];
   /** Match en cours, sauvegardé pour reprendre là où on en était (ajouté en v2). */
   currentMatch: MatchState | null;
+  /** Comptes de la semaine et de la saison (ajouté en v4). */
+  finance: Finance;
+  /** Raisons du dernier arrêt, affichées jusqu'au prochain « Avancer » (ajouté en v4). */
+  alerts: Alert[];
 }

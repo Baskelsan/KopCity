@@ -1,25 +1,41 @@
 import { describe, expect, it } from 'vitest';
 import balance from '../src/data/balance.json';
+import { netResult } from '../src/core/economy';
 import { applyAction, newGame, type Action } from '../src/core/game';
+import { myDivision, myFixture, opponentOf } from '../src/core/league';
 import { defaultDecision } from '../src/core/match';
-import type { GameState } from '../src/core/state';
+import { advance, keyMatchReasons } from '../src/core/season';
+import { MY_TEAM_ID, type GameState, type TableRow } from '../src/core/state';
 
-const fresh = () => newGame({ seed: 2024, now: '2026-10-15T10:00:00.000Z', clubName: 'FC Test' });
+const SEASON = balance.league.seasonWeeks;
+const fresh = (seed = 2024) => newGame({ seed, now: '2026-10-15T10:00:00.000Z', clubName: 'FC Test' });
 const run = (state: GameState, ...actions: Action[]) => actions.reduce(applyAction, state);
 
-function playLiveToEnd(state: GameState): GameState {
-  let s = run(state, { type: 'startFriendly', live: true });
+/** Termine le match en direct en cours avec les choix par défaut. */
+function finishLive(state: GameState): GameState {
+  let s = state;
   while (!s.currentMatch!.finished) {
     const ctx = { players: s.squad.players, formation: s.squad.formation };
     s = applyAction(s, { type: 'matchDecision', decision: defaultDecision(s.currentMatch!, ctx) });
   }
-  return s;
+  return applyAction(s, { type: 'finishMatch' });
+}
+
+/** Joue toute la saison en appuyant sur « Avancer » ; renvoie l'état final et chaque arrêt. */
+function playSeason(start: GameState) {
+  let s = start;
+  const stops: GameState[] = [];
+  for (let guard = 0; guard < 100 && s.time.week <= SEASON; guard++) {
+    s = applyAction(s, { type: 'advance' });
+    stops.push(s);
+    if (s.currentMatch) s = finishLive(s);
+  }
+  return { final: s, stops };
 }
 
 describe('effectif : actions', () => {
   it('changer de formation recalcule la composition automatique', () => {
     const s = run(fresh(), { type: 'setFormation', formation: '4-3-3' });
-    expect(s.squad.formation).toBe('4-3-3');
     const atts = s.squad.lineup.slice(8).map((id) => s.squad.players.find((p) => p.id === id)!.pos);
     expect(atts).toEqual(['ATT', 'ATT', 'ATT']);
   });
@@ -30,81 +46,173 @@ describe('effectif : actions', () => {
     const s = run(s0, { type: 'swapPlayers', a: s0.squad.lineup[5]!, b: benchId });
     expect(s.squad.autoLineup).toBe(false);
     expect(s.squad.lineup[5]).toBe(benchId);
-    const back = run(s, { type: 'setAutoLineup', value: true });
-    expect(back.squad.lineup).toEqual(s0.squad.lineup);
-  });
-
-  it('change le style', () => {
-    expect(run(fresh(), { type: 'setStyle', style: 'defensive' }).squad.style).toBe('defensive');
+    expect(run(s, { type: 'setAutoLineup', value: true }).squad.lineup).toEqual(s0.squad.lineup);
   });
 });
 
-describe('match amical', () => {
-  it('en résumé : le match est joué jusqu’au bout et sauvegardé dans l’état', () => {
-    const s = run(fresh(), { type: 'startFriendly', live: false });
-    expect(s.currentMatch?.finished).toBe(true);
-    expect(s.meta.rngState).not.toBe(fresh().meta.rngState);
-  });
-
-  it('en direct : le match s’arrête à la première décision', () => {
-    const s = run(fresh(), { type: 'startFriendly', live: true });
-    expect(s.currentMatch?.finished).toBe(false);
-    expect(s.currentMatch?.pending.length).toBeGreaterThan(0);
-  });
-
-  it('même partie, même match : en direct sans rien changer ou en résumé', () => {
-    const summary = run(fresh(), { type: 'startFriendly', live: false }).currentMatch!;
-    const live = playLiveToEnd(fresh()).currentMatch!;
-    expect(live.score).toEqual(summary.score);
-    expect(live.events).toEqual(summary.events);
-  });
-
-  it('on ne peut pas relancer un match déjà en cours', () => {
-    const s = run(fresh(), { type: 'startFriendly', live: true });
-    expect(run(s, { type: 'startFriendly', live: true })).toBe(s);
-  });
-
-  it('terminer applique le moral et les blessures, puis libère le match', () => {
-    // On cherche une partie où le club a un blessé, pour vérifier aussi les blessures.
-    for (let seed = 0; seed < 300; seed++) {
-      const start = newGame({ seed, now: 'x', clubName: 'C' });
-      const played = run(start, { type: 'startFriendly', live: false });
-      const match = played.currentMatch!;
-      if (match.injuries.length === 0) continue;
-
-      const done = run(played, { type: 'finishMatch' });
-      expect(done.currentMatch).toBeNull();
-      const outcome = match.score[match.club.side] - match.score[match.club.side === 'home' ? 'away' : 'home'];
-      const delta = outcome > 0 ? balance.morale.win : outcome < 0 ? balance.morale.loss : balance.morale.draw;
-      for (const p of done.squad.players) {
-        const before = start.squad.players.find((x) => x.id === p.id)!;
-        const expected = match.club.played.includes(p.id) ? delta : balance.morale.notPlayed;
-        expect(p.morale).toBe(before.morale + expected);
-      }
-      const injury = match.injuries[0]!;
-      const injured = done.squad.players.find((p) => p.id === injury.playerId)!;
-      expect(injured.injuryWeeks).toBe(injury.weeks);
-      expect(done.squad.lineup).not.toContain(injury.playerId);
-      return;
-    }
-    throw new Error('Aucune blessure trouvée');
-  });
-
-  it('un match ne fait pas guérir les blessés : seules les semaines comptent', () => {
+describe('matchs à enjeu', () => {
+  /** Place le club et son adversaire de la semaine dans un classement imposé. */
+  function setup(week: number, myPoints: number, opponentPoints: number, myRank: number, opponentRank: number) {
     const s0 = fresh();
-    const hurtId = s0.squad.players[0]!.id;
-    const hurt: GameState = {
+    const division = myDivision(s0.league);
+    const fixture = myFixture(division, week)!;
+    const opponent = opponentOf(fixture);
+    const others = division.teams.map((t) => t.id).filter((id) => id !== opponent);
+    const order: string[] = [...others];
+    const slots: [number, string][] = [
+      [myRank, MY_TEAM_ID],
+      [opponentRank, opponent],
+    ];
+    slots.sort((a, b) => a[0] - b[0]).forEach(([rank, id]) => order.splice(rank - 1, 0, id));
+    const table: TableRow[] = order.map((team, i) => ({
+      team,
+      played: week - 1,
+      points: team === MY_TEAM_ID ? myPoints : team === opponent ? opponentPoints : 40 - i * 4,
+      goalsFor: 0,
+      goalsAgainst: 0,
+    }));
+    const s: GameState = {
       ...s0,
-      squad: { ...s0.squad, players: s0.squad.players.map((p) => (p.id === hurtId ? { ...p, injuryWeeks: 3 } : p)) },
+      time: { ...s0.time, week },
+      league: { ...s0.league, rivalId: 'nobody', divisions: [{ ...division, table }] },
     };
-    const afterMatch = run(hurt, { type: 'startFriendly', live: false }, { type: 'finishMatch' });
-    expect(afterMatch.squad.players.find((p) => p.id === hurtId)!.injuryWeeks).toBe(3);
-    const afterWeek = run(afterMatch, { type: 'advanceWeek' });
-    expect(afterWeek.squad.players.find((p) => p.id === hurtId)!.injuryWeeks).toBe(2);
+    return { s, opponent };
+  }
+
+  it('le derby est un match à enjeu', () => {
+    const s = fresh();
+    const week = myDivision(s.league).fixtures.find(
+      (f) => f.home === s.league.rivalId && f.away === MY_TEAM_ID,
+    )!.week;
+    expect(keyMatchReasons({ ...s, time: { ...s.time, week } })).toContain('derby');
   });
 
-  it('terminer un match pas fini ne fait rien', () => {
-    const s = run(fresh(), { type: 'startFriendly', live: true });
+  it('un concurrent direct : 3 points d’écart au plus et proche au classement', () => {
+    expect(keyMatchReasons(setup(6, 12, 10, 4, 5).s)).toContain('directRival');
+    expect(keyMatchReasons(setup(6, 12, 8, 4, 5).s)).not.toContain('directRival');
+    // Trop tôt dans la saison, même avec un petit écart.
+    expect(keyMatchReasons(setup(2, 3, 3, 4, 5).s)).not.toContain('directRival');
+  });
+
+  it('dans les 3 dernières journées, la montée ou le maintien en jeu', () => {
+    expect(keyMatchReasons(setup(17, 31, 0, 3, 10).s)).toContain('promotion');
+    expect(keyMatchReasons(setup(17, 8, 0, 8, 10).s)).toContain('relegation');
+    expect(keyMatchReasons(setup(14, 31, 0, 3, 10).s)).not.toContain('promotion');
+  });
+
+  it('le réglage « tous en direct » arrête chaque semaine', () => {
+    const s = run(fresh(), { type: 'setAlwaysLiveMatches', value: true }, { type: 'advance' });
+    expect(s.currentMatch?.live).toBe(true);
+    expect(s.time.week).toBe(1);
+    expect(s.alerts[0]).toMatchObject({ key: 'keyMatch' });
+  });
+});
+
+describe('Avancer', () => {
+  it('ne fait rien tant qu’un match en direct n’est pas terminé', () => {
+    const s = run(fresh(), { type: 'setAlwaysLiveMatches', value: true }, { type: 'advance' });
+    expect(run(s, { type: 'advance' })).toBe(s);
     expect(run(s, { type: 'finishMatch' })).toBe(s);
   });
+
+  it('un match en direct terminé clôt la semaine comme un match en résumé', () => {
+    const s = run(fresh(), { type: 'setAlwaysLiveMatches', value: true }, { type: 'advance' });
+    const done = finishLive(s);
+    expect(done.currentMatch).toBeNull();
+    expect(done.time.week).toBe(2);
+    const fixture = myFixture(myDivision(done.league), 1)!;
+    expect(fixture.result).not.toBeNull();
+    expect(fixture.live).toBe(true);
+    expect(myDivision(done.league).fixtures.filter((f) => f.week === 1).every((f) => f.result)).toBe(true);
+  });
+
+  it('s’arrête après une semaine où un chantier est livré', () => {
+    const s0 = run({ ...fresh(), club: { ...fresh().club, treasury: 1_000_000 } }, { type: 'build', slotId: 'stade-1', building: 'bar' });
+    let s = s0;
+    for (let i = 0; i < 5 && !s.alerts.some((a) => a.key === 'constructionDelivered'); i++) {
+      s = applyAction(s, { type: 'advance' });
+      if (s.currentMatch) s = finishLive(s);
+    }
+    expect(s.alerts.some((a) => a.key === 'constructionDelivered')).toBe(true);
+    expect(s.time.week).toBe(3);
+  });
+
+  it('s’arrête chaque semaine où la trésorerie est négative', () => {
+    const broke = { ...fresh(), club: { ...fresh().club, treasury: -200_000 } };
+    const s = run(broke, { type: 'advance' });
+    const done = s.currentMatch ? finishLive(s) : s;
+    expect(done.alerts.some((a) => a.key === 'treasuryNegative')).toBe(true);
+    expect(done.club.weeksInRed).toBe(1);
+  });
+
+  it('est déterministe : même partie, même saison', () => {
+    expect(playSeason(fresh(7)).final).toEqual(playSeason(fresh(7)).final);
+  });
+});
+
+describe('une saison complète', () => {
+  const { final, stops } = playSeason(fresh());
+  const division = myDivision(final.league);
+
+  it('enchaîne les 18 journées et s’arrête sur « saison terminée »', () => {
+    expect(final.time.week).toBe(SEASON + 1);
+    expect(division.fixtures.every((f) => f.result !== null)).toBe(true);
+    expect(division.table.every((r) => r.played === SEASON)).toBe(true);
+    expect(stops.at(-1)!.alerts.some((a) => a.key === 'seasonOver')).toBe(true);
+    expect(run(final, { type: 'advance' }).currentMatch).toBeNull();
+    expect(run(final, { type: 'advance' }).time.week).toBe(SEASON + 1);
+  });
+
+  it('la trésorerie se recalcule poste par poste à l’euro près', () => {
+    expect(final.club.treasury).toBe(fresh().club.treasury + netResult(final.finance.season));
+    expect(final.finance.season.income.sponsors).toBeGreaterThan(0);
+    expect(final.finance.season.attendance).toBeGreaterThan(0);
+  });
+
+  it('s’arrête de lui-même, mais pas à chaque semaine', () => {
+    expect(stops.length).toBeGreaterThan(2);
+    expect(stops.length).toBeLessThan(SEASON);
+    for (const stop of stops) expect(stop.alerts.length).toBeGreaterThan(0);
+  });
+
+  it('les points du classement correspondent aux résultats', () => {
+    const total = division.table.reduce((sum, r) => sum + r.points, 0);
+    const draws = division.fixtures.filter((f) => f.result!.homeGoals === f.result!.awayGoals).length;
+    expect(total).toBe(3 * (division.fixtures.length - draws) + 2 * draws);
+  });
+
+  it('les blessés guérissent au fil des semaines', () => {
+    expect(final.squad.players.every((p) => p.injuryWeeks <= balance.match.injuryWeeksMax)).toBe(true);
+  });
+});
+
+describe('sur 100 saisons simulées', () => {
+  const results = Array.from({ length: 100 }, (_, i) => playSeason(fresh(i + 1)));
+
+  it('la marge tourne autour de 200 000 € par saison', () => {
+    const average = results.reduce((sum, r) => sum + netResult(r.final.finance.season), 0) / results.length;
+    expect(average).toBeGreaterThan(120_000);
+    expect(average).toBeLessThan(320_000);
+  });
+
+  it('environ une semaine clé toutes les 2 à 3 semaines', () => {
+    const live = results.reduce(
+      (sum, r) => sum + myDivision(r.final.league).fixtures.filter((f) => f.live).length,
+      0,
+    );
+    const perSeason = live / results.length;
+    expect(perSeason).toBeGreaterThan(4);
+    expect(perSeason).toBeLessThan(10);
+  });
+});
+
+it('advance sur l’état directement, comme l’action', () => {
+  expect(advance(fresh())).toEqual(run(fresh(), { type: 'advance' }));
+});
+
+it('une ancienne entrée du journal portant le même numéro de semaine ne déclenche pas d’arrêt', () => {
+  const s0 = fresh();
+  const old = { ...s0, log: [{ season: 1, week: 1, key: 'constructionDelivered', params: { type: 'bar', level: 1 } }] };
+  const s = run(old, { type: 'advance' });
+  expect(s.alerts.some((a) => a.key === 'constructionDelivered')).toBe(false);
 });

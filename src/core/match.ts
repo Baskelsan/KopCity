@@ -26,6 +26,8 @@ export interface ClubContext {
 }
 
 export interface NewMatchOptions {
+  /** Journée du championnat (0 hors championnat). */
+  week?: number;
   seed: number;
   live: boolean;
   home: MatchTeam;
@@ -78,6 +80,7 @@ function drawPlan(rngState: number): { plan: MatchPlan; rngState: number } {
 export function createMatch(options: NewMatchOptions): MatchState {
   const { plan, rngState } = drawPlan(seedToState(options.seed));
   return {
+    week: options.week ?? 0,
     seed: options.seed,
     rngState,
     live: options.live,

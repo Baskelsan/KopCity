@@ -51,6 +51,8 @@ export interface ClubInMatch {
 }
 
 export interface MatchState {
+  /** Journée du championnat (ajouté en v4). */
+  week: number;
   seed: number;
   rngState: number;
   /** true : affiché en minute par minute ; false : résumé. La simulation est identique. */

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import balance from '../src/data/balance.json';
 import buildings from '../src/data/buildings.json';
 import {
+  progressConstructions,
   accessCap,
   barRates,
   canBuild,
@@ -23,8 +24,15 @@ const fresh = (treasury = 5_000_000): GameState => {
   return { ...s, club: { ...s.club, treasury } };
 };
 const run = (state: GameState, ...actions: Action[]) => actions.reduce(applyAction, state);
-const weeks = (state: GameState, n: number) =>
-  run(state, ...Array.from({ length: n }, (): Action => ({ type: 'advanceWeek' })));
+/** Fait passer des semaines côté ville uniquement (les matchs et l'argent sont testés dans season.test). */
+const weeks = (state: GameState, n: number): GameState => {
+  let s = state;
+  for (let i = 0; i < n; i++) {
+    s = progressConstructions(s);
+    s = { ...s, time: { ...s.time, week: s.time.week + 1 } };
+  }
+  return s;
+};
 const unlockAll = (state: GameState): GameState => ({
   ...state,
   city: { ...state.city, districts: state.city.districts.map((d) => ({ ...d, unlocked: true })) },
@@ -291,16 +299,5 @@ describe('effets chiffrés', () => {
     ]);
     s = { ...s, city: { ...s.city, stadiumLevel: 1 } };
     expect(weeklyUpkeep(s.city)).toBe(4000 + 5000 + 800 + 3000 * 2);
-  });
-});
-
-describe('semaine suivante', () => {
-  it('fait avancer le compteur de semaines', () => {
-    expect(weeks(fresh(), 3).time.week).toBe(4);
-  });
-
-  it('ne fait rien pendant un match en cours', () => {
-    const s = run(fresh(), { type: 'startFriendly', live: true });
-    expect(run(s, { type: 'advanceWeek' })).toBe(s);
   });
 });

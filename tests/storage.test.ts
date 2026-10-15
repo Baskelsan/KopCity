@@ -4,6 +4,7 @@ import { applyAction, newGame } from '../src/core/game';
 import { SCHEMA_VERSION } from '../src/core/state';
 import { SaveError } from '../src/storage/errors';
 import { migrate, type Migration } from '../src/storage/migrations';
+import { v1ToV2 } from '../src/storage/migrations/v1-to-v2';
 import { deleteGame, loadGame, saveGame } from '../src/storage/save';
 import { exportFileName, parseSave, serializeSave } from '../src/storage/serialize';
 
@@ -143,8 +144,8 @@ describe('migration v1 → v2', () => {
   });
 
   it('ajoute un gardien aux équipes existantes', () => {
-    const state = parseSave(JSON.stringify(v1Save()));
-    expect(state.league.divisions[0]!.teams[0]!.strength.gk).toBe(10);
+    const v2 = v1ToV2(v1Save()) as { league: { divisions: { teams: { strength: { gk: number } }[] }[] } };
+    expect(v2.league.divisions[0]!.teams[0]!.strength.gk).toBe(10);
   });
 
   it('garde un effectif déjà présent', () => {
@@ -172,5 +173,28 @@ describe('migration v2 → v3', () => {
       ['nouveau', false],
     ]);
     expect(state.city.districts.flatMap((d) => d.slots)).toHaveLength(19);
+  });
+});
+
+describe('migration v3 → v4', () => {
+  it('crée le championnat, remet la saison à la semaine 1 et abandonne un amical en cours', () => {
+    const v4 = newGame({ seed: 42, now: NOW, clubName: 'FC Test' });
+    const { finance: _f, alerts: _a, ...rest } = v4;
+    const v3 = {
+      ...rest,
+      schemaVersion: 3,
+      time: { season: 1, week: 7 },
+      league: { myDivision: 'D3', divisions: [] },
+      currentMatch: { finished: true },
+    };
+    const state = parseSave(JSON.stringify(v3));
+    expect(state.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(state.time.week).toBe(1);
+    expect(state.currentMatch).toBeNull();
+    expect(state.league.divisions[0]!.fixtures).toHaveLength(90);
+    expect(state.league.rivalId).not.toBeNull();
+    expect(state.finance.lastWeek).toBeNull();
+    expect(state.alerts).toEqual([]);
+    expect(state.log).toEqual([]);
   });
 });

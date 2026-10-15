@@ -24,7 +24,8 @@ const shape: Record<string, Record<string, (v: unknown) => boolean>> = {
     districts: isArray,
     constructions: isArray,
   },
-  league: { myDivision: isString, divisions: isArray },
+  league: { myDivision: isString, divisions: isArray, rivalId: (v) => v === null || isString(v) },
+  finance: { lastWeek: (v) => v === null || isObject(v), season: isObject },
   market: { offers: isArray },
   events: { pending: (v) => v === null || isObject(v), history: isArray },
   records: { titles: isNumber, promotions: isNumber, bestAttendance: isNumber, bestTreasury: isNumber },
@@ -45,6 +46,7 @@ export function assertGameState(save: unknown): GameState {
   }
   if (!isArray(save.objectives)) throw new SaveError('invalidFormat', 'objectives invalide');
   if (!isArray(save.log)) throw new SaveError('invalidFormat', 'log invalide');
+  if (!isArray(save.alerts)) throw new SaveError('invalidFormat', 'alerts invalide');
   if (save.currentMatch !== null && !isObject(save.currentMatch)) {
     throw new SaveError('invalidFormat', 'currentMatch invalide');
   }
