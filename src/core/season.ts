@@ -16,6 +16,7 @@ import type { MatchState, Side } from './matchTypes';
 import { homeStrengthFactor, wearEffects } from './effects';
 import { rollEvent, settleCommitments } from './events';
 import { endSeason, generateMarket } from './offseason';
+import { applyMatchStats } from './playerStats';
 import { addGoals } from './records';
 import { nextInt } from './rng';
 import { MY_TEAM_ID, type Alert, type Division, type GameState, type LogEntry, type Player, type Squad, type Team } from './state';
@@ -162,8 +163,8 @@ function updateSquad(squad: Squad, match: MatchState): Squad {
       morale: Math.min(morale.max, Math.max(morale.min, p.morale + change)),
     };
   });
-  const next = { ...squad, players };
-  return next.autoLineup ? { ...next, lineup: autoLineup(players, next.formation) } : next;
+  const next = { ...squad, players: applyMatchStats(players, match) };
+  return next.autoLineup ? { ...next, lineup: autoLineup(next.players, next.formation) } : next;
 }
 
 /**

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import balance from '../src/data/balance.json';
-import { exportReminderDue, weeksSinceExport } from '../src/core/exportReminder';
+import { exportReminderDue } from '../src/core/exportReminder';
 import { applyAction, newGame } from '../src/core/game';
 import { endSeason, startSeason } from '../src/core/offseason';
 import { weeklyWages } from '../src/core/players';
@@ -27,23 +26,18 @@ describe('création du club', () => {
 });
 
 describe('rappel d’export', () => {
-  it('apparaît après 5 semaines de jeu sans export', () => {
+  it('n’apparaît qu’à l’intersaison, jusqu’à ce qu’on exporte', () => {
     const s = fresh();
-    expect(exportReminderDue(at(s, 1, 5))).toBe(false);
-    expect(exportReminderDue(at(s, 1, 1 + balance.exportReminderWeeks))).toBe(true);
-  });
-
-  it('un export remet le compteur à zéro', () => {
-    const s = applyAction(at(fresh(), 1, 8), { type: 'markExported' });
-    expect(s.meta.lastExport).toEqual({ season: 1, week: 8 });
-    expect(weeksSinceExport(s)).toBe(0);
     expect(exportReminderDue(at(s, 1, 12))).toBe(false);
-    expect(exportReminderDue(at(s, 1, 13))).toBe(true);
+    const off = endSeason(at(s, 1, 19));
+    expect(exportReminderDue(off)).toBe(true);
+    const exported = applyAction(off, { type: 'markExported' });
+    expect(exportReminderDue(exported)).toBe(false);
   });
 
-  it('compte les semaines d’une saison à l’autre', () => {
-    const s = applyAction(at(fresh(), 1, 16), { type: 'markExported' });
-    expect(weeksSinceExport(at(s, 2, 3))).toBe(5);
+  it('un export pendant la saison ne dispense pas du rappel de fin de saison', () => {
+    const exportedMidSeason = applyAction(at(fresh(), 1, 10), { type: 'markExported' });
+    expect(exportReminderDue(endSeason(at(exportedMidSeason, 1, 19)))).toBe(true);
   });
 });
 

@@ -16,7 +16,11 @@ export function describeEvent(event: MatchEvent, match: MatchState, players: Map
       const team = match[event.side].name;
       const player = name(event.playerId);
       const vars = { team, player };
-      if (event.outcome === 'goal') return format(player ? E.goalPlayer : E.goalTeam, vars);
+      if (event.outcome === 'goal') {
+        const assist = name(event.assistId);
+        if (player && assist) return format(E.goalPlayerAssist, { ...vars, assist });
+        return format(player ? E.goalPlayer : E.goalTeam, vars);
+      }
       if (event.outcome === 'saved') return format(player ? E.savedPlayer : E.savedTeam, vars);
       return format(player ? E.offPlayer : E.offTeam, vars);
     }

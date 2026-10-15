@@ -4,6 +4,7 @@ import type { KeyMatchReason } from '../core/season';
 import { eventTexts } from './eventText';
 import { formatEuros } from './formatters';
 import { format, texts } from './i18n';
+import { playerLabel } from './playerLabel';
 
 const buildingName = (type: unknown) => texts.buildings[type as BuildingType | 'stadium'] ?? '';
 const districtName = (id: unknown) => texts.city.districts[id as DistrictId] ?? '';
@@ -81,7 +82,7 @@ export function describeAlert(alert: Alert, state: GameState): string {
       return format(A.districtUnlocked, { district: districtName(params.district) });
     case 'starterInjured': {
       const player = state.squad.players.find((p) => p.id === params.playerId);
-      return format(A.starterInjured, { player: player?.name ?? '', weeks: params.weeks ?? 0 });
+      return format(A.starterInjured, { player: playerLabel(player), weeks: params.weeks ?? 0 });
     }
     case 'treasuryNegative':
       return format(A.treasuryNegative, { treasury: formatEuros(Number(params.treasury)), weeks: params.weeks ?? 1 });
@@ -101,7 +102,7 @@ export function describeAlert(alert: Alert, state: GameState): string {
       if (params.riskHit !== undefined) details.push(params.riskHit ? texts.eventUi.riskHit : texts.eventUi.riskAvoided);
       if (params.playerId) {
         const player = state.squad.players.find((p) => p.id === params.playerId);
-        details.push(format(texts.eventUi.injured, { player: player?.name ?? '', weeks: params.weeks ?? 0 }));
+        details.push(format(texts.eventUi.injured, { player: playerLabel(player), weeks: params.weeks ?? 0 }));
       }
       return format(A.eventOutcome, {
         title: t.title,

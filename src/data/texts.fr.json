@@ -70,7 +70,15 @@
       "pas": "Passes",
       "phy": "Physique"
     },
-    "expiringHidden": "{count} joueur(s) en fin de contrat n'apparaissent plus ici tant qu'ils ne sont pas prolongés (écran d'intersaison)."
+    "expiringHidden": "{count} joueur(s) en fin de contrat n'apparaissent plus ici tant qu'ils ne sont pas prolongés (écran d'intersaison).",
+    "statsTitle": "Statistiques",
+    "statsSeason": "Cette saison",
+    "statsCareer": "Au club",
+    "statsLine": "{apps} match(s) · {goals} but(s) · {assists} passe(s) déc.",
+    "statsRating": "Note moyenne : {rating} / 10",
+    "statsNone": "Pas encore de match.",
+    "averageShort": "{rating}",
+    "rowStats": "{rating}/10 · {goals} but(s) · {assists} p.d."
   },
   "match": {
     "speedNormal": "×1",
@@ -94,7 +102,8 @@
       "lateForce": "On pousse pour marquer.",
       "lateManage": "On gère le score.",
       "halftime": "Mi-temps : {score}.",
-      "fulltime": "Fin du match : {score}."
+      "fulltime": "Fin du match : {score}.",
+      "goalPlayerAssist": "⚽ But de {player}, sur une passe de {assist} ({team}) !"
     },
     "decisions": {
       "halftimeTitle": "Mi-temps",
@@ -582,7 +591,7 @@
     "open": "Installer sur l'iPhone"
   },
   "exportReminder": {
-    "text": "{weeks} semaines de jeu depuis ton dernier export. iOS peut effacer les données : pense à exporter ta sauvegarde.",
+    "text": "La saison est finie : c'est le bon moment pour exporter ta sauvegarde, car iOS peut effacer les données de l'app.",
     "button": "Exporter"
   },
   "playTime": {
@@ -592,5 +601,6 @@
     "total": "Depuis le début",
     "value": "{minutes} min",
     "none": "–"
-  }
+  },
+  "playerLabel": "{name} ({pos}, note {rating})"
 }

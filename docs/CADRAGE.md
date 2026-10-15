@@ -409,7 +409,13 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Valeurs modifiées : salaires plus raides avec la note (exposant 3, 7 000 €/mois pour une note de 10 ; masse de départ toujours ≈ 40 000 €/sem.) ; contrats de départ de 2 à 4 saisons ; joueurs du marché de ±4 autour du niveau de la division ; concurrent direct = 3 points au plus et rang voisin, à partir de la 6e journée ; montée ou maintien « en jeu » = 3 points au plus de la ligne, dans les 3 dernières journées.
 - Événements : 1 chance sur 5 par semaine au lieu de 1 sur 3, pour se rapprocher d'une semaine clé toutes les 2 à 3 semaines.
 - Résultat : faillite dans 2 % des parties pour la stratégie équilibrée, 15 % pour « tout sur le stade » (qui plafonne en Division 3), 22 % pour « tout sur les joueurs » (avec moins d'argent) ; environ 13 arrêts par saison, dont 3 événements. L'aide municipale n'est pas nécessaire.
-- Création du club (nom et 2 couleurs), aide à l'installation dans Safari, icônes définitives, rappel d'export toutes les 5 semaines de jeu, temps de jeu affiché dans l'onglet Club.
+- Création du club (nom et 2 couleurs), aide à l'installation dans Safari, icônes définitives, rappel d'export (en fin de saison depuis les retours de jeu), temps de jeu affiché dans l'onglet Club.
+
+**Retours de jeu après M7**
+- Durée d'une saison mesurée sur iPhone : environ 10 minutes, jugée satisfaisante (au lieu des 30 à 45 minutes visées au départ).
+- Les événements et alertes présentent le joueur avec son poste et sa note, par exemple « J. Diallo (ATT, note 14) ».
+- Statistiques des joueurs, pour la saison et la carrière au club : matchs, buts, passes décisives et note moyenne sur 10. Note de match : 6 de base, +0,5 victoire / −0,5 défaite, +1 par but, +0,6 par passe décisive, +0,2 par tir cadré, −0,1 par tir non cadré ; gardiens et défenseurs : +0,8 sans but encaissé, −0,3 par but encaissé ; entre 3 et 10.
+- Le rappel d'export n'apparaît plus qu'à l'intersaison, tant qu'on n'a pas exporté depuis la fin de la saison.
 
 ## Décisions ouvertes et risques
 

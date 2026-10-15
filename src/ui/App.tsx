@@ -86,9 +86,9 @@ export function App() {
           />
         )}
         {!creating && state && state.phase === 'gameOver' && <GameOverScreen state={state} onNewGame={startNewGame} />}
-        {!creating && state && tab === 'home' && state.phase === 'offseason' && <OffseasonScreen state={state} dispatch={dispatch} />}
+        {!creating && state && tab === 'home' && state.phase === 'offseason' && <OffseasonScreen state={state} dispatch={dispatch} notify={setMessage} />}
         {!creating && state && tab === 'home' && state.phase === 'season' && (
-          <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} notify={setMessage} />
+          <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} />
         )}
         {!creating && state && state.phase !== 'gameOver' && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
         {!creating && state && state.phase !== 'gameOver' && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}

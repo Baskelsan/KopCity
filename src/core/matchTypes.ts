@@ -6,7 +6,15 @@ export type LateChoice = 'keep' | 'force' | 'manage';
 export type ChanceOutcome = 'off' | 'saved' | 'goal';
 
 export type MatchEvent =
-  | { minute: number; type: 'chance'; side: Side; outcome: ChanceOutcome; playerId: string | null }
+  | {
+      minute: number;
+      type: 'chance';
+      side: Side;
+      outcome: ChanceOutcome;
+      playerId: string | null;
+      /** Passeur décisif, sur un but du club (ajouté en v9). */
+      assistId: string | null;
+    }
   | { minute: number; type: 'card'; side: Side; playerId: string | null }
   | { minute: number; type: 'injury'; side: Side; playerId: string | null; weeks: number }
   | { minute: number; type: 'substitution'; side: Side; outId: string; inId: string }

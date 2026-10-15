@@ -289,3 +289,25 @@ describe('migration v7 → v8', () => {
     expect(out.meta).toEqual({ seed: 1, lastExport: null, playTime: { total: 0, season: 0, lastSeason: 0 } });
   });
 });
+
+describe('migration v8 → v9', () => {
+  it('ajoute des statistiques vides aux joueurs et le passeur au fil du match', async () => {
+    const { v8ToV9 } = await import('../src/storage/migrations/v8-to-v9');
+    const out = v8ToV9({
+      schemaVersion: 8,
+      squad: { players: [{ id: 'a' }] },
+      market: { offers: [{ player: { id: 'b' }, price: 1 }] },
+      offseason: null,
+      events: { pending: null },
+      currentMatch: { events: [{ type: 'chance', playerId: 'a' }, { type: 'card' }] },
+    }) as {
+      squad: { players: Record<string, unknown>[] };
+      market: { offers: { player: Record<string, unknown> }[] };
+      currentMatch: { events: Record<string, unknown>[] };
+    };
+    expect(out.squad.players[0]!.seasonStats).toEqual({ apps: 0, goals: 0, assists: 0, ratingTotal: 0 });
+    expect(out.market.offers[0]!.player.careerStats).toEqual({ apps: 0, goals: 0, assists: 0, ratingTotal: 0 });
+    expect(out.currentMatch.events[0]!.assistId).toBeNull();
+    expect(out.currentMatch.events[1]!.assistId).toBeUndefined();
+  });
+});

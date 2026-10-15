@@ -2,13 +2,31 @@ import { useState } from 'preact/hooks';
 import type { Action } from '../../core/game';
 import { FORMATIONS, formationSlots } from '../../core/lineup';
 import { canRemovePlayer, contractedPlayers } from '../../core/offseason';
+import { averageRating } from '../../core/playerStats';
 import { overall, saleValue, weeklyWages } from '../../core/players';
-import type { Formation, GameState, Player, PlayStyle, Position } from '../../core/state';
+import type { Formation, GameState, Player, PlayerSeasonStats, PlayStyle, Position } from '../../core/state';
 import { formatEuros, formatStars } from '../formatters';
 import { format, texts } from '../i18n';
 import { MarketSheet, refusalText } from '../MarketSheet';
 
 const STYLES: PlayStyle[] = ['offensive', 'balanced', 'defensive'];
+const decimal = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+/** « Cette saison : 12 matchs · 3 buts · 2 passes déc. — Note moyenne : 6,8 / 10 ». */
+function StatsLine({ label, stats }: { label: string; stats: PlayerSeasonStats }) {
+  const rating = averageRating(stats);
+  return (
+    <p class="stats-line">
+      <strong>{label}</strong>
+      <span>
+        {stats.apps === 0
+          ? texts.squad.statsNone
+          : format(texts.squad.statsLine, { apps: stats.apps, goals: stats.goals, assists: stats.assists })}
+      </span>
+      {rating !== null && <span class="muted">{format(texts.squad.statsRating, { rating: decimal.format(rating) })}</span>}
+    </p>
+  );
+}
 
 interface SquadScreenProps {
   state: GameState;
@@ -79,6 +97,15 @@ export function SquadScreen({ state, dispatch }: SquadScreenProps) {
           <span class={`pos pos-${player.pos}${outOfPosition ? ' off' : ''}`}>{texts.positions[player.pos]}</span>
           <span class="name">
             {player.name}
+            {player.seasonStats.apps > 0 && (
+              <small class="muted">
+                {format(texts.squad.rowStats, {
+                  rating: decimal.format(averageRating(player.seasonStats) ?? 0),
+                  goals: player.seasonStats.goals,
+                  assists: player.seasonStats.assists,
+                })}
+              </small>
+            )}
             {player.injuryWeeks > 0 && (
               <small class="injury">{format(texts.squad.injured, { weeks: player.injuryWeeks })}</small>
             )}
@@ -234,6 +261,9 @@ function PlayerPanel({
           <dd>{format(texts.squad.contractYears, { years: player.contractYears })}</dd>
         </div>
       </dl>
+      <h3 class="panel-subtitle">{texts.squad.statsTitle}</h3>
+      <StatsLine label={texts.squad.statsSeason} stats={player.seasonStats} />
+      <StatsLine label={texts.squad.statsCareer} stats={player.careerStats} />
       <p class="muted small">{texts.squad.swapHint}</p>
       {canSellNow &&
         (sellCheck.ok ? (

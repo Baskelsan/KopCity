@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -68,6 +68,17 @@ export interface Player {
   injuryWeeks: number;
   /** Formé au centre de formation du club (ajouté en v5). */
   homegrown: boolean;
+  /** Statistiques de la saison en cours et de toute la carrière au club (ajouté en v9). */
+  seasonStats: PlayerSeasonStats;
+  careerStats: PlayerSeasonStats;
+}
+
+export interface PlayerSeasonStats {
+  apps: number;
+  goals: number;
+  assists: number;
+  /** Somme des notes de match (sur 10) ; la moyenne = ratingTotal / apps. */
+  ratingTotal: number;
 }
 
 export interface Squad {

@@ -94,6 +94,8 @@ export function generatePlayer(rngState: number, pos: Position, level: number, o
     contractYears: take(nextInt(rng, P.contractYearsMin, P.contractYearsMax)),
     injuryWeeks: 0,
     homegrown: options.homegrown ?? false,
+    seasonStats: { apps: 0, goals: 0, assists: 0, ratingTotal: 0 },
+    careerStats: { apps: 0, goals: 0, assists: 0, ratingTotal: 0 },
   };
   if (options.contractYears !== undefined) player.contractYears = options.contractYears;
   const rating = overall(player);

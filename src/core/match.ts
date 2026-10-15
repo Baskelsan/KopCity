@@ -139,6 +139,20 @@ function pickOnField(club: ClubInMatch, formation: Formation, roll: number, weig
   return candidates[candidates.length - 1]?.id ?? null;
 }
 
+/** Passeur décisif : un coéquipier sur le terrain (les milieux d'abord), ou personne (but en solo). */
+function pickAssist(club: ClubInMatch, formation: Formation, roll: number, scorerId: string): string | null {
+  const slots = formationSlots(formation);
+  const candidates = club.onField
+    .map((id, index) => ({ id, weight: id && id !== scorerId ? M.assistWeights[slots[index] as Position] : 0 }))
+    .filter((c) => c.weight > 0);
+  let target = roll * (candidates.reduce((sum, c) => sum + c.weight, 0) + M.soloGoalWeight);
+  for (const c of candidates) {
+    target -= c.weight;
+    if (target < 0) return c.id;
+  }
+  return null;
+}
+
 function canSubstitute(club: ClubInMatch): boolean {
   return club.subsUsed < M.maxSubstitutions && club.bench.length > 0;
 }
@@ -180,6 +194,7 @@ function simulateMinute(s: MatchState, minute: number, ctx: ClubContext): void {
     const targetRoll = float();
     const goalRoll = float();
     const scorerRoll = float();
+    const assistRoll = float();
 
     const midHome = Math.pow(safe(home.mid), M.midfieldExponent);
     const midAway = Math.pow(safe(away.mid), M.midfieldExponent);
@@ -192,8 +207,9 @@ function simulateMinute(s: MatchState, minute: number, ctx: ClubContext): void {
     const outcome: ChanceOutcome = targetRoll >= pTarget ? 'off' : goalRoll < pGoal ? 'goal' : 'saved';
 
     const playerId = side === clubSide ? pickOnField(s.club, ctx.formation, scorerRoll, M.scorerWeights) : null;
+    const assistId = outcome === 'goal' && playerId ? pickAssist(s.club, ctx.formation, assistRoll, playerId) : null;
     if (outcome === 'goal') s.score[side] += 1;
-    s.events.push({ minute, type: 'chance', side, outcome, playerId });
+    s.events.push({ minute, type: 'chance', side, outcome, playerId, assistId });
   }
 }
 

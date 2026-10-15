@@ -2,6 +2,7 @@ import type { EventEffect } from '../core/events';
 import type { GameState, PendingEvent } from '../core/state';
 import { formatEuros, formatStars } from './formatters';
 import { format, texts } from './i18n';
+import { playerLabel } from './playerLabel';
 
 const EF = texts.effects;
 
@@ -26,9 +27,9 @@ export function eventParams(state: GameState, pending: PendingEvent): Record<str
   const player = state.squad.players.find((p) => p.id === pending.targetPlayerId);
   const prodigy = pending.prodigy;
   return {
-    player: player?.name ?? '',
+    player: playerLabel(player),
     price: formatEuros(pending.offerPrice),
-    prodigy: prodigy?.name ?? '',
+    prodigy: playerLabel(prodigy ?? undefined),
     age: prodigy?.age ?? 0,
     stars: prodigy ? formatStars(prodigy.potentialStarsShown) : '',
   };

@@ -152,7 +152,14 @@
       "DEF": 0.5,
       "MIL": 1.5,
       "ATT": 3
-    }
+    },
+    "assistWeights": {
+      "GAR": 0.1,
+      "DEF": 0.5,
+      "MIL": 2,
+      "ATT": 1.5
+    },
+    "soloGoalWeight": 1.5
   },
   "morale": {
     "win": 5,
@@ -339,5 +346,17 @@
   "bankruptcy": {
     "weeksInRed": 4
   },
-  "exportReminderWeeks": 5
+  "matchRating": {
+    "base": 6,
+    "goal": 1,
+    "assist": 0.6,
+    "win": 0.5,
+    "loss": -0.5,
+    "cleanSheet": 0.8,
+    "concededPerGoal": -0.3,
+    "shotOnTarget": 0.2,
+    "shotOff": -0.1,
+    "min": 3,
+    "max": 10
+  }
 }

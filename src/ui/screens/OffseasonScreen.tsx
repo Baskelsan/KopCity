@@ -8,6 +8,8 @@ import { formatEuros, formatStars } from '../formatters';
 import { format, texts } from '../i18n';
 import { movementText, rankText } from '../logText';
 import { MarketSheet, refusalText } from '../MarketSheet';
+import { exportReminderDue } from '../../core/exportReminder';
+import { exportSaveFile } from '../../storage/files';
 import { topScorer } from '../../core/records';
 import { formatInteger } from '../formatters';
 
@@ -31,7 +33,24 @@ function PlayerLine({ player }: { player: Player }) {
   );
 }
 
-export function OffseasonScreen({ state, dispatch }: { state: GameState; dispatch: (action: Action) => void }) {
+export function OffseasonScreen({
+  state,
+  dispatch,
+  notify,
+}: {
+  state: GameState;
+  dispatch: (action: Action) => void;
+  notify: (message: string) => void;
+}) {
+  const handleExport = async () => {
+    try {
+      await exportSaveFile(state, new Date().toISOString());
+      dispatch({ type: 'markExported' });
+      notify(texts.save.exported);
+    } catch {
+      notify(texts.save.exportFailed);
+    }
+  };
   const [showMarket, setShowMarket] = useState(false);
   const offseason = state.offseason!;
   const { summary } = offseason;
@@ -47,6 +66,15 @@ export function OffseasonScreen({ state, dispatch }: { state: GameState; dispatc
   return (
     <div class="screen home-screen">
       <h1>{O.title}</h1>
+
+      {exportReminderDue(state) && (
+        <section class="card export-reminder">
+          <p>{texts.exportReminder.text}</p>
+          <button type="button" class="button" onClick={() => void handleExport()}>
+            {texts.exportReminder.button}
+          </button>
+        </section>
+      )}
 
       <section class="card">
         <h2>{format(O.summaryTitle, { season: summary.season })}</h2>

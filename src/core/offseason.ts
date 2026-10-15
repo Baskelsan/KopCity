@@ -388,7 +388,9 @@ export function startSeason(state: GameState): GameState {
   if (state.phase !== 'offseason' || !canStartSeason(state).ok) return state;
   let rng = state.meta.rngState;
   const leaving = new Set(expiringPlayers(state).map((p) => p.id));
-  const players = state.squad.players.filter((p) => !leaving.has(p.id));
+  const players = state.squad.players
+    .filter((p) => !leaving.has(p.id))
+    .map((p) => ({ ...p, seasonStats: { apps: 0, goals: 0, assists: 0, ratingTotal: 0 } }));
 
   const divisions: Division[] = [];
   for (const old of state.league.divisions) {
