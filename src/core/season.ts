@@ -13,6 +13,7 @@ import { myDivision, myFixture, opponentOf, rankOf, recordResult, standings } fr
 import { autoLineup, benchOf, effectiveLineup } from './lineup';
 import { clubOutcome, createMatch, runMatch, simulateToEnd, type ClubContext } from './match';
 import type { MatchState, Side } from './matchTypes';
+import { endSeason, generateMarket } from './offseason';
 import { nextInt } from './rng';
 import { MY_TEAM_ID, type Alert, type Division, type GameState, type LogEntry, type Player, type Squad, type Team } from './state';
 
@@ -25,7 +26,7 @@ export type KeyMatchReason = 'alwaysLive' | 'derby' | 'directRival' | 'promotion
 const clubContext = (state: GameState): ClubContext => ({ players: state.squad.players, formation: state.squad.formation });
 
 export function seasonOver(state: GameState): boolean {
-  return state.time.week > SEASON_WEEKS;
+  return state.phase === 'season' && state.time.week > SEASON_WEEKS;
 }
 
 /** Pourquoi le match de la semaine est un match à enjeu (liste vide : semaine calme). */
@@ -115,33 +116,30 @@ export function simulateAiMatch(seed: number, home: Team, away: Team): { homeGoa
   return { homeGoals: done.score.home, awayGoals: done.score.away };
 }
 
-/** Enregistre le résultat du club et joue les autres matchs de la journée. */
+/** Enregistre le résultat du club et joue tous les autres matchs de la journée, dans les 3 divisions. */
 function playRound(state: GameState, match: MatchState): GameState {
   const week = state.time.week;
   let rng = state.meta.rngState;
-  const division = myDivision(state.league);
-  const teams = new Map(division.teams.map((t) => [t.id, t]));
-  let table = division.table;
 
-  const fixtures = division.fixtures.map((f) => {
-    if (f.week !== week) return f;
-    if (f.home === MY_TEAM_ID || f.away === MY_TEAM_ID) {
-      table = recordResult(table, f.home, f.away, match.score.home, match.score.away);
-      return { ...f, result: { homeGoals: match.score.home, awayGoals: match.score.away, seed: match.seed }, live: match.live };
-    }
-    const seed = nextInt(rng, 0, 0xffffffff);
-    rng = seed.rngState;
-    const result = simulateAiMatch(seed.value, teams.get(f.home)!, teams.get(f.away)!);
-    table = recordResult(table, f.home, f.away, result.homeGoals, result.awayGoals);
-    return { ...f, result: { ...result, seed: seed.value } };
+  const divisions = state.league.divisions.map((division): Division => {
+    const teams = new Map(division.teams.map((t) => [t.id, t]));
+    let table = division.table;
+    const fixtures = division.fixtures.map((f) => {
+      if (f.week !== week) return f;
+      if (f.home === MY_TEAM_ID || f.away === MY_TEAM_ID) {
+        table = recordResult(table, f.home, f.away, match.score.home, match.score.away);
+        return { ...f, result: { homeGoals: match.score.home, awayGoals: match.score.away, seed: match.seed }, live: match.live };
+      }
+      const seed = nextInt(rng, 0, 0xffffffff);
+      rng = seed.rngState;
+      const result = simulateAiMatch(seed.value, teams.get(f.home)!, teams.get(f.away)!);
+      table = recordResult(table, f.home, f.away, result.homeGoals, result.awayGoals);
+      return { ...f, result: { ...result, seed: seed.value } };
+    });
+    return { ...division, fixtures, table };
   });
 
-  const updated: Division = { ...division, fixtures, table };
-  return {
-    ...state,
-    meta: { ...state.meta, rngState: rng },
-    league: { ...state.league, divisions: state.league.divisions.map((d) => (d.id === updated.id ? updated : d)) },
-  };
+  return { ...state, meta: { ...state.meta, rngState: rng }, league: { ...state.league, divisions } };
 }
 
 /** Blessés : une semaine de moins pour les anciens, puis les blessures et le moral du match. */
@@ -232,13 +230,24 @@ export function weekAlerts(before: GameState, after: GameState, match: MatchStat
 
 /**
  * « Avancer » : enchaîne les semaines calmes (match en résumé) et s'arrête de lui-même
- * avant un match à enjeu (joué en direct) ou après une semaine qui demande l'attention du joueur.
+ * avant un match à enjeu (joué en direct), à l'ouverture du mercato d'hiver,
+ * ou après une semaine qui demande l'attention du joueur. Après la dernière journée, il ouvre l'intersaison.
  */
 export function advance(state: GameState): GameState {
-  if (state.currentMatch) return state;
-  let s: GameState = { ...state, alerts: [] };
+  if (state.currentMatch || state.phase !== 'season') return state;
+  // Repartir referme le mercato d'hiver.
+  let s: GameState = { ...state, alerts: [], market: { ...state.market, open: false, offers: [] } };
   for (;;) {
-    if (seasonOver(s)) return { ...s, alerts: [{ key: 'seasonOver' }] };
+    if (seasonOver(s)) return endSeason(s);
+    if (s.time.week === balance.market.winterWeek && s.market.lastWinterSeason !== s.time.season) {
+      const offers = generateMarket(s.meta.rngState, s.league.myDivision);
+      return {
+        ...s,
+        meta: { ...s.meta, rngState: offers.rngState },
+        market: { offers: offers.value, open: true, lastWinterSeason: s.time.season },
+        alerts: [{ key: 'winterMarket' }],
+      };
+    }
     const reasons = keyMatchReasons(s);
     if (reasons.length > 0) {
       const prepared = prepareMyMatch(s, true);

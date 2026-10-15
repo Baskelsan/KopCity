@@ -72,9 +72,19 @@ export function generateOpponent(
   const spread = nextFloat(rng);
   rng = spread.rngState;
   const teamLevel = level + (spread.value * 2 - 1) * S.opponentLevelSpread;
-  const squad = generateSquad(rng, teamLevel);
-  rng = squad.rngState;
+  const strength = strengthForLevel(rng, teamLevel);
+  return {
+    value: { id, name: `${prefix.value} ${town.value}`, level: teamLevel, strength: strength.value, town: town.value },
+    rngState: strength.rngState,
+  };
+}
+
+/** Force d'une équipe d'un niveau donné : un effectif virtuel aligné en 4-4-2. */
+export function strengthForLevel(rngState: number, level: number): Draw<TeamStrength> {
+  const squad = generateSquad(rngState, level);
   const formation: Formation = '4-4-2';
-  const strength = lineupStrength(squad.value, formation, autoLineup(squad.value, formation));
-  return { value: { id, name: `${prefix.value} ${town.value}`, strength, town: town.value }, rngState: rng };
+  return {
+    value: lineupStrength(squad.value, formation, autoLineup(squad.value, formation)),
+    rngState: squad.rngState,
+  };
 }

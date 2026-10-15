@@ -38,39 +38,64 @@ export function emptyTable(teamIds: readonly string[]): TableRow[] {
   return teamIds.map((team) => ({ team, played: 0, points: 0, goalsFor: 0, goalsAgainst: 0 }));
 }
 
-/** Génère une division : 9 adversaires au niveau de la division, un calendrier et un classement vierge. */
-export function generateDivision(rngState: number, id: DivisionId): Draw<{ division: Division; rivalId: string }> {
-  let rng = rngState;
-  // Chaque club de la division vient d'une ville différente.
-  const teams: Team[] = [];
-  const towns: string[] = [];
-  for (let i = 1; teams.length < L.teamsPerDivision - 1; i++) {
-    const draw = generateOpponent(rng, divisionLevel(id), `${id.toLowerCase()}-t${i}`, towns);
-    rng = draw.rngState;
-    const { town, ...team } = draw.value;
-    towns.push(town);
-    teams.push(team);
-  }
-  const order = shuffle(rng, [MY_TEAM_ID, ...teams.map((t) => t.id)]);
-  rng = order.rngState;
-  const rival = nextInt(rng, 0, teams.length - 1);
-  rng = rival.rngState;
-  const ids = [MY_TEAM_ID, ...teams.map((t) => t.id)];
+export const DIVISIONS: readonly DivisionId[] = ['D3', 'D2', 'D1'];
+
+/** Division du dessus et du dessous (null aux extrémités). */
+export function divisionAbove(id: DivisionId): DivisionId | null {
+  return DIVISIONS[DIVISIONS.indexOf(id) + 1] ?? null;
+}
+export function divisionBelow(id: DivisionId): DivisionId | null {
+  const index = DIVISIONS.indexOf(id);
+  return index > 0 ? DIVISIONS[index - 1]! : null;
+}
+
+/** Calendrier mélangé et classement vierge pour les équipes données. */
+export function newSeasonDivision(rngState: number, id: DivisionId, teams: Team[], withClub: boolean): Draw<Division> {
+  const ids = [...(withClub ? [MY_TEAM_ID] : []), ...teams.map((t) => t.id)];
+  const order = shuffle(rngState, ids);
   return {
-    value: {
-      division: { id, teams, fixtures: roundRobin(order.value), table: emptyTable(ids) },
-      rivalId: teams[rival.value]!.id,
-    },
-    rngState: rng,
+    value: { id, teams, fixtures: roundRobin(order.value), table: emptyTable(ids) },
+    rngState: order.rngState,
   };
 }
 
-export function newLeague(rngState: number, division: DivisionId): Draw<League> {
-  const draw = generateDivision(rngState, division);
-  return {
-    value: { myDivision: division, divisions: [draw.value.division], rivalId: draw.value.rivalId },
-    rngState: draw.rngState,
-  };
+/** Tire le rival du club parmi les adversaires de sa division. */
+export function pickRival(rngState: number, division: Division): Draw<string> {
+  const draw = nextInt(rngState, 0, division.teams.length - 1);
+  return { value: division.teams[draw.value]!.id, rngState: draw.rngState };
+}
+
+/**
+ * Génère le championnat complet : 3 divisions de 10 équipes, le club dans la sienne.
+ * Les 29 adversaires viennent tous de villes différentes. `excludedTowns` et `idPrefix`
+ * servent à compléter un championnat existant (migration).
+ */
+export function newLeague(rngState: number, clubDivision: DivisionId, only: readonly DivisionId[] = DIVISIONS, excludedTowns: string[] = []): Draw<League> {
+  let rng = rngState;
+  const towns = [...excludedTowns];
+  const divisions: Division[] = [];
+  let rivalId: string | null = null;
+  for (const id of only) {
+    const withClub = id === clubDivision;
+    const count = L.teamsPerDivision - (withClub ? 1 : 0);
+    const teams: Team[] = [];
+    for (let i = 1; teams.length < count; i++) {
+      const draw = generateOpponent(rng, divisionLevel(id), `${id.toLowerCase()}-t${i}`, towns);
+      rng = draw.rngState;
+      const { town, ...team } = draw.value;
+      towns.push(town);
+      teams.push(team);
+    }
+    const division = newSeasonDivision(rng, id, teams, withClub);
+    rng = division.rngState;
+    divisions.push(division.value);
+    if (withClub) {
+      const rival = pickRival(rng, division.value);
+      rng = rival.rngState;
+      rivalId = rival.value;
+    }
+  }
+  return { value: { myDivision: clubDivision, divisions, rivalId }, rngState: rng };
 }
 
 export function myDivision(league: League): Division {

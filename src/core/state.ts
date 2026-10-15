@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -60,6 +60,8 @@ export interface Player {
   monthlySalary: number;
   contractYears: number;
   injuryWeeks: number;
+  /** Formé au centre de formation du club (ajouté en v5). */
+  homegrown: boolean;
 }
 
 export interface Squad {
@@ -114,6 +116,8 @@ export interface TeamStrength {
 export interface Team {
   id: string;
   name: string;
+  /** Niveau caché (même échelle que les notes des joueurs), d'où se déduit la force (ajouté en v5). */
+  level: number;
   strength: TeamStrength;
 }
 
@@ -164,7 +168,35 @@ export interface MarketOffer {
 
 export interface Market {
   offers: MarketOffer[];
+  /** Mercato ouvert (intersaison ou fenêtre d'hiver) (ajouté en v5). */
+  open: boolean;
+  /** Dernière saison où la fenêtre d'hiver a été ouverte. */
+  lastWinterSeason: number;
 }
+
+export type Movement = 'promoted' | 'relegated' | 'stayed';
+
+/** Bilan de la saison qui vient de se terminer. */
+export interface SeasonSummary {
+  season: number;
+  division: DivisionId;
+  rank: number;
+  bonus: number;
+  movement: Movement;
+  /** Résultat financier de la saison (recettes − dépenses, hors prime). */
+  net: number;
+}
+
+/** Ce qui se décide entre deux saisons (ajouté en v5). */
+export interface Offseason {
+  summary: SeasonSummary;
+  /** Jeunes sortis du centre de formation, à signer ou non. */
+  prospects: Player[];
+  /** Noms des joueurs partis à la retraite. */
+  retired: string[];
+}
+
+export type Phase = 'season' | 'offseason';
 
 export interface PendingEvent {
   eventId: string;
@@ -222,7 +254,8 @@ export type AlertKey =
   | 'starterInjured'
   | 'treasuryNegative'
   | 'lowSatisfaction'
-  | 'seasonOver';
+  | 'seasonOver'
+  | 'winterMarket';
 
 /** Raison pour laquelle « Avancer » s'est arrêté. Texte dans texts.fr.json (alerts). */
 export interface Alert {
@@ -232,6 +265,8 @@ export interface Alert {
 
 export interface GameState {
   schemaVersion: number;
+  /** Saison en cours ou intersaison (ajouté en v5). */
+  phase: Phase;
   meta: Meta;
   settings: Settings;
   time: GameTime;
@@ -250,4 +285,6 @@ export interface GameState {
   finance: Finance;
   /** Raisons du dernier arrêt, affichées jusqu'au prochain « Avancer » (ajouté en v4). */
   alerts: Alert[];
+  /** Décisions de l'intersaison, null pendant la saison (ajouté en v5). */
+  offseason: Offseason | null;
 }

@@ -40,7 +40,7 @@ function potentialGap(age: number): number {
   return P.potentialGapByAge.find((step) => age <= step.maxAge)?.gap ?? 0;
 }
 
-function floatBetween(rngState: number, min: number, max: number): Draw<number> {
+export function floatBetween(rngState: number, min: number, max: number): Draw<number> {
   const draw = nextFloat(rngState);
   return { value: min + draw.value * (max - min), rngState: draw.rngState };
 }
@@ -51,7 +51,18 @@ function newId(rngState: number, prefix: string): Draw<string> {
   return { value: prefix + draw.value.toString(16).padStart(8, '0'), rngState: draw.rngState };
 }
 
-export function generatePlayer(rngState: number, pos: Position, level: number): Draw<Player> {
+export interface PlayerOptions {
+  ageMin?: number;
+  ageMax?: number;
+  /** Potentiel visé (au moins la note actuelle) ; sinon tiré selon l'âge. */
+  potential?: number;
+  /** Multiplie l'erreur d'estimation des étoiles (le centre de formation la réduit). */
+  starsErrorFactor?: number;
+  homegrown?: boolean;
+  contractYears?: number;
+}
+
+export function generatePlayer(rngState: number, pos: Position, level: number, options: PlayerOptions = {}): Draw<Player> {
   let rng = rngState;
   const take = <T>(draw: Draw<T>): T => {
     rng = draw.rngState;
@@ -61,7 +72,7 @@ export function generatePlayer(rngState: number, pos: Position, level: number): 
   const id = take(newId(rng, 'p'));
   const firstName = take(pick(rng, names.firstNames));
   const lastName = take(pick(rng, names.lastNames));
-  const age = take(nextInt(rng, P.ageMin, P.ageMax));
+  const age = take(nextInt(rng, options.ageMin ?? P.ageMin, options.ageMax ?? P.ageMax));
   const base = level + take(floatBetween(rng, -P.levelSpread, P.levelSpread));
   const profile = P.positionProfile[pos];
   const stats = {} as PlayerStats;
@@ -82,10 +93,15 @@ export function generatePlayer(rngState: number, pos: Position, level: number): 
     monthlySalary: 0,
     contractYears: take(nextInt(rng, P.contractYearsMin, P.contractYearsMax)),
     injuryWeeks: 0,
+    homegrown: options.homegrown ?? false,
   };
+  if (options.contractYears !== undefined) player.contractYears = options.contractYears;
   const rating = overall(player);
-  player.potential = clamp(rating + take(nextInt(rng, 0, potentialGap(age))), 1, 20);
-  player.potentialStarsShown = starsShown(player.potential, take(floatBetween(rng, -P.starsError, P.starsError)));
+  const gap = take(nextInt(rng, 0, potentialGap(age)));
+  const target = options.potential !== undefined ? Math.round(options.potential) : rating + gap;
+  player.potential = clamp(Math.max(rating, target), 1, 20);
+  const errorRange = P.starsError * (options.starsErrorFactor ?? 1);
+  player.potentialStarsShown = starsShown(player.potential, take(floatBetween(rng, -errorRange, errorRange)));
   player.monthlySalary = monthlySalary(lineRating(player, pos));
   return { value: player, rngState: rng };
 }
@@ -111,4 +127,29 @@ export function generateSquad(rngState: number, level: number): Draw<Player[]> {
 /** Masse salariale ramenée à la semaine (× 12 ÷ 52). */
 export function weeklyWages(players: readonly Player[]): number {
   return (players.reduce((sum, p) => sum + p.monthlySalary, 0) * 12) / 52;
+}
+
+/** Valeur de transfert : selon la note au poste et l'âge (un jeune vaut plus qu'un vétéran). */
+export function transferValue(player: Player): number {
+  const M = balance.market;
+  const ageFactor = M.ageFactors.find((a) => player.age <= a.maxAge)?.factor ?? 1;
+  const raw = M.valueAtReference * Math.pow(lineRating(player, player.pos) / M.referenceRating, M.valueExponent) * ageFactor;
+  return Math.max(M.valueRounding, Math.round(raw / M.valueRounding) * M.valueRounding);
+}
+
+/** Ce que rapporte la vente d'un joueur (80 % de sa valeur). */
+export function saleValue(player: Player): number {
+  return Math.round(transferValue(player) * balance.market.sellFactor);
+}
+
+/** Poste tiré selon des poids (ex. plus de défenseurs et de milieux que de gardiens). */
+export function weightedPosition(rngState: number, weights: Record<Position, number>): Draw<Position> {
+  const total = POSITIONS.reduce((sum, p) => sum + weights[p], 0);
+  const draw = nextFloat(rngState);
+  let target = draw.value * total;
+  for (const pos of POSITIONS) {
+    target -= weights[pos];
+    if (target < 0) return { value: pos, rngState: draw.rngState };
+  }
+  return { value: 'MIL', rngState: draw.rngState };
 }

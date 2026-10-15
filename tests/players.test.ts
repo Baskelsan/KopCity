@@ -18,6 +18,7 @@ const player = (pos: Player['pos'], stats: Player['stats']): Player => ({
   monthlySalary: 0,
   contractYears: 1,
   injuryWeeks: 0,
+  homegrown: false,
 });
 
 describe("génération de l'effectif", () => {

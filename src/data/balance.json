@@ -224,5 +224,110 @@
     "finalRounds": 3,
     "promotionSpots": 2,
     "relegationSpots": 2
+  },
+  "squadSize": {
+    "min": 16,
+    "max": 22
+  },
+  "seasonEnd": {
+    "bonusFirst": {
+      "D3": 100000,
+      "D2": 200000,
+      "D1": 400000
+    },
+    "bonusLastFactor": 0.2
+  },
+  "teams": {
+    "levelNoise": 0.8,
+    "levelReversion": 0.3
+  },
+  "aging": {
+    "youngMaxAge": 23,
+    "youngGainMin": 1,
+    "youngGainMax": 2,
+    "academyBonusPerLevel": 1,
+    "declineFromAge": 31,
+    "declineMin": 1,
+    "declineMax": 2,
+    "retireFromAge": 35,
+    "retireChance": 0.35,
+    "retireAge": 38
+  },
+  "academy": {
+    "prospectsByLevel": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "ageMin": 16,
+    "ageMax": 18,
+    "currentLevel": 6,
+    "potentialBase": 11,
+    "potentialPerLevel": 1.5,
+    "potentialPerPopulation": 0.0001,
+    "potentialSpread": 3,
+    "starsErrorReductionPerLevel": 0.25,
+    "contractYears": 3,
+    "positionWeights": {
+      "GAR": 1,
+      "DEF": 3,
+      "MIL": 3,
+      "ATT": 2
+    }
+  },
+  "market": {
+    "offersMin": 6,
+    "offersMax": 8,
+    "winterWeek": 9,
+    "levelSpread": 2,
+    "valueAtReference": 150000,
+    "referenceRating": 10,
+    "valueExponent": 3,
+    "valueRounding": 5000,
+    "ageFactors": [
+      {
+        "maxAge": 21,
+        "factor": 1.3
+      },
+      {
+        "maxAge": 25,
+        "factor": 1
+      },
+      {
+        "maxAge": 29,
+        "factor": 0.85
+      },
+      {
+        "maxAge": 32,
+        "factor": 0.6
+      },
+      {
+        "maxAge": 99,
+        "factor": 0.35
+      }
+    ],
+    "sellFactor": 0.8
+  },
+  "contracts": {
+    "renewalSalaryFactor": 1.1,
+    "yearsMin": 1,
+    "yearsMax": 3
+  },
+  "offseason": {
+    "moraleTarget": 70,
+    "moraleRecovery": 0.5
   }
 }

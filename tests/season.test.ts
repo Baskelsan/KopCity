@@ -159,8 +159,8 @@ describe('une saison complète', () => {
     expect(division.fixtures.every((f) => f.result !== null)).toBe(true);
     expect(division.table.every((r) => r.played === SEASON)).toBe(true);
     expect(stops.at(-1)!.alerts.some((a) => a.key === 'seasonOver')).toBe(true);
-    expect(run(final, { type: 'advance' }).currentMatch).toBeNull();
-    expect(run(final, { type: 'advance' }).time.week).toBe(SEASON + 1);
+    // Avancer après la dernière journée ouvre l'intersaison.
+    expect(run(final, { type: 'advance' }).phase).toBe('offseason');
   });
 
   it('la trésorerie se recalcule poste par poste à l’euro près', () => {

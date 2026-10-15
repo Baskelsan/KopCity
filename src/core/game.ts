@@ -5,6 +5,14 @@ import { newLeague } from './league';
 import { autoLineup, swapInLineup } from './lineup';
 import { decide, type ClubContext } from './match';
 import type { Decision } from './matchTypes';
+import {
+  buyPlayer,
+  declineProspect,
+  renewContract,
+  sellPlayer,
+  signProspect,
+  startSeason,
+} from './offseason';
 import { divisionLevel, generateSquad } from './players';
 import { seedToState } from './rng';
 import { advance, finishLiveMatch } from './season';
@@ -48,6 +56,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
   const league = newLeague(squad.rngState, division);
   return {
     schemaVersion: SCHEMA_VERSION,
+    phase: 'season',
     meta: { createdAt: now, lastSavedAt: now, seed, rngState: league.rngState },
     settings: { alwaysLiveMatches: false },
     time: { season: 1, week: 1 },
@@ -67,7 +76,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
       constructions: [],
     },
     league: league.value,
-    market: { offers: [] },
+    market: { offers: [], open: false, lastWinterSeason: 0 },
     events: { pending: null, history: [] },
     objectives: [],
     records: { titles: 0, promotions: 0, bestAttendance: 0, bestTreasury: start.treasury },
@@ -75,6 +84,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
     currentMatch: null,
     finance: { lastWeek: null, season: emptyReport() },
     alerts: [],
+    offseason: null,
   };
 }
 
@@ -90,7 +100,13 @@ export type Action =
   | { type: 'build'; slotId: string; building: BuildingType }
   | { type: 'upgradeBuilding'; slotId: string }
   | { type: 'extendStadium' }
-  | { type: 'demolish'; slotId: string };
+  | { type: 'demolish'; slotId: string }
+  | { type: 'renewContract'; playerId: string; years: number }
+  | { type: 'signProspect'; playerId: string }
+  | { type: 'declineProspect'; playerId: string }
+  | { type: 'buyPlayer'; playerId: string }
+  | { type: 'sellPlayer'; playerId: string }
+  | { type: 'startSeason' };
 
 const clubContext = (state: GameState): ClubContext => ({
   players: state.squad.players,
@@ -133,5 +149,17 @@ export function applyAction(state: GameState, action: Action): GameState {
       return extendStadium(state);
     case 'demolish':
       return demolish(state, action.slotId);
+    case 'renewContract':
+      return renewContract(state, action.playerId, action.years);
+    case 'signProspect':
+      return signProspect(state, action.playerId);
+    case 'declineProspect':
+      return declineProspect(state, action.playerId);
+    case 'buyPlayer':
+      return buyPlayer(state, action.playerId);
+    case 'sellPlayer':
+      return sellPlayer(state, action.playerId);
+    case 'startSeason':
+      return startSeason(state);
   }
 }
