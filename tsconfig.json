@@ -17,5 +17,5 @@
     "noEmit": true,
     "types": ["vite/client", "vite-plugin-pwa/preact"]
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["src", "tests", "vite.config.ts", "vitest.simulate.config.ts"]
 }

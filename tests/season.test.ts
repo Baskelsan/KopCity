@@ -80,15 +80,24 @@ describe('matchs à enjeu', () => {
     expect(keyMatchReasons({ ...s, time: { ...s.time, week } })).toContain('derby');
   });
 
-  it('un concurrent direct : 3 points d’écart au plus et proche au classement', () => {
-    expect(keyMatchReasons(setup(6, 12, 10, 4, 5).s)).toContain('directRival');
-    expect(keyMatchReasons(setup(6, 12, 8, 4, 5).s)).not.toContain('directRival');
+  it('un concurrent direct : 3 points d’écart au plus et juste à côté au classement', () => {
+    expect(keyMatchReasons(setup(7, 12, 10, 4, 5).s)).toContain('directRival');
+    expect(keyMatchReasons(setup(7, 12, 8, 4, 5).s)).not.toContain('directRival');
+    // Une équipe glissée entre les deux au classement : ce n'est plus un concurrent direct.
+    const { s: between, opponent } = setup(7, 12, 10, 4, 5);
+    const division = myDivision(between.league);
+    const other = division.teams.find((t) => t.id !== opponent)!.id;
+    const table = division.table.map((r) => (r.team === other ? { ...r, points: 11 } : r));
+    const withBetween = { ...between, league: { ...between.league, divisions: [{ ...division, table }] } };
+    expect(keyMatchReasons(withBetween)).not.toContain('directRival');
     // Trop tôt dans la saison, même avec un petit écart.
-    expect(keyMatchReasons(setup(2, 3, 3, 4, 5).s)).not.toContain('directRival');
+    expect(keyMatchReasons(setup(3, 3, 3, 4, 5).s)).not.toContain('directRival');
   });
 
   it('dans les 3 dernières journées, la montée ou le maintien en jeu', () => {
-    expect(keyMatchReasons(setup(17, 31, 0, 3, 10).s)).toContain('promotion');
+    expect(keyMatchReasons(setup(17, 34, 0, 3, 10).s)).toContain('promotion');
+    // Trop loin de la ligne de montée (5 points) : pas d'enjeu.
+    expect(keyMatchReasons(setup(17, 31, 0, 3, 10).s)).not.toContain('promotion');
     expect(keyMatchReasons(setup(17, 8, 0, 8, 10).s)).toContain('relegation');
     expect(keyMatchReasons(setup(14, 31, 0, 3, 10).s)).not.toContain('promotion');
   });

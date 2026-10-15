@@ -58,7 +58,8 @@ export function keyMatchReasons(state: GameState): KeyMatchReason[] {
 
   const remaining = SEASON_WEEKS - week + 1;
   if (remaining <= K.finalRounds) {
-    const reachable = balance.league.pointsWin * remaining;
+    // « En jeu » : l'écart avec la ligne de montée ou de descente est d'au plus quelques points.
+    const reachable = K.finalRoundsMaxPointsGap;
     const teams = table.length;
     const promotionLine = K.promotionSpots;
     const promotionAtStake =

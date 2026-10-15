@@ -387,6 +387,12 @@ describe('3 saisons enchaînées', () => {
   }, 120_000);
 });
 
+/** Fin de saison avec quelques contrats qui arrivent à échéance (les contrats de départ durent 2 à 4 saisons). */
+function finishedWithExpiring(rank = 5): GameState {
+  const s = finishedAt(rank);
+  return { ...s, squad: { ...s.squad, players: s.squad.players.map((p, i) => (i % 4 === 0 ? { ...p, contractYears: 1 } : p)) } };
+}
+
 describe('retours de jeu (après M5)', () => {
   it('l’intersaison enregistre l’évolution de la note de chaque joueur', () => {
     const s = finishedAt(5);
@@ -403,7 +409,7 @@ describe('retours de jeu (après M5)', () => {
   });
 
   it('un joueur en fin de contrat sort de la composition et ne peut pas être vendu', () => {
-    const off = endSeason(finishedAt(5));
+    const off = endSeason(finishedWithExpiring());
     const expiring = expiringPlayers(off);
     expect(expiring.length).toBeGreaterThan(0);
     for (const p of expiring) expect(off.squad.lineup).not.toContain(p.id);
@@ -411,7 +417,7 @@ describe('retours de jeu (après M5)', () => {
   });
 
   it('prolongé, il revient dans la composition automatique s’il est parmi les meilleurs', () => {
-    const off = endSeason(finishedAt(5));
+    const off = endSeason(finishedWithExpiring());
     const best = [...expiringPlayers(off)].sort((a, b) => overall(b) - overall(a))[0]!;
     const renewed = run(off, { type: 'renewContract', playerId: best.id, years: 1 });
     const candidates = renewed.squad.players.filter((p) => p.contractYears > 0 && p.pos === best.pos);

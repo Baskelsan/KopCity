@@ -76,12 +76,12 @@
     "starsDivisor": 4,
     "starsError": 1,
     "startMorale": 70,
-    "contractYearsMin": 1,
-    "contractYearsMax": 3,
+    "contractYearsMin": 2,
+    "contractYearsMax": 4,
     "salary": {
-      "monthlyAtReference": 7700,
+      "monthlyAtReference": 7000,
       "referenceRating": 10,
-      "exponent": 2,
+      "exponent": 3,
       "rounding": 100
     }
   },
@@ -219,11 +219,12 @@
   },
   "keyMatch": {
     "directRivalMaxPointsGap": 3,
-    "directRivalMaxRankGap": 2,
-    "directRivalFromRound": 4,
+    "directRivalMaxRankGap": 1,
+    "directRivalFromRound": 6,
     "finalRounds": 3,
     "promotionSpots": 2,
-    "relegationSpots": 2
+    "relegationSpots": 2,
+    "finalRoundsMaxPointsGap": 3
   },
   "squadSize": {
     "min": 16,
@@ -292,7 +293,7 @@
     "offersMin": 6,
     "offersMax": 8,
     "winterWeek": 9,
-    "levelSpread": 2,
+    "levelSpread": 4,
     "valueAtReference": 150000,
     "referenceRating": 10,
     "valueExponent": 3,
@@ -337,5 +338,6 @@
   },
   "bankruptcy": {
     "weeksInRed": 4
-  }
+  },
+  "exportReminderWeeks": 5
 }
