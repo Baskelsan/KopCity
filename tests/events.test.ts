@@ -273,7 +273,7 @@ describe('chaque événement et ses choix', () => {
 });
 
 describe('tirage hebdomadaire', () => {
-  it('jamais avant la semaine 3, une fois par semaine, environ une semaine sur trois', () => {
+  it('jamais avant la semaine 3, une fois par semaine, environ une semaine sur cinq', () => {
     let fired = 0;
     const runs = 600;
     for (let seed = 1; seed <= runs; seed++) {
@@ -286,8 +286,8 @@ describe('tirage hebdomadaire', () => {
       const again = rollEvent({ ...rolled, events: { ...rolled.events, pending: null } });
       expect(again.events.pending).toBeNull();
     }
-    expect(fired / runs).toBeGreaterThan(0.27);
-    expect(fired / runs).toBeLessThan(0.4);
+    expect(fired / runs).toBeGreaterThan(0.15);
+    expect(fired / runs).toBeLessThan(0.25);
   });
 
   it('Avancer s’arrête sur un événement, et attend la réponse', () => {

@@ -202,7 +202,7 @@ Monter de division augmente les recettes, mais aussi les salaires des joueurs ca
 
 ## Événements et objectifs
 
-Les événements cassent la routine et créent des décisions. Chaque semaine, il y a une chance sur trois qu'un événement se déclenche (jamais pendant les 2 premières semaines, jamais plus d'un par semaine), tiré parmi ceux dont la condition est remplie. Chacun propose 2 choix avec un coût et un effet visibles avant de décider.
+Les événements cassent la routine et créent des décisions. Chaque semaine, il y a une chance sur cinq qu'un événement se déclenche (une sur trois à l'origine, réduite en M7 pour le rythme) (jamais pendant les 2 premières semaines, jamais plus d'un par semaine), tiré parmi ceux dont la condition est remplie. Chacun propose 2 choix avec un coût et un effet visibles avant de décider.
 
 **Catalogue de départ (12 événements)**
 
@@ -396,7 +396,7 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - À l'intersaison, les blessés sont guéris et le moral se rapproche de 70.
 
 **Événements, objectifs et fin de partie (M6)**
-- Un tirage par semaine à partir de la 3e, 1 chance sur 3, jamais deux fois de suite le même événement. L'événement arrête « Avancer » ; un choix qui coûte plus que la trésorerie est refusé.
+- Un tirage par semaine à partir de la 3e, 1 chance sur 3 (1 sur 5 depuis M7), jamais deux fois de suite le même événement. L'événement arrête « Avancer » ; un choix qui coûte plus que la trésorerie est refusé.
 - Chiffres des 12 événements : star blessée (jouer : 40 % de risque de 3 à 5 semaines ; reposer : 1 semaine) ; voisins excédés (mur −30 000 €, +10 ; ignorer −10) ; subvention (+80 000 € avec engagement de construire un transport dans la saison, sinon remboursement et riverains −10) ; offre pour un joueur noté au moins 2 de plus que le niveau de la division (vendre à 120 % de sa valeur ; refuser : moral +15) ; sponsor maillot après 4 victoires (+6 000 €/sem. pendant 8 sem. ou +3 000 €/sem. pendant 25 sem.) ; jeune prodige (centre ≥ 1) ; dispute au vestiaire si moral moyen < 50 (réunion +10 ; sanction +20 000 €, moral −5) ; pelouse abîmée (−20 000 € ou −5 % de force à domicile pendant 2 matchs) ; match amical rémunéré (+30 000 €, 25 % de risque de blessure de 1 à 3 sem.) ; grève des transports (affluence −30 % un match ou navettes −15 000 €) ; inspection si capacité > 8 000 (−40 000 € ou 50 % de risque d'amende de 80 000 €) ; série de 3 défaites (défendre l'équipe : moral +10 ; s'excuser : supporters +1 point).
 - Les comptes ont une ligne « Transferts et événements » en recettes et en dépenses, pour que le récapitulatif colle à la trésorerie.
 - Objectifs : un sportif (top 5, top 3 ou invaincu à domicile 5 matchs de suite), un financier (300 000 € en caisse ou résultat positif), un urbain (riverains à 60 ou 2 bâtiments livrés). 50 000 € par objectif atteint (×1,5 en D2, ×2 en Élite) ; les trois atteints donnent +10 % de sponsors la saison suivante.
@@ -407,7 +407,8 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 **Équilibrage et finitions (M7)**
 - `npm run simulate` fait jouer 3 joueurs automatiques (équilibré, tout sur le stade, tout sur les joueurs) sur 100 parties de 5 saisons ; le rapport est dans `docs/EQUILIBRAGE.md`.
 - Valeurs modifiées : salaires plus raides avec la note (exposant 3, 7 000 €/mois pour une note de 10 ; masse de départ toujours ≈ 40 000 €/sem.) ; contrats de départ de 2 à 4 saisons ; joueurs du marché de ±4 autour du niveau de la division ; concurrent direct = 3 points au plus et rang voisin, à partir de la 6e journée ; montée ou maintien « en jeu » = 3 points au plus de la ligne, dans les 3 dernières journées.
-- Résultat : faillite dans 2 % des parties pour la stratégie équilibrée, 11 % pour « tout sur le stade » (qui plafonne en Division 3), 20 % pour « tout sur les joueurs » (avec moins d'argent). L'aide municipale n'est pas nécessaire.
+- Événements : 1 chance sur 5 par semaine au lieu de 1 sur 3, pour se rapprocher d'une semaine clé toutes les 2 à 3 semaines.
+- Résultat : faillite dans 2 % des parties pour la stratégie équilibrée, 15 % pour « tout sur le stade » (qui plafonne en Division 3), 22 % pour « tout sur les joueurs » (avec moins d'argent) ; environ 13 arrêts par saison, dont 3 événements. L'aide municipale n'est pas nécessaire.
 - Création du club (nom et 2 couleurs), aide à l'installation dans Safari, icônes définitives, rappel d'export toutes les 5 semaines de jeu, temps de jeu affiché dans l'onglet Club.
 
 ## Décisions ouvertes et risques

@@ -332,7 +332,7 @@
     "moraleRecovery": 0.5
   },
   "events": {
-    "weeklyChance": 0.3333,
+    "weeklyChance": 0.2,
     "firstWeek": 3,
     "noRepeat": true
   },
