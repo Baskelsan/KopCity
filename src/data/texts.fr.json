@@ -4,21 +4,127 @@
     "shortName": "Kop City",
     "description": "Dirige un club de football et fais grandir la ville autour de son stade.",
     "monogram": "KC",
-    "tagline": "Le club fait la ville, la ville fait le club.",
     "version": "Version {version}",
     "loading": "Chargement de la partie…"
   },
   "defaults": {
     "clubName": "FC Kop City"
   },
+  "tabs": {
+    "home": "Accueil",
+    "squad": "Effectif",
+    "matches": "Matchs",
+    "club": "Club"
+  },
   "game": {
     "seasonWeek": "Saison {season} · Semaine {week}",
     "treasury": "Trésorerie",
     "population": "Habitants",
+    "wages": "Salaires",
+    "perWeek": "{amount} / sem.",
     "seed": "Graine",
     "alwaysLiveMatches": "Tous les matchs en direct"
   },
+  "positions": {
+    "GAR": "GAR",
+    "DEF": "DEF",
+    "MIL": "MIL",
+    "ATT": "ATT"
+  },
+  "lines": {
+    "GAR": "Gardien",
+    "DEF": "Défense",
+    "MIL": "Milieu",
+    "ATT": "Attaque"
+  },
+  "styles": {
+    "offensive": "Offensif",
+    "balanced": "Équilibré",
+    "defensive": "Défensif"
+  },
+  "squad": {
+    "formation": "Formation",
+    "style": "Style",
+    "autoLineup": "Composition automatique",
+    "starters": "Titulaires",
+    "bench": "Remplaçants",
+    "unavailable": "Indisponibles",
+    "emptySlot": "Place vide",
+    "rating": "Note",
+    "morale": "Moral",
+    "age": "{age} ans",
+    "stars": "{stars} ★",
+    "injured": "Blessé {weeks} sem.",
+    "swapHint": "Touche un autre joueur pour l'échanger.",
+    "close": "Fermer",
+    "salary": "Salaire",
+    "perMonth": "{amount} / mois",
+    "contract": "Contrat",
+    "contractYears": "{years} saison(s)",
+    "potential": "Potentiel estimé",
+    "stats": {
+      "att": "Attaque",
+      "saves": "Arrêts",
+      "def": "Défense",
+      "pas": "Passes",
+      "phy": "Physique"
+    }
+  },
+  "match": {
+    "friendlyTitle": "Match amical",
+    "friendlyText": "Affronte un club de ta division pour tester ton équipe. Le résultat ne compte pas, mais les blessures et le moral, si.",
+    "playSummary": "Résumé",
+    "playLive": "En direct",
+    "speedNormal": "×1",
+    "speedFast": "×4",
+    "skip": "Passer",
+    "finish": "Terminer",
+    "minute": "{minute}'",
+    "report": "Résumé du match",
+    "scorers": "Buteurs",
+    "noScorer": "Aucun but",
+    "highlights": "Faits marquants",
+    "nothingToReport": "Rien à signaler.",
+    "opponentGoals": "{team} : {count} but(s)",
+    "home": "Domicile",
+    "away": "Extérieur",
+    "events": {
+      "goalPlayer": "⚽ But de {player} ({team}) !",
+      "goalTeam": "⚽ But pour {team} !",
+      "savedPlayer": "Frappe de {player}, arrêtée par le gardien.",
+      "savedTeam": "{team} tente sa chance, le gardien arrête.",
+      "offPlayer": "Tir de {player} à côté.",
+      "offTeam": "{team} tire à côté.",
+      "cardPlayer": "🟨 Carton jaune pour {player}.",
+      "cardTeam": "🟨 Carton jaune pour un joueur de {team}.",
+      "injuryPlayer": "🚑 {player} se blesse ({weeks} sem.).",
+      "injuryTeam": "🚑 Un joueur de {team} se blesse.",
+      "substitution": "🔁 {in} remplace {out}.",
+      "styleChange": "Nouvelle consigne : jeu {style}.",
+      "lateForce": "On pousse pour marquer.",
+      "lateManage": "On gère le score.",
+      "halftime": "Mi-temps : {score}.",
+      "fulltime": "Fin du match : {score}."
+    },
+    "decisions": {
+      "halftimeTitle": "Mi-temps",
+      "halftimeText": "Quelle consigne pour la seconde période ?",
+      "current": "{label} (actuel)",
+      "lateTitle": "{minute}e minute",
+      "lateText": "Le match entre dans son dernier tiers.",
+      "force": "Forcer",
+      "forceHint": "Plus d'attaque, moins de défense",
+      "manage": "Gérer",
+      "manageHint": "Plus de défense, moins d'attaque",
+      "keep": "Ne rien changer",
+      "injuryTitle": "Blessure",
+      "injuryText": "{player} ne peut pas continuer. Qui le remplace ?",
+      "recommended": "conseillé",
+      "playWithTen": "Jouer à 10"
+    }
+  },
   "save": {
+    "title": "Sauvegarde",
     "export": "Exporter",
     "import": "Importer",
     "newGame": "Nouvelle partie",
@@ -30,6 +136,9 @@
     "saveFailed": "La sauvegarde a échoué. Pense à exporter ta partie.",
     "loadFailed": "Impossible de relire la sauvegarde. Importe un export ou lance une nouvelle partie.",
     "exportFailed": "L'export a échoué."
+  },
+  "settings": {
+    "title": "Réglages"
   },
   "saveErrors": {
     "invalidJson": "Ce fichier n'est pas une sauvegarde Kop City.",

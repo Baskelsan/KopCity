@@ -24,13 +24,10 @@ export function useGame(onSaveError: () => void) {
     void requestPersistentStorage();
     loadGame()
       .then((saved) => {
-        if (saved) {
-          setState(saved);
-        } else {
-          const fresh = createGame();
-          setState(fresh);
-          void saveGame(fresh, new Date().toISOString()).catch(onSaveError);
-        }
+        // On réenregistre aussitôt : une sauvegarde migrée est ainsi écrite à la version courante.
+        const game = saved ?? createGame();
+        setState(game);
+        void saveGame(game, new Date().toISOString()).catch(onSaveError);
         setStatus('ready');
       })
       .catch(() => setStatus('loadFailed'));
