@@ -43,6 +43,7 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
         <div>
           <h1>{state.club.name}</h1>
           <p class="muted">
+            {texts.divisions[state.league.myDivision]} ·{' '}
             {format(texts.game.seasonWeek, { season: state.time.season, week: Math.min(state.time.week, balance.league.seasonWeeks) })}
             {started && ` · ${format(rank === 1 ? H.rankFirst : H.rank, { rank, teams })}`}
           </p>
@@ -116,8 +117,8 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
             {H.playMatch}
           </button>
         ) : (
-          <button type="button" class="button wide big" disabled={over} onClick={() => dispatch({ type: 'advance' })}>
-            {H.advance}
+          <button type="button" class="button wide big" onClick={() => dispatch({ type: 'advance' })}>
+            {over ? H.toOffseason : H.advance}
           </button>
         )}
       </div>

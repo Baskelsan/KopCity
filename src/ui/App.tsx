@@ -4,6 +4,7 @@ import { CityScreen } from './screens/CityScreen';
 import { ClubScreen } from './screens/ClubScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MatchScreen } from './screens/MatchScreen';
+import { OffseasonScreen } from './screens/OffseasonScreen';
 import { SquadScreen } from './screens/SquadScreen';
 import { UpdateBanner } from './UpdateBanner';
 import { createGame, useGame } from './useGame';
@@ -52,7 +53,10 @@ export function App() {
             </button>
           </div>
         )}
-        {state && tab === 'home' && <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} />}
+        {state && tab === 'home' && state.phase === 'offseason' && <OffseasonScreen state={state} dispatch={dispatch} />}
+        {state && tab === 'home' && state.phase === 'season' && (
+          <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} />
+        )}
         {state && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
         {state && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}
         {state && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} liveFromStart={liveFromStart} />}

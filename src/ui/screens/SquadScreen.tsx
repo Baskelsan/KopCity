@@ -1,10 +1,12 @@
 import { useState } from 'preact/hooks';
 import type { Action } from '../../core/game';
 import { FORMATIONS, formationSlots } from '../../core/lineup';
-import { overall, weeklyWages } from '../../core/players';
+import { canRemovePlayer } from '../../core/offseason';
+import { overall, saleValue, weeklyWages } from '../../core/players';
 import type { Formation, GameState, Player, PlayStyle, Position } from '../../core/state';
 import { formatEuros, formatStars } from '../formatters';
 import { format, texts } from '../i18n';
+import { MarketSheet, refusalText } from '../MarketSheet';
 
 const STYLES: PlayStyle[] = ['offensive', 'balanced', 'defensive'];
 
@@ -16,6 +18,8 @@ interface SquadScreenProps {
 export function SquadScreen({ state, dispatch }: SquadScreenProps) {
   const { squad } = state;
   const [selected, setSelected] = useState<string | null>(null);
+  const [showMarket, setShowMarket] = useState(false);
+  const marketOpen = state.market.open;
   const byId = new Map(squad.players.map((p) => [p.id, p]));
   const slots = formationSlots(squad.formation);
   const starters = new Set(squad.lineup);
@@ -69,6 +73,14 @@ export function SquadScreen({ state, dispatch }: SquadScreenProps) {
 
   return (
     <div class="screen squad">
+      {marketOpen && state.phase === 'season' && (
+        <div class="card market-banner">
+          <strong>{texts.market.openBanner}</strong>
+          <button type="button" class="button" onClick={() => setShowMarket(true)}>
+            {format(texts.market.openButton, { count: state.market.offers.length })}
+          </button>
+        </div>
+      )}
       <div class="card controls">
         <label class="field">
           <span>{texts.squad.formation}</span>
@@ -126,12 +138,38 @@ export function SquadScreen({ state, dispatch }: SquadScreenProps) {
         </>
       )}
 
-      {selectedPlayer && <PlayerPanel player={selectedPlayer} onClose={() => setSelected(null)} />}
+      {selectedPlayer && (
+        <PlayerPanel
+          player={selectedPlayer}
+          state={state}
+          onClose={() => setSelected(null)}
+          onSell={() => {
+            const amount = formatEuros(saleValue(selectedPlayer));
+            if (window.confirm(format(texts.market.confirmSell, { player: selectedPlayer.name, amount }))) {
+              dispatch({ type: 'sellPlayer', playerId: selectedPlayer.id });
+              setSelected(null);
+            }
+          }}
+        />
+      )}
+      {showMarket && <MarketSheet state={state} dispatch={dispatch} onClose={() => setShowMarket(false)} />}
     </div>
   );
 }
 
-function PlayerPanel({ player, onClose }: { player: Player; onClose: () => void }) {
+function PlayerPanel({
+  player,
+  state,
+  onClose,
+  onSell,
+}: {
+  player: Player;
+  state: GameState;
+  onClose: () => void;
+  onSell: () => void;
+}) {
+  const canSellNow = state.phase === 'offseason' || state.market.open;
+  const sellCheck = canRemovePlayer(state);
   const s = texts.squad.stats;
   const stats: [string, number][] = [
     [player.pos === 'GAR' ? s.saves : s.att, player.stats.att],
@@ -175,6 +213,14 @@ function PlayerPanel({ player, onClose }: { player: Player; onClose: () => void 
         </div>
       </dl>
       <p class="muted small">{texts.squad.swapHint}</p>
+      {canSellNow &&
+        (sellCheck.ok ? (
+          <button type="button" class="button secondary wide" onClick={onSell}>
+            {format(texts.market.sell, { amount: formatEuros(saleValue(player)) })}
+          </button>
+        ) : (
+          <p class="refusal">{refusalText(sellCheck)}</p>
+        ))}
     </aside>
   );
 }

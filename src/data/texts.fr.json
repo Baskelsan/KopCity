@@ -150,7 +150,8 @@
   "log": {
     "constructionDelivered": "Chantier livré : {building} (niveau {level}).",
     "districtUnlocked": "Nouveau quartier débloqué : {district} !",
-    "matchResult": "{outcome} {scored}-{conceded} contre {opponent} ({venue})."
+    "matchResult": "{outcome} {scored}-{conceded} contre {opponent} ({venue}).",
+    "seasonEnd": "Fin de saison : {rank} en {division}. {movement}"
   },
   "buildings": {
     "stadium": "Stade",
@@ -244,8 +245,10 @@
     "journal": "Journal",
     "emptyJournal": "Rien pour l'instant.",
     "seasonOverTitle": "Saison terminée",
-    "seasonOverText": "Classement final : {rank}. Résultat de la saison : {net}. L'intersaison (montées, descentes, mercato) n'est pas encore disponible.",
-    "matchInProgress": "Un match est en cours : il se joue dans l'onglet Matchs."
+    "seasonOverText": "Classement final : {rank}. Résultat de la saison : {net}. Passe à l'intersaison pour les montées, descentes, contrats et le mercato.",
+    "matchInProgress": "Un match est en cours : il se joue dans l'onglet Matchs.",
+    "toOffseason": "Passer à l'intersaison",
+    "division": "{division}"
   },
   "alerts": {
     "keyMatch": "Match à enjeu ({reasons}) : il se joue en direct.",
@@ -261,7 +264,8 @@
     "starterInjured": "{player} est blessé pour {weeks} sem.",
     "treasuryNegative": "Trésorerie négative ({treasury}) depuis {weeks} semaine(s). 4 semaines de suite dans le rouge, et c'est la faillite.",
     "lowSatisfaction": "Riverains mécontents ({satisfaction}) : le stade ne peut plus s'agrandir.",
-    "seasonOver": "La saison est terminée."
+    "seasonOver": "La saison est terminée.",
+    "winterMarket": "Mercato d'hiver ouvert : des joueurs sont à vendre dans l'onglet Effectif. Il se referme quand tu repars."
   },
   "outcomes": {
     "win": "Victoire",
@@ -309,5 +313,52 @@
     "goalDiff": "DB",
     "round": "J{week}",
     "notPlayed": "–"
+  },
+  "movements": {
+    "promoted": "Montée en {division} !",
+    "relegated": "Descente en {division}.",
+    "stayed": "Maintien en {division}."
+  },
+  "offseason": {
+    "title": "Intersaison",
+    "summaryTitle": "Bilan de la saison {season}",
+    "rank": "{rank} en {division}",
+    "bonus": "Prime de fin de saison : {bonus}",
+    "net": "Résultat de la saison (hors prime) : {net}",
+    "retired": "Départ à la retraite : {names}.",
+    "contractsTitle": "Fins de contrat",
+    "contractsHint": "Sans prolongation, ces joueurs partiront au lancement de la saison.",
+    "contractsNone": "Aucun contrat n'arrive à échéance.",
+    "newSalary": "Nouveau salaire : {salary} / mois",
+    "renew": "{years} saison(s)",
+    "prospectsTitle": "Centre de formation",
+    "prospectsNone": "Aucun jeune ne sort du centre cette année.",
+    "sign": "Signer",
+    "decline": "Laisser partir",
+    "marketTitle": "Mercato",
+    "openMarket": "Voir les joueurs à vendre ({count})",
+    "squadSize": "Effectif au lancement : {count} joueurs (de {min} à {max})",
+    "start": "Lancer la saison {season}",
+    "squadTooSmall": "Il faut au moins {min} joueurs pour lancer la saison.",
+    "squadFull": "{max} joueurs au maximum pour lancer la saison."
+  },
+  "market": {
+    "title": "Mercato",
+    "openBanner": "Mercato ouvert",
+    "openButton": "Voir le marché ({count})",
+    "buy": "Acheter · {price}",
+    "sell": "Vendre (+{amount})",
+    "confirmBuy": "Acheter {player} pour {price} ?",
+    "confirmSell": "Vendre {player} pour {amount} ?",
+    "empty": "Plus aucun joueur à vendre.",
+    "salary": "{salary} / mois",
+    "close": "Fermer",
+    "refusals": {
+      "squadFull": "Effectif complet ({max} joueurs).",
+      "squadTooSmall": "Effectif minimum atteint ({min} joueurs).",
+      "notEnoughMoney": "Trésorerie insuffisante.",
+      "marketClosed": "Le mercato est fermé.",
+      "unknown": "Action impossible."
+    }
   }
 }

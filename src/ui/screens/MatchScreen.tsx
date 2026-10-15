@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'preact/hooks';
 import balance from '../../data/balance.json';
 import type { Action } from '../../core/game';
-import { myDivision, standings } from '../../core/league';
+import { DIVISIONS, myDivision, standings } from '../../core/league';
 import { bestReplacement } from '../../core/match';
 import type { Decision, MatchEvent, MatchState } from '../../core/matchTypes';
 import { overall } from '../../core/players';
-import { MY_TEAM_ID, type GameState, type Player, type PlayStyle } from '../../core/state';
+import { MY_TEAM_ID, type DivisionId, type GameState, type Player, type PlayStyle } from '../../core/state';
 import { format, texts } from '../i18n';
 import { teamName } from '../logText';
 import { describeEvent, scoreAt, scoreLine } from '../matchText';
@@ -203,7 +203,9 @@ function DecisionSheet({
 
 function LeagueView({ state }: { state: GameState }) {
   const [view, setView] = useState<'calendar' | 'table'>('calendar');
+  const [shownDivision, setShownDivision] = useState<DivisionId>(state.league.myDivision);
   const division = myDivision(state.league);
+  const tableDivision = state.league.divisions.find((d) => d.id === shownDivision) ?? division;
   const G = texts.league;
   const mine = division.fixtures
     .filter((f) => f.home === MY_TEAM_ID || f.away === MY_TEAM_ID)
@@ -243,6 +245,14 @@ function LeagueView({ state }: { state: GameState }) {
           })}
         </ol>
       ) : (
+        <>
+        <div class="segmented division-picker">
+          {[...DIVISIONS].reverse().map((id) => (
+            <button key={id} type="button" class={shownDivision === id ? 'active' : ''} onClick={() => setShownDivision(id)}>
+              {texts.divisions[id]}
+            </button>
+          ))}
+        </div>
         <table class="standings">
           <thead>
             <tr>
@@ -254,13 +264,13 @@ function LeagueView({ state }: { state: GameState }) {
             </tr>
           </thead>
           <tbody>
-            {standings(division.table).map((row, i) => (
+            {standings(tableDivision.table).map((row, i) => (
               <tr
                 key={row.team}
                 class={[
                   row.team === MY_TEAM_ID ? 'mine' : '',
                   i + 1 === balance.keyMatch.promotionSpots ? 'promotion-line' : '',
-                  i + 1 === division.table.length - balance.keyMatch.relegationSpots ? 'relegation-line' : '',
+                  i + 1 === tableDivision.table.length - balance.keyMatch.relegationSpots ? 'relegation-line' : '',
                 ].join(' ')}
               >
                 <td>{i + 1}</td>
@@ -274,6 +284,7 @@ function LeagueView({ state }: { state: GameState }) {
             ))}
           </tbody>
         </table>
+        </>
       )}
     </div>
   );

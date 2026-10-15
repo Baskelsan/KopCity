@@ -1,10 +1,22 @@
-import type { Alert, BuildingType, DistrictId, GameState, LogEntry } from '../core/state';
+import { divisionAbove, divisionBelow } from '../core/league';
+import type { Alert, BuildingType, DistrictId, DivisionId, GameState, LogEntry, Movement } from '../core/state';
 import type { KeyMatchReason } from '../core/season';
 import { formatEuros } from './formatters';
 import { format, texts } from './i18n';
 
 const buildingName = (type: unknown) => texts.buildings[type as BuildingType | 'stadium'] ?? '';
 const districtName = (id: unknown) => texts.city.districts[id as DistrictId] ?? '';
+
+/** « 1er », « 2e »… */
+export function rankText(rank: number): string {
+  return rank === 1 ? `${rank}er` : `${rank}e`;
+}
+
+/** « Montée en Division 2 ! », « Maintien en Division 3. »… à partir de la division quittée. */
+export function movementText(movement: Movement, from: DivisionId): string {
+  const to = movement === 'promoted' ? divisionAbove(from) : movement === 'relegated' ? divisionBelow(from) : from;
+  return format(texts.movements[movement], { division: texts.divisions[to ?? from] });
+}
 
 export function teamName(state: GameState, teamId: string): string {
   if (teamId === 'me') return state.club.name;
@@ -23,6 +35,12 @@ export function describeLog(entry: LogEntry, state: GameState): string {
       return format(texts.log.constructionDelivered, { building: buildingName(params.type), level: params.level ?? 1 });
     case 'districtUnlocked':
       return format(texts.log.districtUnlocked, { district: districtName(params.district) });
+    case 'seasonEnd':
+      return format(texts.log.seasonEnd, {
+        rank: rankText(Number(params.rank)),
+        division: texts.divisions[params.division as DivisionId],
+        movement: movementText(params.movement as Movement, params.division as DivisionId),
+      });
     case 'matchResult': {
       const scored = Number(params.scored);
       const conceded = Number(params.conceded);
@@ -66,5 +84,7 @@ export function describeAlert(alert: Alert, state: GameState): string {
       return format(A.lowSatisfaction, { satisfaction: params.satisfaction ?? 0 });
     case 'seasonOver':
       return A.seasonOver;
+    case 'winterMarket':
+      return A.winterMarket;
   }
 }

@@ -949,3 +949,49 @@ select {
 .standings tr.relegation-line td {
   border-bottom: 2px solid var(--danger);
 }
+
+/* Intersaison et mercato */
+
+.offers {
+  display: grid;
+  gap: 10px;
+}
+
+.offer {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.offer p {
+  margin: 4px 0 8px;
+}
+
+.offer-head {
+  display: grid;
+  grid-template-columns: 48px 1fr 36px;
+  align-items: center;
+  gap: 8px;
+}
+
+.offer .actions {
+  padding: 0;
+}
+
+.market-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  border-color: var(--accent);
+}
+
+.division-picker {
+  margin-top: 12px;
+}
+
+.home-screen > .refusal,
+.home-screen > .muted {
+  margin: 8px 4px 12px;
+}
