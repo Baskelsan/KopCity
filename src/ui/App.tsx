@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { texts } from './i18n';
 import { CityScreen } from './screens/CityScreen';
 import { ClubScreen } from './screens/ClubScreen';
+import { GameOverScreen } from './screens/GameOverScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MatchScreen } from './screens/MatchScreen';
 import { OffseasonScreen } from './screens/OffseasonScreen';
@@ -53,14 +54,15 @@ export function App() {
             </button>
           </div>
         )}
+        {state && state.phase === 'gameOver' && <GameOverScreen state={state} replace={replace} />}
         {state && tab === 'home' && state.phase === 'offseason' && <OffseasonScreen state={state} dispatch={dispatch} />}
         {state && tab === 'home' && state.phase === 'season' && (
           <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} />
         )}
-        {state && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
-        {state && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}
-        {state && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} liveFromStart={liveFromStart} />}
-        {state && tab === 'club' && (
+        {state && state.phase !== 'gameOver' && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
+        {state && state.phase !== 'gameOver' && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}
+        {state && state.phase !== 'gameOver' && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} liveFromStart={liveFromStart} />}
+        {state && state.phase !== 'gameOver' && tab === 'club' && (
           <ClubScreen state={state} dispatch={dispatch} replace={replace} notify={setMessage} />
         )}
       </main>

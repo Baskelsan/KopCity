@@ -152,7 +152,8 @@
     "constructionDelivered": "Chantier livré : {building} (niveau {level}).",
     "districtUnlocked": "Nouveau quartier débloqué : {district} !",
     "matchResult": "{outcome} {scored}-{conceded} contre {opponent} ({venue}).",
-    "seasonEnd": "Fin de saison : {rank} en {division}. {movement}"
+    "seasonEnd": "Fin de saison : {rank} en {division}. {movement}",
+    "eventResolved": "{title} : {choice}."
   },
   "buildings": {
     "stadium": "Stade",
@@ -270,7 +271,10 @@
     "treasuryNegative": "Trésorerie négative ({treasury}) depuis {weeks} semaine(s). 4 semaines de suite dans le rouge, et c'est la faillite.",
     "lowSatisfaction": "Riverains mécontents ({satisfaction}) : le stade ne peut plus s'agrandir.",
     "seasonOver": "La saison est terminée.",
-    "winterMarket": "Mercato d'hiver ouvert : des joueurs sont à vendre dans l'onglet Effectif. Il se referme quand tu repars."
+    "winterMarket": "Mercato d'hiver ouvert : des joueurs sont à vendre dans l'onglet Effectif. Il se referme quand tu repars.",
+    "event": "Événement : {title}.",
+    "bankruptcy": "Faillite : 4 semaines de suite dans le rouge.",
+    "eventOutcome": "{title} : {choice}. {detail}"
   },
   "outcomes": {
     "win": "Victoire",
@@ -306,7 +310,9 @@
       "demand": "la demande : {supporters} supporters × attrait {attraction}"
     },
     "close": "Fermer",
-    "seasonAttendance": "{total} spectateurs sur {matches} match(s) à domicile, soit {average} en moyenne"
+    "seasonAttendance": "{total} spectateurs sur {matches} match(s) à domicile, soit {average} en moyenne",
+    "otherIncome": "Transferts et événements",
+    "otherExpenses": "Transferts et événements"
   },
   "league": {
     "calendar": "Calendrier",
@@ -369,5 +375,189 @@
       "marketClosed": "Le mercato est fermé.",
       "unknown": "Action impossible."
     }
+  },
+  "events": {
+    "starInjured": {
+      "title": "Star touchée",
+      "text": "{player} s'est fait mal à l'entraînement. Le médecin hésite.",
+      "choices": {
+        "play": "La faire jouer",
+        "rest": "La reposer"
+      }
+    },
+    "angryNeighbours": {
+      "title": "Voisins excédés",
+      "text": "Les riverains du stade se plaignent du bruit et des embouteillages.",
+      "choices": {
+        "wall": "Payer un mur antibruit",
+        "ignore": "Ignorer"
+      }
+    },
+    "cityGrant": {
+      "title": "Subvention municipale",
+      "text": "La mairie salue vos résultats et propose une aide, à condition d'améliorer l'accès au stade.",
+      "choices": {
+        "accept": "Accepter",
+        "refuse": "Refuser"
+      }
+    },
+    "playerOffer": {
+      "title": "Offre pour un joueur",
+      "text": "Un club ambitieux propose {price} pour {player}.",
+      "choices": {
+        "sell": "Vendre",
+        "refuse": "Refuser"
+      }
+    },
+    "shirtSponsor": {
+      "title": "Sponsor maillot",
+      "text": "Votre série de victoires attire une marque qui veut s'afficher sur le maillot.",
+      "choices": {
+        "short": "Contrat court",
+        "exclusive": "Exclusivité longue"
+      }
+    },
+    "prodigy": {
+      "title": "Jeune prodige du quartier",
+      "text": "Un gamin du quartier impressionne au centre de formation : {prodigy}, {age} ans, {stars}.",
+      "choices": {
+        "sign": "Le signer",
+        "letGo": "Le laisser filer"
+      }
+    },
+    "dressingRoom": {
+      "title": "Dispute au vestiaire",
+      "text": "L'ambiance est mauvaise : des joueurs se sont accrochés à l'entraînement.",
+      "choices": {
+        "meeting": "Réunion d'équipe",
+        "fine": "Sanction financière"
+      }
+    },
+    "damagedPitch": {
+      "title": "Pelouse abîmée",
+      "text": "La pelouse a souffert des intempéries.",
+      "choices": {
+        "repair": "Réparer",
+        "playOn": "Jouer dessus"
+      }
+    },
+    "paidFriendly": {
+      "title": "Match amical rémunéré",
+      "text": "Un club étranger propose un match amical bien payé en pleine saison.",
+      "choices": {
+        "accept": "Accepter",
+        "refuse": "Refuser"
+      }
+    },
+    "transportStrike": {
+      "title": "Grève des transports",
+      "text": "Les transports seront en grève le jour du prochain match à domicile.",
+      "choices": {
+        "endure": "Faire avec",
+        "shuttles": "Affréter des navettes"
+      }
+    },
+    "safetyInspection": {
+      "title": "Inspection de sécurité",
+      "text": "Une inspection va contrôler les tribunes agrandies.",
+      "choices": {
+        "upgrade": "Mise aux normes",
+        "gamble": "Tenter sa chance"
+      }
+    },
+    "losingStreak": {
+      "title": "Série de défaites",
+      "text": "Trois défaites de suite : la presse attend une réaction.",
+      "choices": {
+        "defend": "Défendre l'équipe",
+        "apologise": "S'excuser auprès des supporters"
+      }
+    }
+  },
+  "effects": {
+    "treasury": "{amount}",
+    "satisfaction": "Riverains {amount}",
+    "moraleAll": "Moral de l'équipe {amount}",
+    "moraleTarget": "Moral de {player} {amount}",
+    "supporters": "Supporters {amount} point",
+    "injureExact": "{player} absent {weeks} sem.",
+    "injureRange": "{player} blessé de {min} à {max} sem.",
+    "injureRandom": "Un joueur blessé de {min} à {max} sem.",
+    "sellTarget": "{player} part contre {price}",
+    "signProdigy": "{prodigy} rejoint l'effectif",
+    "homeStrength": "Force à domicile {percent} pendant {matches} match(s)",
+    "attendance": "Affluence {percent} au prochain match à domicile",
+    "sponsorBonus": "+{amount} par semaine pendant {weeks} semaines ({total} en tout)",
+    "commitTransport": "S'engager à construire un parking ou arrêt cette saison, sinon rembourser {amount} et riverains {satisfaction}",
+    "risk": "{percent} de risque : {inner}",
+    "nothing": "Rien ne change.",
+    "refusals": {
+      "notEnoughMoney": "Trésorerie insuffisante.",
+      "squadFull": "Effectif complet.",
+      "squadTooSmall": "Effectif minimum atteint."
+    }
+  },
+  "eventUi": {
+    "answer": "Répondre à l'événement",
+    "riskHit": "Pas de chance, le risque s'est réalisé.",
+    "riskAvoided": "Ouf, le risque ne s'est pas réalisé.",
+    "injured": "{player} est blessé {weeks} sem."
+  },
+  "objectives": {
+    "title": "Objectifs de la saison",
+    "reward": "Prime : {reward} par objectif. Les trois : sponsors +10 % la saison suivante.",
+    "done": "Atteint",
+    "items": {
+      "top5": "Finir dans le top 5",
+      "top3": "Finir dans le top 3",
+      "homeUnbeaten": "Rester invaincu à domicile 5 matchs de suite",
+      "treasury300": "Finir la saison avec au moins 300 000 € en caisse",
+      "positiveSeason": "Finir la saison avec un résultat positif",
+      "satisfaction60": "Finir la saison avec des riverains satisfaits à 60 au moins",
+      "build2": "Livrer 2 bâtiments dans la saison"
+    },
+    "progress": {
+      "rankAtMost": "Actuellement {current}e",
+      "homeUnbeatenStreak": "Meilleure série : {current} / {target}",
+      "treasuryAtLeast": "{current} / {target}",
+      "seasonNetPositive": "Résultat actuel : {current}",
+      "satisfactionAtLeast": "{current} / {target}",
+      "buildingsDelivered": "{current} / {target}"
+    },
+    "resultsTitle": "Objectifs de la saison",
+    "achieved": "Atteint (+{reward})",
+    "missed": "Manqué",
+    "allAchieved": "Les trois objectifs sont atteints : sponsors +10 % la saison prochaine !",
+    "onTrack": "En bonne voie",
+    "notStarted": "La saison n'a pas commencé"
+  },
+  "records": {
+    "title": "Palmarès",
+    "titles": "Titres",
+    "titleItem": "Champion de {division}, saison {season}",
+    "noTitle": "Aucun titre pour l'instant.",
+    "promotions": "Montées",
+    "bestAttendance": "Meilleure affluence",
+    "bestTreasury": "Plus grosse trésorerie",
+    "topScorer": "Meilleur buteur de l'histoire",
+    "scorerValue": "{name} ({goals} but(s))",
+    "noScorer": "Personne n'a encore marqué.",
+    "history": "Saisons",
+    "historyItem": "Saison {season} : {rank} en {division}",
+    "beatenTitle": "Records battus",
+    "beaten": {
+      "bestAttendance": "Nouveau record d'affluence : {value} spectateurs !",
+      "bestTreasury": "Nouveau record de trésorerie : {value} !",
+      "topScorer": "{name} devient le meilleur buteur de l'histoire du club ({goals} buts) !"
+    },
+    "pastGames": "Parties précédentes",
+    "pastGame": "{club} : {seasons} saison(s), {titles} titre(s), meilleure division {division}",
+    "noPastGame": "Aucune partie terminée."
+  },
+  "gameOver": {
+    "title": "Faillite",
+    "text": "Le club a passé 4 semaines de suite dans le rouge. La partie s'arrête en saison {season}, semaine {week}.",
+    "newGame": "Nouvelle partie",
+    "summary": "Bilan de la partie"
   }
 }

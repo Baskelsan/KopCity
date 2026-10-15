@@ -5,7 +5,9 @@ import type { Action } from '../../core/game';
 import { myDivision, myFixture, opponentOf, rankOf } from '../../core/league';
 import { seasonOver } from '../../core/season';
 import { MY_TEAM_ID, type GameState } from '../../core/state';
+import { EventSheet } from '../EventSheet';
 import { FinanceSheet } from '../FinanceSheet';
+import { ObjectivesCard } from '../ObjectivesCard';
 import { formatEuros } from '../formatters';
 import { format, texts } from '../i18n';
 import { describeAlert, describeLog, teamName } from '../logText';
@@ -25,6 +27,7 @@ interface HomeScreenProps {
 
 export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
   const [showAccounts, setShowAccounts] = useState(false);
+  const [showEvent, setShowEvent] = useState(true);
   const division = myDivision(state.league);
   const teams = division.table.length;
   const rank = rankOf(division.table, MY_TEAM_ID);
@@ -95,6 +98,8 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
         )
       )}
 
+      <ObjectivesCard state={state} />
+
       <section class="card journal">
         <h2>{H.journal}</h2>
         {journal.length === 0 ? (
@@ -116,6 +121,10 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
           <button type="button" class="button wide big" onClick={onOpenMatch}>
             {H.playMatch}
           </button>
+        ) : state.events.pending ? (
+          <button type="button" class="button wide big" onClick={() => setShowEvent(true)}>
+            {texts.eventUi.answer}
+          </button>
         ) : (
           <button type="button" class="button wide big" onClick={() => dispatch({ type: 'advance' })}>
             {over ? H.toOffseason : H.advance}
@@ -124,6 +133,7 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
       </div>
 
       {showAccounts && <FinanceSheet state={state} onClose={() => setShowAccounts(false)} />}
+      {state.events.pending && showEvent && <EventSheet state={state} dispatch={dispatch} />}
     </div>
   );
 }

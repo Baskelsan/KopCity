@@ -22,12 +22,14 @@ function Report({ title, report, homeMatches }: { title: string; report: Finance
     [F.bars, report.income.bars],
     [F.shop, report.income.shop],
     [F.sponsors, report.income.sponsors],
+    [F.otherIncome, report.income.other],
   ];
   const expenses: [string, number][] = [
     [F.wages, report.expenses.wages],
     [F.upkeep, report.expenses.upkeep],
     [F.running, report.expenses.running],
     [F.fines, report.expenses.fines],
+    [F.otherExpenses, report.expenses.other],
   ];
   const net = netResult(report);
   return (

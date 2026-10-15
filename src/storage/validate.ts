@@ -14,7 +14,7 @@ const shape: Record<string, Record<string, (v: unknown) => boolean>> = {
   meta: { createdAt: isString, lastSavedAt: isString, seed: isNumber, rngState: isNumber },
   settings: { alwaysLiveMatches: isBoolean },
   time: { season: isNumber, week: isNumber },
-  club: { name: isString, colors: isArray, treasury: isNumber, weeksInRed: isNumber },
+  club: { name: isString, colors: isArray, treasury: isNumber, weeksInRed: isNumber, sponsorMultiplier: isNumber },
   squad: { formation: isString, style: isString, autoLineup: isBoolean, lineup: isArray, players: isArray },
   city: {
     stadiumLevel: isNumber,
@@ -27,8 +27,16 @@ const shape: Record<string, Record<string, (v: unknown) => boolean>> = {
   league: { myDivision: isString, divisions: isArray, rivalId: (v) => v === null || isString(v) },
   finance: { lastWeek: (v) => v === null || isObject(v), season: isObject },
   market: { offers: isArray, open: isBoolean, lastWinterSeason: isNumber },
-  events: { pending: (v) => v === null || isObject(v), history: isArray },
-  records: { titles: isNumber, promotions: isNumber, bestAttendance: isNumber, bestTreasury: isNumber },
+  events: { pending: (v) => v === null || isObject(v), history: isArray, lastRoll: (v) => v === null || isObject(v) },
+  records: {
+    titles: isArray,
+    promotions: isNumber,
+    bestAttendance: isNumber,
+    bestTreasury: isNumber,
+    scorers: isArray,
+    history: isArray,
+    seasonStart: isObject,
+  },
 };
 
 /** Vérifie qu'un objet a la structure d'un état de jeu à la version courante. */
@@ -47,7 +55,11 @@ export function assertGameState(save: unknown): GameState {
   if (!isArray(save.objectives)) throw new SaveError('invalidFormat', 'objectives invalide');
   if (!isArray(save.log)) throw new SaveError('invalidFormat', 'log invalide');
   if (!isArray(save.alerts)) throw new SaveError('invalidFormat', 'alerts invalide');
-  if (save.phase !== 'season' && save.phase !== 'offseason') throw new SaveError('invalidFormat', 'phase invalide');
+  if (save.phase !== 'season' && save.phase !== 'offseason' && save.phase !== 'gameOver') {
+    throw new SaveError('invalidFormat', 'phase invalide');
+  }
+  if (!isArray(save.effects)) throw new SaveError('invalidFormat', 'effects invalide');
+  if (save.gameOver !== null && !isObject(save.gameOver)) throw new SaveError('invalidFormat', 'gameOver invalide');
   if (save.offseason !== null && !isObject(save.offseason)) throw new SaveError('invalidFormat', 'offseason invalide');
   if (save.currentMatch !== null && !isObject(save.currentMatch)) {
     throw new SaveError('invalidFormat', 'currentMatch invalide');

@@ -1004,3 +1004,26 @@ select {
   border-bottom: 1px solid var(--border);
   font-variant-numeric: tabular-nums;
 }
+
+/* Objectifs et palmarès */
+
+.objectives li {
+  display: grid;
+  gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.objectives li.done span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.records h3 {
+  margin: 12px 0 4px;
+  font-size: 16px;
+}
+
+.records .wide-summary {
+  margin-top: 12px;
+}

@@ -4,6 +4,7 @@ import type { GameState } from '../../core/state';
 import { SaveError } from '../../storage/errors';
 import { exportSaveFile, readSaveFile } from '../../storage/files';
 import { format, texts } from '../i18n';
+import { PastGames, RecordsView } from '../RecordsView';
 import { createGame } from '../useGame';
 
 interface ClubScreenProps {
@@ -53,6 +54,9 @@ export function ClubScreen({ state, dispatch, replace, notify }: ClubScreenProps
 
   return (
     <div class="screen">
+      <RecordsView state={state} />
+      <PastGames />
+
       <h2>{texts.settings.title}</h2>
       <label class="card toggle">
         <span>{texts.game.alwaysLiveMatches}</span>

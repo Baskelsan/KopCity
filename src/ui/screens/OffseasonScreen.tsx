@@ -8,6 +8,8 @@ import { formatEuros, formatStars } from '../formatters';
 import { format, texts } from '../i18n';
 import { movementText, rankText } from '../logText';
 import { MarketSheet, refusalText } from '../MarketSheet';
+import { topScorer } from '../../core/records';
+import { formatInteger } from '../formatters';
 
 const O = texts.offseason;
 const YEARS = Array.from(
@@ -57,6 +59,43 @@ export function OffseasonScreen({ state, dispatch }: { state: GameState; dispatc
         <p>{format(O.bonus, { bonus: formatEuros(summary.bonus) })}</p>
         <p class="muted">{format(O.net, { net: signed(summary.net) })}</p>
         {offseason.retired.length > 0 && <p class="muted">{format(O.retired, { names: offseason.retired.join(', ') })}</p>}
+      </section>
+
+      <section class="card">
+        <h2>{texts.objectives.resultsTitle}</h2>
+        <ul class="plain objectives">
+          {offseason.objectiveResults.map((r) => (
+            <li key={r.id} class={r.achieved ? 'done' : ''}>
+              <span>
+                {r.achieved ? '✓ ' : '✗ '}
+                {texts.objectives.items[r.id as keyof typeof texts.objectives.items]}
+              </span>
+              <small class={r.achieved ? 'positive' : 'muted'}>
+                {r.achieved ? format(texts.objectives.achieved, { reward: formatEuros(r.reward) }) : texts.objectives.missed}
+              </small>
+            </li>
+          ))}
+        </ul>
+        {offseason.objectiveResults.length > 0 && offseason.objectiveResults.every((r) => r.achieved) && (
+          <p class="positive">{texts.objectives.allAchieved}</p>
+        )}
+        {offseason.recordsBeaten.length > 0 && (
+          <>
+            <h3>{texts.records.beatenTitle}</h3>
+            <ul class="plain">
+              {offseason.recordsBeaten.map((key) => {
+                const best = topScorer(state.records);
+                const value =
+                  key === 'bestAttendance' ? formatInteger(state.records.bestAttendance) : formatEuros(state.records.bestTreasury);
+                return (
+                  <li key={key}>
+                    {format(texts.records.beaten[key], { value, name: best?.name ?? '', goals: best?.goals ?? 0 })}
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
       </section>
 
       <section class="card">

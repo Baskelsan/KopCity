@@ -1,6 +1,7 @@
 import { divisionAbove, divisionBelow } from '../core/league';
 import type { Alert, BuildingType, DistrictId, DivisionId, GameState, LogEntry, Movement } from '../core/state';
 import type { KeyMatchReason } from '../core/season';
+import { eventTexts } from './eventText';
 import { formatEuros } from './formatters';
 import { format, texts } from './i18n';
 
@@ -41,6 +42,10 @@ export function describeLog(entry: LogEntry, state: GameState): string {
         division: texts.divisions[params.division as DivisionId],
         movement: movementText(params.movement as Movement, params.division as DivisionId),
       });
+    case 'eventResolved': {
+      const t = eventTexts(String(params.eventId));
+      return format(texts.log.eventResolved, { title: t.title, choice: t.choices[params.choiceId as keyof typeof t.choices] });
+    }
     case 'matchResult': {
       const scored = Number(params.scored);
       const conceded = Number(params.conceded);
@@ -86,5 +91,23 @@ export function describeAlert(alert: Alert, state: GameState): string {
       return A.seasonOver;
     case 'winterMarket':
       return A.winterMarket;
+    case 'event':
+      return format(A.event, { title: eventTexts(String(params.eventId)).title });
+    case 'bankruptcy':
+      return A.bankruptcy;
+    case 'eventOutcome': {
+      const t = eventTexts(String(params.eventId));
+      const details: string[] = [];
+      if (params.riskHit !== undefined) details.push(params.riskHit ? texts.eventUi.riskHit : texts.eventUi.riskAvoided);
+      if (params.playerId) {
+        const player = state.squad.players.find((p) => p.id === params.playerId);
+        details.push(format(texts.eventUi.injured, { player: player?.name ?? '', weeks: params.weeks ?? 0 }));
+      }
+      return format(A.eventOutcome, {
+        title: t.title,
+        choice: t.choices[params.choiceId as keyof typeof t.choices],
+        detail: details.join(' '),
+      }).trim();
+    }
   }
 }
