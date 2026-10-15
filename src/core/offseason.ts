@@ -407,7 +407,11 @@ export function startSeason(state: GameState): GameState {
   return {
     ...state,
     phase: 'season',
-    meta: { ...state.meta, rngState: rng },
+    meta: {
+      ...state.meta,
+      rngState: rng,
+      playTime: { ...state.meta.playTime, season: 0, lastSeason: state.meta.playTime.season },
+    },
     time: { season: state.time.season + 1, week: 1 },
     club: { ...state.club, weeksInRed: state.club.treasury < 0 ? state.club.weeksInRed : 0, sponsorMultiplier },
     objectives: objectives.value,

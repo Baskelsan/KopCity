@@ -5,6 +5,8 @@ import { ClubScreen } from './screens/ClubScreen';
 import { GameOverScreen } from './screens/GameOverScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MatchScreen } from './screens/MatchScreen';
+import { InstallHelp, rememberInstallHelpDismissed, shouldOfferInstallHelp } from './InstallHelp';
+import { NewClubScreen } from './screens/NewClubScreen';
 import { OffseasonScreen } from './screens/OffseasonScreen';
 import { SquadScreen } from './screens/SquadScreen';
 import { UpdateBanner } from './UpdateBanner';
@@ -18,6 +20,25 @@ export function App() {
   const [message, setMessage] = useState<string | null>(null);
   const onSaveError = useCallback(() => setMessage(texts.save.saveFailed), []);
   const { state, status, dispatch, replace } = useGame(onSaveError);
+  // Création du club : au premier lancement, et à chaque nouvelle partie.
+  const [creating, setCreating] = useState(false);
+  const startNewGame = useCallback(() => setCreating(true), []);
+  const [showInstall, setShowInstall] = useState(shouldOfferInstallHelp);
+  const closeInstall = useCallback(() => {
+    rememberInstallHelpDismissed();
+    setShowInstall(false);
+  }, []);
+
+  // Temps de jeu : compté par tranches, seulement quand l'app est à l'écran.
+  const playing = state !== null && !creating;
+  useEffect(() => {
+    if (!playing) return;
+    const STEP = 30;
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') dispatch({ type: 'addPlayTime', seconds: STEP });
+    }, STEP * 1000);
+    return () => clearInterval(timer);
+  }, [playing, dispatch]);
 
   // Un match à enjeu lancé par « Avancer » se déroule depuis la 1re minute sur l'onglet Matchs ;
   // un match repris après fermeture s'affiche là où il en était. À la fin du match, retour à l'accueil.
@@ -49,21 +70,38 @@ export function App() {
         {status === 'loadFailed' && (
           <div class="screen">
             <p>{texts.save.loadFailed}</p>
-            <button type="button" class="button wide" onClick={() => replace(createGame())}>
+            <button type="button" class="button wide" onClick={startNewGame}>
               {texts.save.newGame}
             </button>
           </div>
         )}
-        {state && state.phase === 'gameOver' && <GameOverScreen state={state} replace={replace} />}
-        {state && tab === 'home' && state.phase === 'offseason' && <OffseasonScreen state={state} dispatch={dispatch} />}
-        {state && tab === 'home' && state.phase === 'season' && (
-          <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} />
+        {(status === 'needsClub' || creating) && (
+          <NewClubScreen
+            onCreate={(name, colors) => {
+              replace(createGame(name, colors));
+              setCreating(false);
+              setTab('home');
+            }}
+            onCancel={creating && state && state.phase !== 'gameOver' ? () => setCreating(false) : undefined}
+          />
         )}
-        {state && state.phase !== 'gameOver' && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
-        {state && state.phase !== 'gameOver' && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}
-        {state && state.phase !== 'gameOver' && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} liveFromStart={liveFromStart} />}
-        {state && state.phase !== 'gameOver' && tab === 'club' && (
-          <ClubScreen state={state} dispatch={dispatch} replace={replace} notify={setMessage} />
+        {!creating && state && state.phase === 'gameOver' && <GameOverScreen state={state} onNewGame={startNewGame} />}
+        {!creating && state && tab === 'home' && state.phase === 'offseason' && <OffseasonScreen state={state} dispatch={dispatch} />}
+        {!creating && state && tab === 'home' && state.phase === 'season' && (
+          <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} notify={setMessage} />
+        )}
+        {!creating && state && state.phase !== 'gameOver' && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
+        {!creating && state && state.phase !== 'gameOver' && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}
+        {!creating && state && state.phase !== 'gameOver' && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} liveFromStart={liveFromStart} />}
+        {!creating && state && state.phase !== 'gameOver' && tab === 'club' && (
+          <ClubScreen
+            state={state}
+            dispatch={dispatch}
+            replace={replace}
+            notify={setMessage}
+            onNewGame={startNewGame}
+            onShowInstall={() => setShowInstall(true)}
+          />
         )}
       </main>
 
@@ -80,6 +118,7 @@ export function App() {
           </button>
         ))}
       </nav>
+      {showInstall && <InstallHelp onClose={closeInstall} />}
       <UpdateBanner />
     </div>
   );

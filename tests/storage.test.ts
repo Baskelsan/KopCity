@@ -281,3 +281,11 @@ describe('migration v6 → v7', () => {
     expect(state.gameOver).toBeNull();
   });
 });
+
+describe('migration v7 → v8', () => {
+  it('ajoute le dernier export et le temps de jeu', async () => {
+    const { v7ToV8 } = await import('../src/storage/migrations/v7-to-v8');
+    const out = v7ToV8({ schemaVersion: 7, meta: { seed: 1 } }) as { meta: Record<string, unknown> };
+    expect(out.meta).toEqual({ seed: 1, lastExport: null, playTime: { total: 0, season: 0, lastSeason: 0 } });
+  });
+});

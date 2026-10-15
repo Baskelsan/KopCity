@@ -1027,3 +1027,78 @@ select {
 .records .wide-summary {
   margin-top: 12px;
 }
+
+/* Création du club */
+
+.new-club {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 96px;
+}
+
+.big-crest {
+  justify-self: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 28px;
+  font-size: 44px;
+  border: 2px solid var(--border);
+}
+
+.small-crest {
+  border: 1px solid var(--border);
+}
+
+.text-input {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 18px;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.swatch {
+  height: 48px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+}
+
+.swatch.active {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.new-club-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.new-club-actions .button {
+  flex: 1;
+}
+
+/* Rappel d'export et aide à l'installation */
+
+.export-reminder {
+  display: grid;
+  gap: 8px;
+  border-color: var(--pos-GAR);
+}
+
+.export-reminder p {
+  margin: 0;
+}
+
+.install-steps {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+  padding-left: 24px;
+}

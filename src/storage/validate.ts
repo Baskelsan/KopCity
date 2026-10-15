@@ -11,7 +11,14 @@ const isArray = Array.isArray;
 
 /** Champs attendus, par bloc de l'état. Contrôle de structure, pas de cohérence de jeu. */
 const shape: Record<string, Record<string, (v: unknown) => boolean>> = {
-  meta: { createdAt: isString, lastSavedAt: isString, seed: isNumber, rngState: isNumber },
+  meta: {
+    createdAt: isString,
+    lastSavedAt: isString,
+    seed: isNumber,
+    rngState: isNumber,
+    lastExport: (v) => v === null || isObject(v),
+    playTime: isObject,
+  },
   settings: { alwaysLiveMatches: isBoolean },
   time: { season: isNumber, week: isNumber },
   club: { name: isString, colors: isArray, treasury: isNumber, weeksInRed: isNumber, sponsorMultiplier: isNumber },

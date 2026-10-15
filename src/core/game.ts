@@ -61,7 +61,14 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
   return {
     schemaVersion: SCHEMA_VERSION,
     phase: 'season',
-    meta: { createdAt: now, lastSavedAt: now, seed, rngState: objectives.rngState },
+    meta: {
+      createdAt: now,
+      lastSavedAt: now,
+      seed,
+      rngState: objectives.rngState,
+      lastExport: null,
+      playTime: { total: 0, season: 0, lastSeason: 0 },
+    },
     settings: { alwaysLiveMatches: false },
     time: { season: 1, week: 1 },
     club: {
@@ -115,7 +122,9 @@ export type Action =
   | { type: 'buyPlayer'; playerId: string }
   | { type: 'sellPlayer'; playerId: string }
   | { type: 'startSeason' }
-  | { type: 'resolveEvent'; choiceId: string };
+  | { type: 'resolveEvent'; choiceId: string }
+  | { type: 'markExported' }
+  | { type: 'addPlayTime'; seconds: number };
 
 const clubContext = (state: GameState): ClubContext => ({
   players: state.squad.players,
@@ -178,6 +187,16 @@ export function applyAction(state: GameState, action: Action): GameState {
       return recordOtherMoney(state, sellPlayer(state, action.playerId));
     case 'startSeason':
       return startSeason(state);
+    case 'markExported':
+      return { ...state, meta: { ...state.meta, lastExport: { season: state.time.season, week: state.time.week } } };
+    case 'addPlayTime': {
+      if (!(action.seconds > 0)) return state;
+      const t = state.meta.playTime;
+      return {
+        ...state,
+        meta: { ...state.meta, playTime: { ...t, total: t.total + action.seconds, season: t.season + action.seconds } },
+      };
+    }
     case 'resolveEvent':
       return recordOtherMoney(state, resolveEvent(state, action.choiceId));
   }

@@ -3,16 +3,15 @@ import type { GameState } from '../../core/state';
 import { addToHallOfFame } from '../../storage/hallOfFame';
 import { format, texts } from '../i18n';
 import { RecordsView } from '../RecordsView';
-import { createGame } from '../useGame';
 
 /** Faillite : le bilan de la partie, gardé à part, puis une nouvelle partie. */
-export function GameOverScreen({ state, replace }: { state: GameState; replace: (state: GameState) => void }) {
+export function GameOverScreen({ state, onNewGame }: { state: GameState; onNewGame: () => void }) {
   const G = texts.gameOver;
   const startNewGame = async () => {
     try {
       await addToHallOfFame(gameSummary(state, new Date().toISOString()));
     } finally {
-      replace(createGame());
+      onNewGame();
     }
   };
   return (

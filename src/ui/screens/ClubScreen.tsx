@@ -4,28 +4,33 @@ import type { GameState } from '../../core/state';
 import { SaveError } from '../../storage/errors';
 import { exportSaveFile, readSaveFile } from '../../storage/files';
 import { format, texts } from '../i18n';
+import { isStandalone } from '../InstallHelp';
 import { PastGames, RecordsView } from '../RecordsView';
-import { createGame } from '../useGame';
 
 interface ClubScreenProps {
   state: GameState;
   dispatch: (action: Action) => void;
   replace: (state: GameState) => void;
   notify: (message: string) => void;
+  onNewGame: () => void;
+  onShowInstall: () => void;
 }
 
-export function ClubScreen({ state, dispatch, replace, notify }: ClubScreenProps) {
+export function ClubScreen({ state, dispatch, replace, notify, onNewGame, onShowInstall }: ClubScreenProps) {
+  const minutes = (seconds: number) =>
+    seconds > 0 ? format(texts.playTime.value, { minutes: Math.round(seconds / 60) }) : texts.playTime.none;
+  const time = state.meta.playTime;
   const fileInput = useRef<HTMLInputElement>(null);
 
   const handleNewGame = () => {
     if (!window.confirm(texts.save.confirmNewGame)) return;
-    replace(createGame());
-    notify(texts.save.newGameStarted);
+    onNewGame();
   };
 
   const handleExport = async () => {
     try {
       await exportSaveFile(state, new Date().toISOString());
+      dispatch({ type: 'markExported' });
       notify(texts.save.exported);
     } catch {
       notify(texts.save.exportFailed);
@@ -56,6 +61,24 @@ export function ClubScreen({ state, dispatch, replace, notify }: ClubScreenProps
     <div class="screen">
       <RecordsView state={state} />
       <PastGames />
+
+      <section class="card">
+        <h2>{texts.playTime.title}</h2>
+        <dl class="summary wide-summary">
+          <div>
+            <dt>{texts.playTime.season}</dt>
+            <dd>{minutes(time.season)}</dd>
+          </div>
+          <div>
+            <dt>{texts.playTime.lastSeason}</dt>
+            <dd>{minutes(time.lastSeason)}</dd>
+          </div>
+          <div>
+            <dt>{texts.playTime.total}</dt>
+            <dd>{minutes(time.total)}</dd>
+          </div>
+        </dl>
+      </section>
 
       <h2>{texts.settings.title}</h2>
       <label class="card toggle">
@@ -88,6 +111,11 @@ export function ClubScreen({ state, dispatch, replace, notify }: ClubScreenProps
           onChange={(e) => void handleImportFile(e)}
         />
       </div>
+      {!isStandalone() && (
+        <button type="button" class="button secondary wide" onClick={onShowInstall}>
+          {texts.install.open}
+        </button>
+      )}
       <p class="muted small">
         {texts.game.seed} {state.meta.seed} · {format(texts.app.version, { version: __APP_VERSION__ })}
       </p>

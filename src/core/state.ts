@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -22,6 +22,10 @@ export interface Meta {
   seed: number;
   /** État courant du générateur aléatoire (entier 32 bits non signé). */
   rngState: number;
+  /** Dernier export de la sauvegarde, pour le rappel (ajouté en v8). */
+  lastExport: { season: number; week: number } | null;
+  /** Temps passé à jouer, en secondes, fourni par l'interface (ajouté en v8). */
+  playTime: { total: number; season: number; lastSeason: number };
 }
 
 export interface Settings {

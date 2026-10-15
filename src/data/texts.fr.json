@@ -559,5 +559,38 @@
     "text": "Le club a passé 4 semaines de suite dans le rouge. La partie s'arrête en saison {season}, semaine {week}.",
     "newGame": "Nouvelle partie",
     "summary": "Bilan de la partie"
+  },
+  "newClub": {
+    "title": "Crée ton club",
+    "intro": "Tu reprends un petit club de Division 3, dans un quartier endormi. À toi de le mener jusqu'à l'élite et de faire grandir la ville autour de son stade.",
+    "name": "Nom du club",
+    "primary": "Couleur principale",
+    "secondary": "Deuxième couleur",
+    "colorLabel": "Couleur {index}",
+    "start": "Commencer",
+    "cancel": "Annuler",
+    "nameRequired": "Donne un nom à ton club."
+  },
+  "install": {
+    "title": "Installer Kop City",
+    "intro": "Pour jouer en plein écran et sans réseau, ajoute Kop City à l'écran d'accueil de ton iPhone :",
+    "step1": "Touche le bouton Partager de Safari (le carré avec une flèche vers le haut).",
+    "step2": "Fais défiler et choisis « Sur l'écran d'accueil ».",
+    "step3": "Touche « Ajouter » : l'icône Kop City apparaît sur ton écran d'accueil.",
+    "offline": "Lance ensuite le jeu depuis cette icône : il marche même en mode avion.",
+    "close": "J'ai compris",
+    "open": "Installer sur l'iPhone"
+  },
+  "exportReminder": {
+    "text": "{weeks} semaines de jeu depuis ton dernier export. iOS peut effacer les données : pense à exporter ta sauvegarde.",
+    "button": "Exporter"
+  },
+  "playTime": {
+    "title": "Temps de jeu",
+    "season": "Cette saison",
+    "lastSeason": "Saison précédente",
+    "total": "Depuis le début",
+    "value": "{minutes} min",
+    "none": "–"
   }
 }

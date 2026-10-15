@@ -5,6 +5,9 @@ import type { Action } from '../../core/game';
 import { myDivision, myFixture, opponentOf, rankOf } from '../../core/league';
 import { seasonOver } from '../../core/season';
 import { MY_TEAM_ID, type GameState } from '../../core/state';
+import { exportReminderDue, weeksSinceExport } from '../../core/exportReminder';
+import { exportSaveFile } from '../../storage/files';
+import { ClubCrest } from '../clubCrest';
 import { EventSheet } from '../EventSheet';
 import { FinanceSheet } from '../FinanceSheet';
 import { ObjectivesCard } from '../ObjectivesCard';
@@ -23,9 +26,19 @@ interface HomeScreenProps {
   state: GameState;
   dispatch: (action: Action) => void;
   onOpenMatch: () => void;
+  notify: (message: string) => void;
 }
 
-export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
+export function HomeScreen({ state, dispatch, onOpenMatch, notify }: HomeScreenProps) {
+  const handleExport = async () => {
+    try {
+      await exportSaveFile(state, new Date().toISOString());
+      dispatch({ type: 'markExported' });
+      notify(texts.save.exported);
+    } catch {
+      notify(texts.save.exportFailed);
+    }
+  };
   const [showAccounts, setShowAccounts] = useState(false);
   const [showEvent, setShowEvent] = useState(true);
   const division = myDivision(state.league);
@@ -40,9 +53,7 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
   return (
     <div class="screen home-screen">
       <header class="club-header">
-        <div class="crest small-crest" aria-hidden="true">
-          {texts.app.monogram}
-        </div>
+        <ClubCrest state={state} />
         <div>
           <h1>{state.club.name}</h1>
           <p class="muted">
@@ -61,6 +72,15 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
         </span>
         <span class="link">{H.seeAccounts}</span>
       </button>
+
+      {exportReminderDue(state) && (
+        <section class="card export-reminder">
+          <p>{format(texts.exportReminder.text, { weeks: weeksSinceExport(state) })}</p>
+          <button type="button" class="button" onClick={() => void handleExport()}>
+            {texts.exportReminder.button}
+          </button>
+        </section>
+      )}
 
       {state.alerts.length > 0 && (
         <section class="card alerts">

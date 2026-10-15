@@ -4,15 +4,15 @@ import type { GameState } from '../core/state';
 import { loadGame, requestPersistentStorage, saveGame } from '../storage/save';
 import { texts } from './i18n';
 
-export type GameStatus = 'loading' | 'ready' | 'loadFailed';
+export type GameStatus = 'loading' | 'ready' | 'loadFailed' | 'needsClub';
 
 /** Graine aléatoire : le hasard du navigateur n'est utilisé qu'ici, jamais dans le cœur. */
 function randomSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0] ?? 1;
 }
 
-export function createGame(): GameState {
-  return newGame({ seed: randomSeed(), now: new Date().toISOString(), clubName: texts.defaults.clubName });
+export function createGame(clubName: string = texts.defaults.clubName, clubColors?: [string, string]): GameState {
+  return newGame({ seed: randomSeed(), now: new Date().toISOString(), clubName, clubColors });
 }
 
 /** Charge la partie au démarrage, puis l'enregistre à chaque changement d'état. */
@@ -24,10 +24,14 @@ export function useGame(onSaveError: () => void) {
     void requestPersistentStorage();
     loadGame()
       .then((saved) => {
-        // On réenregistre aussitôt : une sauvegarde migrée est ainsi écrite à la version courante.
-        const game = saved ?? createGame();
-        setState(game);
-        void saveGame(game, new Date().toISOString()).catch(onSaveError);
+        // Pas de partie : le joueur crée son club. Sinon on réenregistre aussitôt,
+        // pour qu'une sauvegarde migrée soit écrite à la version courante.
+        if (!saved) {
+          setStatus('needsClub');
+          return;
+        }
+        setState(saved);
+        void saveGame(saved, new Date().toISOString()).catch(onSaveError);
         setStatus('ready');
       })
       .catch(() => setStatus('loadFailed'));
