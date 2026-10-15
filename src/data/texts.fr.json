@@ -1,0 +1,20 @@
+{
+  "app": {
+    "name": "Kop City",
+    "shortName": "Kop City",
+    "description": "Dirige un club de football et fais grandir la ville autour de son stade.",
+    "monogram": "KC",
+    "tagline": "Le club fait la ville, la ville fait le club.",
+    "version": "Version {version}"
+  },
+  "home": {
+    "comingSoon": "Les fondations sont posées. La partie arrive bientôt."
+  },
+  "pwa": {
+    "updateAvailable": "Nouvelle version disponible.",
+    "reload": "Relancer",
+    "later": "Plus tard",
+    "offlineReady": "Prêt à jouer hors ligne.",
+    "close": "OK"
+  }
+}
