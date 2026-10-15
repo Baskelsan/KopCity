@@ -198,3 +198,49 @@ describe('migration v3 → v4', () => {
     expect(state.log).toEqual([]);
   });
 });
+
+describe('migration v4 → v5', () => {
+  /** Une sauvegarde M4 : une seule division, équipes sans niveau, joueurs sans « formé au club », semaine 7. */
+  function v4Save(week: number): Record<string, unknown> {
+    const v5 = newGame({ seed: 42, now: NOW, clubName: 'FC Test' });
+    const { phase: _p, offseason: _o, ...rest } = v5;
+    const d3 = v5.league.divisions.find((d) => d.id === 'D3')!;
+    return {
+      ...rest,
+      schemaVersion: 4,
+      time: { season: 1, week },
+      market: { offers: [] },
+      squad: { ...v5.squad, players: v5.squad.players.map(({ homegrown: _h, ...p }) => p) },
+      league: {
+        ...v5.league,
+        divisions: [{ ...d3, teams: d3.teams.map(({ level: _l, ...t }) => t) }],
+      },
+    };
+  }
+
+  it('ajoute les deux autres divisions, avec des villes différentes', () => {
+    const state = parseSave(JSON.stringify(v4Save(1)));
+    expect(state.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(state.league.divisions.map((d) => d.id)).toEqual(['D3', 'D2', 'D1']);
+    const teams = state.league.divisions.flatMap((d) => d.teams);
+    expect(teams).toHaveLength(29);
+    expect(new Set(teams.map((t) => t.name.slice(t.name.indexOf(' ') + 1))).size).toBe(29);
+    expect(teams.every((t) => t.level > 0)).toBe(true);
+  });
+
+  it('les nouvelles divisions rattrapent les journées déjà jouées', () => {
+    const state = parseSave(JSON.stringify(v4Save(7)));
+    for (const id of ['D2', 'D1']) {
+      const d = state.league.divisions.find((x) => x.id === id)!;
+      expect(d.table.every((r) => r.played === 6)).toBe(true);
+    }
+  });
+
+  it('passe en phase de saison, sans mercato ouvert, joueurs non formés au club', () => {
+    const state = parseSave(JSON.stringify(v4Save(12)));
+    expect(state.phase).toBe('season');
+    expect(state.offseason).toBeNull();
+    expect(state.market).toEqual({ offers: [], open: false, lastWinterSeason: 1 });
+    expect(state.squad.players.every((p) => p.homegrown === false)).toBe(true);
+  });
+});

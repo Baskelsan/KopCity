@@ -26,7 +26,7 @@ const shape: Record<string, Record<string, (v: unknown) => boolean>> = {
   },
   league: { myDivision: isString, divisions: isArray, rivalId: (v) => v === null || isString(v) },
   finance: { lastWeek: (v) => v === null || isObject(v), season: isObject },
-  market: { offers: isArray },
+  market: { offers: isArray, open: isBoolean, lastWinterSeason: isNumber },
   events: { pending: (v) => v === null || isObject(v), history: isArray },
   records: { titles: isNumber, promotions: isNumber, bestAttendance: isNumber, bestTreasury: isNumber },
 };
@@ -47,6 +47,8 @@ export function assertGameState(save: unknown): GameState {
   if (!isArray(save.objectives)) throw new SaveError('invalidFormat', 'objectives invalide');
   if (!isArray(save.log)) throw new SaveError('invalidFormat', 'log invalide');
   if (!isArray(save.alerts)) throw new SaveError('invalidFormat', 'alerts invalide');
+  if (save.phase !== 'season' && save.phase !== 'offseason') throw new SaveError('invalidFormat', 'phase invalide');
+  if (save.offseason !== null && !isObject(save.offseason)) throw new SaveError('invalidFormat', 'offseason invalide');
   if (save.currentMatch !== null && !isObject(save.currentMatch)) {
     throw new SaveError('invalidFormat', 'currentMatch invalide');
   }
