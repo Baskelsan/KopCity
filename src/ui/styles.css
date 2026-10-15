@@ -81,9 +81,81 @@ h1 {
   font-size: 32px;
 }
 
-.tagline {
+.muted {
   margin: 0;
   color: var(--muted);
+}
+
+.summary {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+  margin: 16px 0 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.summary dt {
+  color: var(--muted);
+}
+
+.summary dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 360px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.toggle input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--accent);
+}
+
+.message {
+  margin: 8px 0 0;
+  max-width: 360px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 16px 0 8px;
+}
+
+.actions .button {
+  padding: 0 8px;
+}
+
+.actions .button.wide {
+  grid-column: 1 / -1;
+}
+
+.button:disabled {
+  opacity: 0.5;
 }
 
 .footer {

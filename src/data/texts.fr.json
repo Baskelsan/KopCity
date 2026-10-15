@@ -5,10 +5,37 @@
     "description": "Dirige un club de football et fais grandir la ville autour de son stade.",
     "monogram": "KC",
     "tagline": "Le club fait la ville, la ville fait le club.",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "loading": "Chargement de la partie…"
   },
-  "home": {
-    "comingSoon": "Les fondations sont posées. La partie arrive bientôt."
+  "defaults": {
+    "clubName": "FC Kop City"
+  },
+  "game": {
+    "seasonWeek": "Saison {season} · Semaine {week}",
+    "treasury": "Trésorerie",
+    "population": "Habitants",
+    "seed": "Graine",
+    "alwaysLiveMatches": "Tous les matchs en direct"
+  },
+  "save": {
+    "export": "Exporter",
+    "import": "Importer",
+    "newGame": "Nouvelle partie",
+    "confirmNewGame": "Lancer une nouvelle partie ? La partie en cours sera perdue si tu ne l'as pas exportée.",
+    "confirmImport": "Remplacer la partie en cours par « {club} » (saison {season}, semaine {week}) ?",
+    "exported": "Sauvegarde exportée.",
+    "imported": "Sauvegarde importée.",
+    "newGameStarted": "Nouvelle partie lancée.",
+    "saveFailed": "La sauvegarde a échoué. Pense à exporter ta partie.",
+    "loadFailed": "Impossible de relire la sauvegarde. Importe un export ou lance une nouvelle partie.",
+    "exportFailed": "L'export a échoué."
+  },
+  "saveErrors": {
+    "invalidJson": "Ce fichier n'est pas une sauvegarde Kop City.",
+    "invalidFormat": "Cette sauvegarde est incomplète ou abîmée.",
+    "futureVersion": "Cette sauvegarde vient d'une version plus récente du jeu. Mets l'application à jour.",
+    "missingMigration": "Cette sauvegarde est trop ancienne pour être convertie."
   },
   "pwa": {
     "updateAvailable": "Nouvelle version disponible.",
