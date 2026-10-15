@@ -362,6 +362,29 @@ Le développement avance en 8 jalons, chacun jouable ou testable seul et termin�
 - Tester sur l'iPhone réel à la fin de M0, M2 et M4, pas seulement dans le navigateur du PC.
 - Quand une valeur d'équilibrage change, la modifier dans `balance.json` et ajouter une ligne dans ce document, pour qu'il reste la référence.
 
+## Précisions décidées en cours de développement
+
+Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs vivent dans `src/data/balance.json`.
+
+**Match (M2)**
+- Forces : chaque ligne additionne les notes pondérées de ses joueurs (attaquant : 60 % attaque, 20 % passes, 20 % physique…) ; le milieu soutient l'attaque et la défense à 30 %. Hors de son poste, un joueur vaut 80 % (40 % dans les buts).
+- Style : ±10 % entre attaque et défense. Fin de match : forcer ou gérer déplace 20 %. Moral : de −10 % à +10 %. Domicile : +5 %.
+- Les adversaires n'ont pas de joueurs mais une force `{att, mid, def, gk}` sur la même échelle que le club.
+- Les cartons sont décoratifs en v1 (pas de suspension).
+- Moral après un match : +5 victoire, +1 nul, −5 défaite pour ceux qui ont joué, −3 pour les autres.
+- Les blessés guérissent d'une semaine à chaque semaine jouée.
+- Le match en cours est sauvegardé (`currentMatch`) : quitter puis revenir ne permet pas de le rejouer.
+
+**Semaines et économie (M4)**
+- Attrait du match : 0,85, +0,15 pour le derby, de +0,10 (adversaire premier) à −0,10 (dernier), ±0,03 par victoire ou défaite sur les 5 derniers matchs, borné entre 0,7 et 1,2.
+- Coefficient sponsor : 1,4 pour le premier, 0,8 pour le dernier, régulier entre les deux, 1 avant la 1re journée.
+- Amende si les riverains sont sous 20 : 10 000 € par semaine.
+- Un rival est tiré dans la division pour le derby. Chaque club d'une division vient d'une ville différente.
+- Concurrent direct : 3 points d'écart au plus et 2 places au plus, à partir de la 4e journée.
+- Montée ou maintien « en jeu » dans les 3 dernières journées : l'écart avec la ligne de montée ou de descente peut encore être comblé.
+- Mesuré sur 100 saisons : marge moyenne d'environ 200 000 €, 7 à 8 matchs à enjeu par saison.
+- Le marché des transferts (et donc l'arrêt du mercato en semaine 9) est rattaché à M5, avec l'intersaison.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**
