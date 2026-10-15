@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';

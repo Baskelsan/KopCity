@@ -1,4 +1,5 @@
 import balance from '../data/balance.json';
+import { build, demolish, extendStadium, initialDistricts, progressConstructions, upgradeBuilding } from './city';
 import { autoLineup, benchOf, effectiveLineup, swapInLineup } from './lineup';
 import { clubOutcome, createMatch, decide, runMatch, simulateToEnd, type ClubContext } from './match';
 import type { Decision, Side } from './matchTypes';
@@ -6,6 +7,7 @@ import { divisionLevel, generateSquad } from './players';
 import { nextFloat, nextInt, seedToState } from './rng';
 import {
   SCHEMA_VERSION,
+  type BuildingType,
   type DivisionId,
   type Formation,
   type GameState,
@@ -64,7 +66,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
       population: start.population,
       supporterShare: start.supporterShare,
       residentSatisfaction: start.residentSatisfaction,
-      districts: [],
+      districts: initialDistricts(),
       constructions: [],
     },
     league: { myDivision: division, divisions: [] },
@@ -85,7 +87,12 @@ export type Action =
   | { type: 'swapPlayers'; a: string; b: string }
   | { type: 'startFriendly'; live: boolean }
   | { type: 'matchDecision'; decision: Decision }
-  | { type: 'finishMatch' };
+  | { type: 'finishMatch' }
+  | { type: 'build'; slotId: string; building: BuildingType }
+  | { type: 'upgradeBuilding'; slotId: string }
+  | { type: 'extendStadium' }
+  | { type: 'demolish'; slotId: string }
+  | { type: 'advanceWeek' };
 
 const clubContext = (state: GameState): ClubContext => ({
   players: state.squad.players,
@@ -130,8 +137,8 @@ function startFriendly(state: GameState, live: boolean): GameState {
 }
 
 /**
- * Applique les suites du match à l'effectif : un match compte comme une semaine pour les blessures en cours,
- * puis les nouvelles blessures et le moral (joueurs entrés en jeu selon le résultat, les autres baissent).
+ * Applique les suites du match à l'effectif : nouvelles blessures et moral
+ * (joueurs entrés en jeu selon le résultat, les autres baissent).
  */
 function finishMatch(state: GameState): GameState {
   const match = state.currentMatch;
@@ -143,14 +150,30 @@ function finishMatch(state: GameState): GameState {
 
   const players = state.squad.players.map((p): Player => {
     const change = played.has(p.id) ? delta : morale.notPlayed;
-    const healed = Math.max(0, p.injuryWeeks - 1);
     return {
       ...p,
       morale: Math.min(morale.max, Math.max(morale.min, p.morale + change)),
-      injuryWeeks: Math.max(healed, injuries.get(p.id) ?? 0),
+      injuryWeeks: Math.max(p.injuryWeeks, injuries.get(p.id) ?? 0),
     };
   });
   return { ...state, squad: refreshLineup({ ...state.squad, players }), currentMatch: null };
+}
+
+/**
+ * Semaine suivante (version M3) : les chantiers avancent, les blessés guérissent d'une semaine.
+ * M4 y ajoutera les matchs, l'argent, les supporters et les arrêts aux semaines clés.
+ */
+function advanceWeek(state: GameState): GameState {
+  if (state.currentMatch) return state;
+  const built = progressConstructions(state);
+  const players = built.squad.players.map((p) =>
+    p.injuryWeeks > 0 ? { ...p, injuryWeeks: p.injuryWeeks - 1 } : p,
+  );
+  return {
+    ...built,
+    time: { ...built.time, week: built.time.week + 1 },
+    squad: refreshLineup({ ...built.squad, players }),
+  };
 }
 
 /** Point d'entrée unique pour faire évoluer l'état : (state, action) => newState. */
@@ -176,5 +199,15 @@ export function applyAction(state: GameState, action: Action): GameState {
       return { ...state, currentMatch: decide(state.currentMatch, action.decision, clubContext(state)) };
     case 'finishMatch':
       return finishMatch(state);
+    case 'build':
+      return build(state, action.slotId, action.building);
+    case 'upgradeBuilding':
+      return upgradeBuilding(state, action.slotId);
+    case 'extendStadium':
+      return extendStadium(state);
+    case 'demolish':
+      return demolish(state, action.slotId);
+    case 'advanceWeek':
+      return advanceWeek(state);
   }
 }

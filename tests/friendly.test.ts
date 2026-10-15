@@ -90,17 +90,17 @@ describe('match amical', () => {
     throw new Error('Aucune blessure trouvée');
   });
 
-  it('un match fait passer une semaine pour les blessures en cours', () => {
+  it('un match ne fait pas guérir les blessés : seules les semaines comptent', () => {
     const s0 = fresh();
     const hurtId = s0.squad.players[0]!.id;
     const hurt: GameState = {
       ...s0,
       squad: { ...s0.squad, players: s0.squad.players.map((p) => (p.id === hurtId ? { ...p, injuryWeeks: 3 } : p)) },
     };
-    const done = run(hurt, { type: 'startFriendly', live: false }, { type: 'finishMatch' });
-    const after = done.squad.players.find((p) => p.id === hurtId)!;
-    expect(after.injuryWeeks).toBeGreaterThanOrEqual(2);
-    expect(after.injuryWeeks).toBeLessThanOrEqual(3);
+    const afterMatch = run(hurt, { type: 'startFriendly', live: false }, { type: 'finishMatch' });
+    expect(afterMatch.squad.players.find((p) => p.id === hurtId)!.injuryWeeks).toBe(3);
+    const afterWeek = run(afterMatch, { type: 'advanceWeek' });
+    expect(afterWeek.squad.players.find((p) => p.id === hurtId)!.injuryWeeks).toBe(2);
   });
 
   it('terminer un match pas fini ne fait rien', () => {

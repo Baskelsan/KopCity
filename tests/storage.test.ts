@@ -129,7 +129,7 @@ describe('migration v1 → v2', () => {
 
   it('génère un effectif complet et une composition', () => {
     const state = parseSave(JSON.stringify(v1Save()));
-    expect(state.schemaVersion).toBe(2);
+    expect(state.schemaVersion).toBe(SCHEMA_VERSION);
     expect(state.squad.players).toHaveLength(18);
     expect(state.squad.lineup.filter(Boolean)).toHaveLength(11);
     expect(state.currentMatch).toBeNull();
@@ -152,5 +152,25 @@ describe('migration v1 → v2', () => {
     const players = newGame({ seed: 1, now: NOW, clubName: 'X' }).squad.players;
     save.squad = { ...(save.squad as object), players, lineup: [] };
     expect(parseSave(JSON.stringify(save)).squad.players).toEqual(players);
+  });
+});
+
+describe('migration v2 → v3', () => {
+  it('crée les quartiers vides et ouvre ceux dont la condition est remplie', () => {
+    const v3 = newGame({ seed: 42, now: NOW, clubName: 'FC Test' });
+    const v2 = {
+      ...v3,
+      schemaVersion: 2,
+      city: { ...v3.city, population: 26000, districts: [] },
+    };
+    const state = parseSave(JSON.stringify(v2));
+    expect(state.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(state.city.districts.map((d) => [d.id, d.unlocked])).toEqual([
+      ['stade', true],
+      ['faubourg', true],
+      ['gare', false],
+      ['nouveau', false],
+    ]);
+    expect(state.city.districts.flatMap((d) => d.slots)).toHaveLength(19);
   });
 });
