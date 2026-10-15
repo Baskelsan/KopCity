@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'preact/hooks';
+import balance from '../../data/balance.json';
 import type { Action } from '../../core/game';
+import { myDivision, standings } from '../../core/league';
 import { bestReplacement } from '../../core/match';
 import type { Decision, MatchEvent, MatchState } from '../../core/matchTypes';
 import { overall } from '../../core/players';
-import type { GameState, Player, PlayStyle } from '../../core/state';
+import { MY_TEAM_ID, type GameState, type Player, type PlayStyle } from '../../core/state';
 import { format, texts } from '../i18n';
+import { teamName } from '../logText';
 import { describeEvent, scoreAt, scoreLine } from '../matchText';
 import { Sheet } from '../Sheet';
 
@@ -16,46 +19,14 @@ const STYLES: PlayStyle[] = ['offensive', 'balanced', 'defensive'];
 interface MatchScreenProps {
   state: GameState;
   dispatch: (action: Action) => void;
+  /** true : le match vient d'être lancé, on le déroule depuis la 1re minute. */
+  liveFromStart: boolean;
 }
 
-export function MatchScreen({ state, dispatch }: MatchScreenProps) {
+export function MatchScreen({ state, dispatch, liveFromStart }: MatchScreenProps) {
   const match = state.currentMatch;
-  // Un match lancé depuis cet écran se déroule depuis la 1re minute ; un match repris s'affiche là où il en était.
-  const [startedHere, setStartedHere] = useState(false);
-
-  if (!match) {
-    const start = (live: boolean) => {
-      setStartedHere(true);
-      dispatch({ type: 'startFriendly', live });
-    };
-    return (
-      <div class="screen">
-        <section class="card">
-          <h2>{texts.match.friendlyTitle}</h2>
-          <p class="muted">{texts.match.friendlyText}</p>
-          <div class="actions">
-            {!state.settings.alwaysLiveMatches && (
-              <button type="button" class="button secondary" onClick={() => start(false)}>
-                {texts.match.playSummary}
-              </button>
-            )}
-            <button
-              type="button"
-              class={`button${state.settings.alwaysLiveMatches ? ' wide' : ''}`}
-              onClick={() => start(true)}
-            >
-              {texts.match.playLive}
-            </button>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
-  if (!match.live) {
-    return <MatchReport state={state} match={match} onFinish={() => dispatch({ type: 'finishMatch' })} />;
-  }
-  return <LiveMatch state={state} match={match} dispatch={dispatch} fromStart={startedHere} />;
+  if (!match) return <LeagueView state={state} />;
+  return <LiveMatch state={state} match={match} dispatch={dispatch} fromStart={liveFromStart} />;
 }
 
 function LiveMatch({
@@ -230,53 +201,80 @@ function DecisionSheet({
   );
 }
 
-function MatchReport({ state, match, onFinish }: { state: GameState; match: MatchState; onFinish: () => void }) {
-  const players = new Map(state.squad.players.map((p) => [p.id, p]));
-  const clubSide = match.club.side;
-  const opponentSide = clubSide === 'home' ? 'away' : 'home';
-  const scorers = match.events
-    .filter((e): e is Extract<MatchEvent, { type: 'chance' }> => e.type === 'chance')
-    .filter((e) => e.outcome === 'goal' && e.side === clubSide)
-    .map((e) => `${players.get(e.playerId ?? '')?.name ?? ''} ${format(texts.match.minute, { minute: e.minute })}`);
-  const opponentGoals = match.score[opponentSide];
-  const highlights = match.events.filter((e) => e.type === 'injury' || e.type === 'card' || e.type === 'substitution').slice(0, 3);
+function LeagueView({ state }: { state: GameState }) {
+  const [view, setView] = useState<'calendar' | 'table'>('calendar');
+  const division = myDivision(state.league);
+  const G = texts.league;
+  const mine = division.fixtures
+    .filter((f) => f.home === MY_TEAM_ID || f.away === MY_TEAM_ID)
+    .sort((a, b) => a.week - b.week);
 
   return (
     <div class="screen">
-      <div class="card scoreboard">
-        <span class="team">{match.home.name}</span>
-        <strong class="score">
-          {match.score.home} - {match.score.away}
-        </strong>
-        <span class="team">{match.away.name}</span>
-      </div>
-      <section class="card">
-        <h2>{texts.match.scorers}</h2>
-        {scorers.length === 0 && opponentGoals === 0 && <p class="muted">{texts.match.noScorer}</p>}
-        <ul class="plain">
-          {scorers.map((s, i) => (
-            <li key={i}>⚽ {s}</li>
-          ))}
-          {opponentGoals > 0 && (
-            <li class="muted">{format(texts.match.opponentGoals, { team: match[opponentSide].name, count: opponentGoals })}</li>
-          )}
-        </ul>
-        <h2>{texts.match.highlights}</h2>
-        {highlights.length === 0 ? (
-          <p class="muted">{texts.match.nothingToReport}</p>
-        ) : (
-          <ol class="feed">
-            {highlights.map((event, i) => (
-              <FeedLine key={i} event={event} match={match} players={players} />
-            ))}
-          </ol>
-        )}
-      </section>
-      <div class="actions">
-        <button type="button" class="button wide" onClick={onFinish}>
-          {texts.match.finish}
+      <div class="segmented">
+        <button type="button" class={view === 'calendar' ? 'active' : ''} onClick={() => setView('calendar')}>
+          {G.calendar}
+        </button>
+        <button type="button" class={view === 'table' ? 'active' : ''} onClick={() => setView('table')}>
+          {G.table}
         </button>
       </div>
+
+      {view === 'calendar' ? (
+        <ol class="calendar">
+          {mine.map((f) => {
+            const home = f.home === MY_TEAM_ID;
+            const opponent = home ? f.away : f.home;
+            const r = f.result;
+            const scored = r ? (home ? r.homeGoals : r.awayGoals) : 0;
+            const conceded = r ? (home ? r.awayGoals : r.homeGoals) : 0;
+            const outcome = !r ? '' : scored > conceded ? 'win' : scored < conceded ? 'loss' : 'draw';
+            return (
+              <li key={f.week} class={`${f.week === state.time.week ? 'current ' : ''}${outcome}`}>
+                <span class="muted">{format(G.round, { week: f.week })}</span>
+                <span>
+                  {teamName(state, opponent)}
+                  {opponent === state.league.rivalId && <span class="tag derby">{texts.home.derby}</span>}
+                  <small class="muted"> · {home ? texts.venueShort.home : texts.venueShort.away}</small>
+                </span>
+                <strong>{r ? `${scored}-${conceded}` : G.notPlayed}</strong>
+              </li>
+            );
+          })}
+        </ol>
+      ) : (
+        <table class="standings">
+          <thead>
+            <tr>
+              <th>{G.rank}</th>
+              <th class="team-col">{G.team}</th>
+              <th>{G.played}</th>
+              <th>{G.goalDiff}</th>
+              <th>{G.points}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {standings(division.table).map((row, i) => (
+              <tr
+                key={row.team}
+                class={[
+                  row.team === MY_TEAM_ID ? 'mine' : '',
+                  i + 1 === balance.keyMatch.promotionSpots ? 'promotion-line' : '',
+                  i + 1 === division.table.length - balance.keyMatch.relegationSpots ? 'relegation-line' : '',
+                ].join(' ')}
+              >
+                <td>{i + 1}</td>
+                <td class="team-col">{teamName(state, row.team)}</td>
+                <td>{row.played}</td>
+                <td>{row.goalsFor - row.goalsAgainst}</td>
+                <td>
+                  <strong>{row.points}</strong>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

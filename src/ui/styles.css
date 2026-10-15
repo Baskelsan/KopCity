@@ -734,3 +734,218 @@ select {
   max-width: 360px;
   margin-top: 8px;
 }
+
+/* Accueil M4 */
+
+.club-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.club-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.small-crest {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 22px;
+}
+
+.home-screen > .card {
+  margin-bottom: 12px;
+}
+
+.money {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+}
+
+.money strong {
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.positive {
+  color: var(--accent);
+}
+
+.negative {
+  color: var(--danger);
+}
+
+.link {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.alerts {
+  border-color: var(--accent);
+}
+
+.alerts li {
+  padding: 4px 0;
+}
+
+.tag.derby {
+  margin-left: 8px;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.home-screen .journal {
+  max-width: none;
+  margin-top: 0;
+}
+
+.home-screen {
+  padding-bottom: 80px;
+}
+
+.advance-bar {
+  position: fixed;
+  left: calc(var(--safe-left) + 16px);
+  right: calc(var(--safe-right) + 16px);
+  bottom: calc(var(--safe-bottom) + var(--tabbar-height) + 12px);
+  z-index: 5;
+  max-width: 560px;
+  margin: 0 auto;
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.button.big {
+  min-height: 56px;
+  font-size: 18px;
+}
+
+/* Comptes */
+
+.report h3 {
+  margin: 16px 0 6px;
+}
+
+.ledger {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.ledger div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0 2px 12px;
+}
+
+.ledger dt {
+  color: var(--muted);
+}
+
+.ledger dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger .ledger-head {
+  padding-left: 0;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.ledger .ledger-head dt {
+  color: var(--text);
+}
+
+.ledger .ledger-total {
+  padding-left: 0;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-weight: 700;
+}
+
+.ledger-total.positive dd {
+  color: var(--accent);
+}
+
+.ledger-total.negative dd {
+  color: var(--danger);
+}
+
+/* Championnat */
+
+.calendar {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendar li {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.calendar li.current {
+  border-color: var(--accent);
+}
+
+.calendar li.win {
+  border-left-color: var(--accent);
+}
+
+.calendar li.loss {
+  border-left-color: var(--danger);
+}
+
+.calendar li.draw {
+  border-left-color: var(--muted);
+}
+
+.standings {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.standings th,
+.standings td {
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.standings .team-col {
+  text-align: left;
+}
+
+.standings tr.mine {
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+
+.standings tr.promotion-line td {
+  border-bottom: 2px solid var(--accent);
+}
+
+.standings tr.relegation-line td {
+  border-bottom: 2px solid var(--danger);
+}

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { texts } from './i18n';
-import { describeLog } from './logText';
 import { CityScreen } from './screens/CityScreen';
 import { ClubScreen } from './screens/ClubScreen';
 import { HomeScreen } from './screens/HomeScreen';
@@ -18,22 +17,22 @@ export function App() {
   const onSaveError = useCallback(() => setMessage(texts.save.saveFailed), []);
   const { state, status, dispatch, replace } = useGame(onSaveError);
 
-  // Un match en cours (repris après fermeture) ramène sur l'onglet Matchs.
+  // Un match à enjeu lancé par « Avancer » se déroule depuis la 1re minute sur l'onglet Matchs ;
+  // un match repris après fermeture s'affiche là où il en était. À la fin du match, retour à l'accueil.
   const matchInProgress = state?.currentMatch != null;
+  const loaded = state !== null;
+  const [liveFromStart, setLiveFromStart] = useState(false);
+  const wasInProgress = useRef<boolean | null>(null);
   useEffect(() => {
-    if (matchInProgress) setTab('matches');
-  }, [matchInProgress]);
-
-  // Les nouvelles entrées du journal (chantier livré, quartier débloqué) s'affichent en message.
-  const logLength = state?.log.length;
-  const previousLogLength = useRef<number | undefined>(undefined);
-  useEffect(() => {
-    if (logLength === undefined) return;
-    const previous = previousLogLength.current;
-    previousLogLength.current = logLength;
-    if (previous === undefined || logLength <= previous || !state) return;
-    setMessage(state.log.slice(previous).map(describeLog).join(' '));
-  }, [logLength]);
+    if (!loaded) return;
+    const before = wasInProgress.current;
+    wasInProgress.current = matchInProgress;
+    if (matchInProgress && before !== true) {
+      setLiveFromStart(before === false);
+      setTab('matches');
+    }
+    if (!matchInProgress && before === true) setTab('home');
+  }, [matchInProgress, loaded]);
 
   useEffect(() => {
     if (!message) return;
@@ -53,10 +52,10 @@ export function App() {
             </button>
           </div>
         )}
-        {state && tab === 'home' && <HomeScreen state={state} dispatch={dispatch} />}
+        {state && tab === 'home' && <HomeScreen state={state} dispatch={dispatch} onOpenMatch={() => setTab('matches')} />}
         {state && tab === 'city' && <CityScreen state={state} dispatch={dispatch} />}
         {state && tab === 'squad' && <SquadScreen state={state} dispatch={dispatch} />}
-        {state && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} />}
+        {state && tab === 'matches' && <MatchScreen state={state} dispatch={dispatch} liveFromStart={liveFromStart} />}
         {state && tab === 'club' && (
           <ClubScreen state={state} dispatch={dispatch} replace={replace} notify={setMessage} />
         )}

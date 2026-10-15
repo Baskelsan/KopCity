@@ -1,66 +1,128 @@
-import { weeklyUpkeep } from '../../core/city';
+import { useState } from 'preact/hooks';
+import balance from '../../data/balance.json';
+import { netResult } from '../../core/economy';
 import type { Action } from '../../core/game';
-import { weeklyWages } from '../../core/players';
-import type { GameState } from '../../core/state';
-import { formatEuros, formatInteger } from '../formatters';
+import { myDivision, myFixture, opponentOf, rankOf } from '../../core/league';
+import { seasonOver } from '../../core/season';
+import { MY_TEAM_ID, type GameState } from '../../core/state';
+import { FinanceSheet } from '../FinanceSheet';
+import { formatEuros } from '../formatters';
 import { format, texts } from '../i18n';
-import { describeLog } from '../logText';
+import { describeAlert, describeLog, teamName } from '../logText';
 
+const H = texts.home;
 const JOURNAL_SIZE = 6;
 
-export function HomeScreen({ state, dispatch }: { state: GameState; dispatch: (action: Action) => void }) {
+function signed(value: number): string {
+  return value > 0 ? `+${formatEuros(value)}` : formatEuros(value);
+}
+
+interface HomeScreenProps {
+  state: GameState;
+  dispatch: (action: Action) => void;
+  onOpenMatch: () => void;
+}
+
+export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
+  const [showAccounts, setShowAccounts] = useState(false);
+  const division = myDivision(state.league);
+  const teams = division.table.length;
+  const rank = rankOf(division.table, MY_TEAM_ID);
+  const started = division.table.some((row) => row.played > 0);
+  const fixture = myFixture(division, state.time.week);
+  const over = seasonOver(state);
+  const lastWeek = state.finance.lastWeek;
   const journal = state.log.slice(-JOURNAL_SIZE).reverse();
+
   return (
-    <div class="screen home">
-      <div class="crest" aria-hidden="true">
-        {texts.app.monogram}
-      </div>
-      <h1>{state.club.name}</h1>
-      <p class="muted">{format(texts.game.seasonWeek, { season: state.time.season, week: state.time.week })}</p>
-      <dl class="card summary">
-        <div>
-          <dt>{texts.game.treasury}</dt>
-          <dd>{formatEuros(state.club.treasury)}</dd>
+    <div class="screen home-screen">
+      <header class="club-header">
+        <div class="crest small-crest" aria-hidden="true">
+          {texts.app.monogram}
         </div>
         <div>
-          <dt>{texts.game.wages}</dt>
-          <dd>{format(texts.game.perWeek, { amount: formatEuros(weeklyWages(state.squad.players)) })}</dd>
+          <h1>{state.club.name}</h1>
+          <p class="muted">
+            {format(texts.game.seasonWeek, { season: state.time.season, week: Math.min(state.time.week, balance.league.seasonWeeks) })}
+            {started && ` · ${format(rank === 1 ? H.rankFirst : H.rank, { rank, teams })}`}
+          </p>
         </div>
-        <div>
-          <dt>{texts.city.upkeep}</dt>
-          <dd>{format(texts.game.perWeek, { amount: formatEuros(weeklyUpkeep(state.city)) })}</dd>
-        </div>
-        <div>
-          <dt>{texts.game.population}</dt>
-          <dd>{formatInteger(state.city.population)}</dd>
-        </div>
-      </dl>
+      </header>
+
+      <button type="button" class="card money" onClick={() => setShowAccounts(true)}>
+        <span class="muted">{texts.game.treasury}</span>
+        <strong class={state.club.treasury < 0 ? 'negative' : ''}>{formatEuros(state.club.treasury)}</strong>
+        <span class={lastWeek && netResult(lastWeek) < 0 ? 'negative' : 'positive'}>
+          {lastWeek ? format(H.weekResult, { amount: signed(netResult(lastWeek)) }) : H.noWeekYet}
+        </span>
+        <span class="link">{H.seeAccounts}</span>
+      </button>
+
+      {state.alerts.length > 0 && (
+        <section class="card alerts">
+          <h2>{H.stopTitle}</h2>
+          <ul class="plain">
+            {state.alerts.map((alert, i) => (
+              <li key={i}>{describeAlert(alert, state)}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {over ? (
+        <section class="card">
+          <h2>{H.seasonOverTitle}</h2>
+          <p>
+            {format(H.seasonOverText, {
+              rank: format(rank === 1 ? H.rankFirst : H.rank, { rank, teams }),
+              net: signed(netResult(state.finance.season)),
+            })}
+          </p>
+        </section>
+      ) : (
+        fixture && (
+          <section class="card next-match">
+            <h2>{H.nextMatch}</h2>
+            <p>
+              <strong>{format(H.fixture, { week: fixture.week, opponent: teamName(state, opponentOf(fixture)) })}</strong>
+            </p>
+            <p class="muted">
+              {fixture.home === MY_TEAM_ID ? H.venueHome : H.venueAway}
+              {opponentOf(fixture) === state.league.rivalId && <span class="tag derby">{H.derby}</span>}
+            </p>
+          </section>
+        )
+      )}
 
       <section class="card journal">
-        <h2>{texts.week.journal}</h2>
+        <h2>{H.journal}</h2>
         {journal.length === 0 ? (
-          <p class="muted">{texts.week.emptyJournal}</p>
+          <p class="muted">{H.emptyJournal}</p>
         ) : (
           <ul class="plain">
             {journal.map((entry, i) => (
               <li key={i}>
-                <span class="muted">{format(texts.game.seasonWeek, { season: entry.season, week: entry.week })}</span>
-                <span>{describeLog(entry)}</span>
+                <span class="muted">{format(texts.league.round, { week: entry.week })}</span>
+                <span>{describeLog(entry, state)}</span>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      <button
-        type="button"
-        class="button wide next-week"
-        disabled={state.currentMatch !== null}
-        onClick={() => dispatch({ type: 'advanceWeek' })}
-      >
-        {texts.week.next}
-      </button>
-      {state.currentMatch !== null && <p class="muted">{texts.week.matchInProgress}</p>}
+      <div class="advance-bar">
+        {state.currentMatch ? (
+          <button type="button" class="button wide big" onClick={onOpenMatch}>
+            {H.playMatch}
+          </button>
+        ) : (
+          <button type="button" class="button wide big" disabled={over} onClick={() => dispatch({ type: 'advance' })}>
+            {H.advance}
+          </button>
+        )}
+      </div>
+
+      {showAccounts && <FinanceSheet state={state} onClose={() => setShowAccounts(false)} />}
     </div>
   );
 }

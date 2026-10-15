@@ -72,23 +72,11 @@
     }
   },
   "match": {
-    "friendlyTitle": "Match amical",
-    "friendlyText": "Affronte un club de ta division pour tester ton équipe. Le résultat ne compte pas, mais les blessures et le moral, si.",
-    "playSummary": "Résumé",
-    "playLive": "En direct",
     "speedNormal": "×1",
     "speedFast": "×4",
     "skip": "Passer",
     "finish": "Terminer",
     "minute": "{minute}'",
-    "report": "Résumé du match",
-    "scorers": "Buteurs",
-    "noScorer": "Aucun but",
-    "highlights": "Faits marquants",
-    "nothingToReport": "Rien à signaler.",
-    "opponentGoals": "{team} : {count} but(s)",
-    "home": "Domicile",
-    "away": "Extérieur",
     "events": {
       "goalPlayer": "⚽ But de {player} ({team}) !",
       "goalTeam": "⚽ But pour {team} !",
@@ -159,15 +147,10 @@
     "D2": "Division 2",
     "D1": "Élite"
   },
-  "week": {
-    "next": "Semaine suivante",
-    "journal": "Journal",
-    "emptyJournal": "Rien pour l'instant.",
-    "matchInProgress": "Termine d'abord le match en cours (onglet Matchs)."
-  },
   "log": {
     "constructionDelivered": "Chantier livré : {building} (niveau {level}).",
-    "districtUnlocked": "Nouveau quartier débloqué : {district} !"
+    "districtUnlocked": "Nouveau quartier débloqué : {district} !",
+    "matchResult": "{outcome} {scored}-{conceded} contre {opponent} ({venue})."
   },
   "buildings": {
     "stadium": "Stade",
@@ -243,5 +226,88 @@
       "unknownSlot": "Emplacement introuvable.",
       "onePerDistrict": "Un seul par quartier."
     }
+  },
+  "home": {
+    "rank": "{rank}e sur {teams}",
+    "rankFirst": "1er sur {teams}",
+    "nextMatch": "Prochain match",
+    "fixture": "J{week} · {opponent}",
+    "venueHome": "Domicile",
+    "venueAway": "Extérieur",
+    "derby": "Derby",
+    "weekResult": "{amount} cette semaine",
+    "noWeekYet": "Pas encore de semaine jouée",
+    "seeAccounts": "Voir les comptes",
+    "advance": "Avancer",
+    "playMatch": "Jouer le match",
+    "stopTitle": "On s'arrête",
+    "journal": "Journal",
+    "emptyJournal": "Rien pour l'instant.",
+    "seasonOverTitle": "Saison terminée",
+    "seasonOverText": "Classement final : {rank}. Résultat de la saison : {net}. L'intersaison (montées, descentes, mercato) n'est pas encore disponible.",
+    "matchInProgress": "Un match est en cours : il se joue dans l'onglet Matchs."
+  },
+  "alerts": {
+    "keyMatch": "Match à enjeu ({reasons}) : il se joue en direct.",
+    "reasons": {
+      "alwaysLive": "tous les matchs en direct",
+      "derby": "derby",
+      "directRival": "concurrent direct",
+      "promotion": "montée en jeu",
+      "relegation": "maintien en jeu"
+    },
+    "constructionDelivered": "Chantier livré : {building}.",
+    "districtUnlocked": "Nouveau quartier débloqué : {district} !",
+    "starterInjured": "{player} est blessé pour {weeks} sem.",
+    "treasuryNegative": "Trésorerie négative ({treasury}) depuis {weeks} semaine(s). 4 semaines de suite dans le rouge, et c'est la faillite.",
+    "lowSatisfaction": "Riverains mécontents ({satisfaction}) : le stade ne peut plus s'agrandir.",
+    "seasonOver": "La saison est terminée."
+  },
+  "outcomes": {
+    "win": "Victoire",
+    "draw": "Nul",
+    "loss": "Défaite"
+  },
+  "venueShort": {
+    "home": "dom.",
+    "away": "ext."
+  },
+  "finance": {
+    "title": "Comptes",
+    "week": "Cette semaine",
+    "season": "Depuis le début de la saison",
+    "income": "Recettes",
+    "expenses": "Dépenses",
+    "tickets": "Billetterie",
+    "bars": "Bars",
+    "shop": "Boutique",
+    "sponsors": "Sponsors",
+    "wages": "Salaires",
+    "upkeep": "Entretien",
+    "running": "Fonctionnement",
+    "fines": "Amendes (riverains)",
+    "net": "Solde",
+    "attendance": "Affluence : {attendance} spectateurs",
+    "noHomeMatch": "Pas de match à domicile cette semaine.",
+    "nextHomeTitle": "Prochain match à domicile",
+    "limitedBy": "Limitée par {limit}.",
+    "limits": {
+      "capacity": "la capacité du stade ({value})",
+      "accessCap": "le plafond d'accès ({value})",
+      "demand": "la demande : {supporters} supporters × attrait {attraction}"
+    },
+    "close": "Fermer",
+    "seasonAttendance": "{total} spectateurs sur {matches} match(s) à domicile, soit {average} en moyenne"
+  },
+  "league": {
+    "calendar": "Calendrier",
+    "table": "Classement",
+    "rank": "#",
+    "team": "Équipe",
+    "played": "J",
+    "points": "Pts",
+    "goalDiff": "DB",
+    "round": "J{week}",
+    "notPlayed": "–"
   }
 }
