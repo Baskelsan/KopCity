@@ -1,0 +1,22 @@
+{
+  "firstNames": [
+    "Adrien", "Alexis", "Antoine", "Arthur", "Bastien", "Benjamin", "Bilal", "Clément", "Damien", "Dylan",
+    "Enzo", "Florian", "Gabriel", "Hugo", "Ibrahim", "Jérémy", "Jules", "Kevin", "Kylian", "Léo",
+    "Lucas", "Mathis", "Maxime", "Mehdi", "Moussa", "Nathan", "Nicolas", "Noah", "Olivier", "Paul",
+    "Quentin", "Rayan", "Romain", "Samuel", "Sofiane", "Théo", "Thomas", "Valentin", "Yanis", "Yoann"
+  ],
+  "lastNames": [
+    "Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand", "Leroy", "Moreau",
+    "Simon", "Laurent", "Lefebvre", "Michel", "Garcia", "David", "Bertrand", "Roux", "Vincent", "Fournier",
+    "Morel", "Girard", "André", "Mercier", "Dupont", "Lambert", "Bonnet", "François", "Martinez", "Legrand",
+    "Garnier", "Faure", "Rousseau", "Blanc", "Guérin", "Muller", "Henry", "Roussel", "Nicolas", "Perrin",
+    "Diallo", "Traoré", "Benali", "Haddad", "Mendes", "Da Silva", "Kone", "Camara", "Lopez", "Barbier"
+  ],
+  "clubPrefixes": ["AS", "FC", "US", "SC", "Stade", "Olympique", "Racing", "ES", "AC", "Union"],
+  "towns": [
+    "Valmont", "Bréville", "Saint-Aubert", "Montclar", "Rivesac", "Lormes", "Haut-Verger", "Cormelles",
+    "Villebrune", "Port-Ardent", "Sablons", "Marchevieille", "Belcourt", "Fontrouge", "Les Aulnes",
+    "Pierrefeu", "Garancières", "Châteaubleu", "Roche-Noire", "Vauclerc", "Mirebois", "Les Tilleuls",
+    "Saint-Ormel", "Basse-Rive", "Clairmarais", "Montferrand-le-Haut", "Grandpré", "Ravenel", "Ormoy", "Belleforge"
+  ]
+}

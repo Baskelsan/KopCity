@@ -1,0 +1,114 @@
+import balance from '../data/balance.json';
+import names from '../data/names.json';
+import { nextFloat, nextInt, pick, type Draw } from './rng';
+import type { DivisionId, Player, PlayerStats, Position } from './state';
+
+const P = balance.players;
+const S = balance.strength;
+
+export const POSITIONS: readonly Position[] = ['GAR', 'DEF', 'MIL', 'ATT'];
+const STAT_KEYS: readonly (keyof PlayerStats)[] = ['att', 'def', 'pas', 'phy'];
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+/** Valeur d'un joueur dans une ligne : moyenne pondérée de ses stats, pénalisée hors de son poste. */
+export function lineRating(player: Player, line: Position): number {
+  const weights = S.lineWeights[line];
+  const raw = STAT_KEYS.reduce((sum, key) => sum + player.stats[key] * weights[key], 0);
+  if (player.pos === line) return raw;
+  return raw * (line === 'GAR' ? S.outOfPositionGoalkeeperFactor : S.outOfPositionFactor);
+}
+
+/** Note globale affichée (sur 20) : valeur du joueur à son poste. */
+export function overall(player: Player): number {
+  return Math.round(lineRating(player, player.pos));
+}
+
+/** Étoiles affichées : potentiel ÷ 4 plus l'erreur d'estimation, à la demi-étoile, entre 0,5 et 5. */
+export function starsShown(potential: number, error: number): number {
+  const stars = Math.round((potential / P.starsDivisor + error) * 2) / 2;
+  return clamp(stars, 0.5, 5);
+}
+
+export function monthlySalary(rating: number): number {
+  const { monthlyAtReference, referenceRating, exponent, rounding } = P.salary;
+  const raw = monthlyAtReference * Math.pow(rating / referenceRating, exponent);
+  return Math.max(rounding, Math.round(raw / rounding) * rounding);
+}
+
+function potentialGap(age: number): number {
+  return P.potentialGapByAge.find((step) => age <= step.maxAge)?.gap ?? 0;
+}
+
+function floatBetween(rngState: number, min: number, max: number): Draw<number> {
+  const draw = nextFloat(rngState);
+  return { value: min + draw.value * (max - min), rngState: draw.rngState };
+}
+
+/** Identifiant tiré du générateur : « p » suivi de 8 caractères hexadécimaux. */
+function newId(rngState: number, prefix: string): Draw<string> {
+  const draw = nextInt(rngState, 0, 0xffffffff);
+  return { value: prefix + draw.value.toString(16).padStart(8, '0'), rngState: draw.rngState };
+}
+
+export function generatePlayer(rngState: number, pos: Position, level: number): Draw<Player> {
+  let rng = rngState;
+  const take = <T>(draw: Draw<T>): T => {
+    rng = draw.rngState;
+    return draw.value;
+  };
+
+  const id = take(newId(rng, 'p'));
+  const firstName = take(pick(rng, names.firstNames));
+  const lastName = take(pick(rng, names.lastNames));
+  const age = take(nextInt(rng, P.ageMin, P.ageMax));
+  const base = level + take(floatBetween(rng, -P.levelSpread, P.levelSpread));
+  const profile = P.positionProfile[pos];
+  const stats = {} as PlayerStats;
+  for (const key of STAT_KEYS) {
+    const noise = take(floatBetween(rng, -P.statNoise, P.statNoise));
+    stats[key] = clamp(Math.round(base + profile[key] + noise), 1, 20);
+  }
+
+  const player: Player = {
+    id,
+    name: `${firstName.charAt(0)}. ${lastName}`,
+    pos,
+    age,
+    stats,
+    potential: 0,
+    potentialStarsShown: 0,
+    morale: P.startMorale,
+    monthlySalary: 0,
+    contractYears: take(nextInt(rng, P.contractYearsMin, P.contractYearsMax)),
+    injuryWeeks: 0,
+  };
+  const rating = overall(player);
+  player.potential = clamp(rating + take(nextInt(rng, 0, potentialGap(age))), 1, 20);
+  player.potentialStarsShown = starsShown(player.potential, take(floatBetween(rng, -P.starsError, P.starsError)));
+  player.monthlySalary = monthlySalary(lineRating(player, pos));
+  return { value: player, rngState: rng };
+}
+
+export function divisionLevel(division: DivisionId): number {
+  return P.divisionLevel[division];
+}
+
+/** Effectif complet (18 joueurs) au niveau donné. */
+export function generateSquad(rngState: number, level: number): Draw<Player[]> {
+  let rng = rngState;
+  const players: Player[] = [];
+  for (const pos of POSITIONS) {
+    for (let i = 0; i < P.squadComposition[pos]; i++) {
+      const draw = generatePlayer(rng, pos, level);
+      rng = draw.rngState;
+      players.push(draw.value);
+    }
+  }
+  return { value: players, rngState: rng };
+}
+
+/** Masse salariale ramenée à la semaine (× 12 ÷ 52). */
+export function weeklyWages(players: readonly Player[]): number {
+  return (players.reduce((sum, p) => sum + p.monthlySalary, 0) * 12) / 52;
+}
