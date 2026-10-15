@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -38,6 +38,8 @@ export interface Club {
   colors: [string, string];
   treasury: number;
   weeksInRed: number;
+  /** Multiplicateur des sponsors de la saison (1,1 si tous les objectifs de la saison précédente sont atteints) (v7). */
+  sponsorMultiplier: number;
 }
 
 export interface PlayerStats {
@@ -196,6 +198,10 @@ export interface Offseason {
   retired: string[];
   /** Évolution des notes pendant l'intersaison (ajouté en v6). */
   ratingChanges: RatingChange[];
+  /** Objectifs de la saison écoulée et leurs primes (ajouté en v7). */
+  objectiveResults: ObjectiveResult[];
+  /** Records battus pendant la saison écoulée (ajouté en v7). */
+  recordsBeaten: RecordKey[];
 }
 
 export interface RatingChange {
@@ -206,15 +212,21 @@ export interface RatingChange {
   after: number;
 }
 
-export type Phase = 'season' | 'offseason';
+export type Phase = 'season' | 'offseason' | 'gameOver';
 
 export interface PendingEvent {
   eventId: string;
+  /** Joueur concerné (star blessée, offre pour un joueur), null sinon. */
+  targetPlayerId: string | null;
+  /** Montant proposé pour le joueur visé (offre), 0 sinon. */
+  offerPrice: number;
+  /** Jeune prodige proposé, null sinon. */
+  prodigy: Player | null;
 }
 
 export interface EventRecord {
   eventId: string;
-  choice: number;
+  choiceId: string;
   season: number;
   week: number;
 }
@@ -222,19 +234,63 @@ export interface EventRecord {
 export interface Events {
   pending: PendingEvent | null;
   history: EventRecord[];
+  /** Dernière semaine où le tirage d'événement a eu lieu (un seul tirage par semaine). */
+  lastRoll: { season: number; week: number } | null;
 }
+
+/** Effets temporaires laissés par les événements (ajouté en v7). */
+export type ActiveEffect =
+  | { kind: 'homeStrength'; factor: number; matchesLeft: number }
+  | { kind: 'attendance'; factor: number; matchesLeft: number }
+  | { kind: 'sponsorBonus'; perWeek: number; weeksLeft: number }
+  | { kind: 'commitTransport'; season: number; transportsAtStart: number; repay: number; satisfaction: number };
+
+export type ObjectiveCategory = 'sport' | 'finance' | 'city';
 
 export interface Objective {
   id: string;
+  category: ObjectiveCategory;
+  type: string;
+  value: number;
   achieved: boolean;
 }
 
+export interface ObjectiveResult {
+  id: string;
+  achieved: boolean;
+  reward: number;
+}
+
+export interface Title {
+  season: number;
+  division: DivisionId;
+}
+
+export interface ScorerRecord {
+  playerId: string;
+  name: string;
+  goals: number;
+}
+
+export interface SeasonRecord {
+  season: number;
+  division: DivisionId;
+  rank: number;
+}
+
 export interface Records {
-  titles: number;
+  titles: Title[];
   promotions: number;
   bestAttendance: number;
   bestTreasury: number;
+  /** Buts marqués pour le club en championnat, par joueur. */
+  scorers: ScorerRecord[];
+  history: SeasonRecord[];
+  /** Records au début de la saison, pour signaler ceux battus pendant la saison. */
+  seasonStart: { bestAttendance: number; bestTreasury: number; topScorer: ScorerRecord | null };
 }
+
+export type RecordKey = 'bestAttendance' | 'bestTreasury' | 'topScorer';
 
 /** Entrée du journal : une clé de texte (texts.fr.json) et ses paramètres, jamais un texte en dur. */
 export interface LogEntry {
@@ -246,8 +302,9 @@ export interface LogEntry {
 
 /** Comptes d'une semaine (ou cumul de la saison), en euros. */
 export interface FinanceReport {
-  income: { tickets: number; bars: number; shop: number; sponsors: number };
-  expenses: { wages: number; upkeep: number; running: number; fines: number };
+  /** `other` : transferts et événements en cours de saison (ajouté en v7). */
+  income: { tickets: number; bars: number; shop: number; sponsors: number; other: number };
+  expenses: { wages: number; upkeep: number; running: number; fines: number; other: number };
   /** Affluence du match à domicile (cumul pour la saison), null sans match à domicile. */
   attendance: number | null;
 }
@@ -265,7 +322,10 @@ export type AlertKey =
   | 'treasuryNegative'
   | 'lowSatisfaction'
   | 'seasonOver'
-  | 'winterMarket';
+  | 'winterMarket'
+  | 'event'
+  | 'bankruptcy'
+  | 'eventOutcome';
 
 /** Raison pour laquelle « Avancer » s'est arrêté. Texte dans texts.fr.json (alerts). */
 export interface Alert {
@@ -297,4 +357,8 @@ export interface GameState {
   alerts: Alert[];
   /** Décisions de l'intersaison, null pendant la saison (ajouté en v5). */
   offseason: Offseason | null;
+  /** Effets temporaires des événements (ajouté en v7). */
+  effects: ActiveEffect[];
+  /** Faillite : moment où la partie s'est terminée, null tant qu'elle continue (ajouté en v7). */
+  gameOver: { season: number; week: number } | null;
 }

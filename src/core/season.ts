@@ -13,7 +13,10 @@ import { myDivision, myFixture, opponentOf, rankOf, recordResult, standings } fr
 import { autoLineup, benchOf, effectiveLineup } from './lineup';
 import { clubOutcome, createMatch, runMatch, simulateToEnd, type ClubContext } from './match';
 import type { MatchState, Side } from './matchTypes';
+import { homeStrengthFactor, wearEffects } from './effects';
+import { rollEvent, settleCommitments } from './events';
 import { endSeason, generateMarket } from './offseason';
+import { addGoals } from './records';
 import { nextInt } from './rng';
 import { MY_TEAM_ID, type Alert, type Division, type GameState, type LogEntry, type Player, type Squad, type Team } from './state';
 
@@ -95,6 +98,7 @@ function prepareMyMatch(state: GameState, live: boolean): { state: GameState; ma
     onField,
     bench: benchOf(players, onField),
     style,
+    strengthFactor: clubSide === 'home' ? homeStrengthFactor(state) : 1,
   });
   return { state: { ...state, meta: { ...state.meta, rngState: seed.rngState } }, match };
 }
@@ -168,13 +172,29 @@ function updateSquad(squad: Squad, match: MatchState): Squad {
 export function completeWeek(state: GameState, match: MatchState): { state: GameState; entries: LogEntry[] } {
   const week = state.time.week;
   const fixture = myFixture(myDivision(state.league), week)!;
-  const report = weekFinance(state, fixture.home === MY_TEAM_ID ? fixture.away : null);
+  const home = fixture.home === MY_TEAM_ID;
+  const report = weekFinance(state, home ? fixture.away : null);
   const treasury = state.club.treasury + netResult(report);
+  const weeksInRed = treasury < 0 ? state.club.weeksInRed + 1 : 0;
+  const bankrupt = weeksInRed >= balance.bankruptcy.weeksInRed;
+
+  // Palmarès : buts du club, meilleure affluence, plus grosse trésorerie.
+  const names = new Map(state.squad.players.map((p) => [p.id, p.name]));
+  const scored = addGoals(state.records, match, names);
+  const records = {
+    ...scored,
+    bestAttendance: Math.max(scored.bestAttendance, report.attendance ?? 0),
+    bestTreasury: Math.max(scored.bestTreasury, treasury),
+  };
 
   let next = playRound(state, match);
   next = {
     ...next,
-    club: { ...next.club, treasury, weeksInRed: treasury < 0 ? next.club.weeksInRed + 1 : 0 },
+    phase: bankrupt ? 'gameOver' : next.phase,
+    gameOver: bankrupt ? { season: state.time.season, week } : next.gameOver,
+    club: { ...next.club, treasury, weeksInRed },
+    records,
+    effects: wearEffects(next.effects, home),
     finance: { lastWeek: report, season: addReports(next.finance.season, report) },
     city: {
       ...next.city,
@@ -225,6 +245,7 @@ export function weekAlerts(before: GameState, after: GameState, match: MatchStat
     alerts.push({ key: 'lowSatisfaction', params: { satisfaction: after.city.residentSatisfaction } });
   }
   if (seasonOver(after)) alerts.push({ key: 'seasonOver' });
+  if (after.phase === 'gameOver') alerts.push({ key: 'bankruptcy' });
   return alerts;
 }
 
@@ -234,11 +255,14 @@ export function weekAlerts(before: GameState, after: GameState, match: MatchStat
  * ou après une semaine qui demande l'attention du joueur. Après la dernière journée, il ouvre l'intersaison.
  */
 export function advance(state: GameState): GameState {
-  if (state.currentMatch || state.phase !== 'season') return state;
+  if (state.currentMatch || state.phase !== 'season' || state.events.pending) return state;
   // Repartir referme le mercato d'hiver.
   let s: GameState = { ...state, alerts: [], market: { ...state.market, open: false, offers: [] } };
   for (;;) {
-    if (seasonOver(s)) return endSeason(s);
+    if (seasonOver(s)) return endSeason(settleCommitments(s).state);
+    // Un événement peut tomber au début de la semaine : il faut y répondre avant de jouer.
+    s = rollEvent(s);
+    if (s.events.pending) return { ...s, alerts: [{ key: 'event', params: { eventId: s.events.pending.eventId } }] };
     if (s.time.week === balance.market.winterWeek && s.market.lastWinterSeason !== s.time.season) {
       const offers = generateMarket(s.meta.rngState, s.league.myDivision);
       return {
@@ -259,7 +283,7 @@ export function advance(state: GameState): GameState {
     const week = completeWeek(prepared.state, played);
     const alerts = weekAlerts(s, week.state, played, week.entries);
     s = { ...week.state, alerts };
-    if (alerts.length > 0) return s;
+    if (alerts.length > 0 || s.phase !== 'season') return s;
   }
 }
 

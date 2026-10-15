@@ -31,6 +31,8 @@ import {
   type Squad,
   type Team,
 } from './state';
+import { drawObjectives, evaluateObjectives, sponsorMultiplierFor } from './objectives';
+import { beatenRecords, markSeasonStart } from './records';
 import { strengthForLevel } from './strength';
 
 const AG = balance.aging;
@@ -118,17 +120,24 @@ function retires(rngState: number, player: Player): Draw<boolean> {
 }
 
 /** Jeunes sortis du centre : leur nombre et leur potentiel montent avec le niveau du centre et la population. */
-export function generateProspects(rngState: number, level: number, population: number): Draw<Player[]> {
+export function generateProspects(
+  rngState: number,
+  level: number,
+  population: number,
+  extraPotential = 0,
+  fixedCount?: number,
+): Draw<Player[]> {
   let rng = rngState;
   const [min, max] = AC.prospectsByLevel[clamp(level, 0, AC.prospectsByLevel.length - 1)]!;
-  const count = nextInt(rng, min!, max!);
+  const count = fixedCount !== undefined ? { value: fixedCount, rngState: rng } : nextInt(rng, min!, max!);
   rng = count.rngState;
   const prospects: Player[] = [];
   for (let i = 0; i < count.value; i++) {
     const pos = weightedPosition(rng, AC.positionWeights);
     const spread = floatBetween(pos.rngState, -AC.potentialSpread, AC.potentialSpread);
     rng = spread.rngState;
-    const potential = AC.potentialBase + level * AC.potentialPerLevel + population * AC.potentialPerPopulation + spread.value;
+    const potential =
+      AC.potentialBase + level * AC.potentialPerLevel + population * AC.potentialPerPopulation + spread.value + extraPotential;
     const draw = generatePlayer(rng, pos.value, AC.currentLevel, {
       ageMin: AC.ageMin,
       ageMax: AC.ageMax,
@@ -232,11 +241,25 @@ export function endSeason(state: GameState): GameState {
   ];
   const alerts: Alert[] = unlock.unlocked.map((district) => ({ key: 'districtUnlocked', params: { district } }));
 
+  // Objectifs, palmarès et records de la saison.
+  const objectiveResults = evaluateObjectives(state, myDiv);
+  const rewards = objectiveResults.reduce((sum, r) => sum + r.reward, 0);
+  const treasury = state.club.treasury + bonus + rewards;
+  const records = {
+    ...state.records,
+    titles: rank === 1 ? [...state.records.titles, { season: state.time.season, division: myDiv }] : state.records.titles,
+    promotions: state.records.promotions + (movement === 'promoted' ? 1 : 0),
+    history: [...state.records.history, { season: state.time.season, division: myDiv, rank }],
+    bestTreasury: Math.max(state.records.bestTreasury, treasury),
+  };
+
   return {
     ...state,
     phase: 'offseason',
     meta: { ...state.meta, rngState: rng },
-    club: { ...state.club, treasury: state.club.treasury + bonus },
+    club: { ...state.club, treasury },
+    objectives: [],
+    records,
     city: unlock.city,
     league: { ...state.league, myDivision: newDivision, divisions },
     squad: cleanLineup({ ...state.squad, players }),
@@ -246,6 +269,8 @@ export function endSeason(state: GameState): GameState {
       prospects: prospects.value,
       retired,
       ratingChanges,
+      objectiveResults,
+      recordsBeaten: beatenRecords(records),
     },
     log,
     alerts,
@@ -375,13 +400,18 @@ export function startSeason(state: GameState): GameState {
   const mine = divisions.find((d) => d.id === state.league.myDivision)!;
   const rival = pickRival(rng, mine);
   rng = rival.rngState;
+  const objectives = drawObjectives(rng);
+  rng = objectives.rngState;
+  const sponsorMultiplier = sponsorMultiplierFor(state.offseason?.objectiveResults ?? []);
 
   return {
     ...state,
     phase: 'season',
     meta: { ...state.meta, rngState: rng },
     time: { season: state.time.season + 1, week: 1 },
-    club: { ...state.club, weeksInRed: state.club.treasury < 0 ? state.club.weeksInRed : 0 },
+    club: { ...state.club, weeksInRed: state.club.treasury < 0 ? state.club.weeksInRed : 0, sponsorMultiplier },
+    objectives: objectives.value,
+    records: markSeasonStart(state.records),
     squad: cleanLineup({ ...state.squad, players }),
     league: { ...state.league, divisions, rivalId: rival.value },
     market: { ...state.market, offers: [], open: false },

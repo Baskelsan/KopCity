@@ -1,6 +1,7 @@
 // Économie de la semaine : affluence, recettes, dépenses, supporters et satisfaction (voir docs/CADRAGE.md).
 import balance from '../data/balance.json';
 import { accessCap, barRates, satisfactionTarget, shopWeeklyRevenue, stadiumCapacity, supporters, weeklyUpkeep } from './city';
+import { attendanceFactor, sponsorBonusPerWeek } from './effects';
 import { myDivision, myForm, rankOf } from './league';
 import { MY_TEAM_ID, type City, type FinanceReport, type GameState } from './state';
 
@@ -75,33 +76,41 @@ export function weeklyWagesRounded(state: GameState): number {
 export function weekFinance(state: GameState, homeOpponentId: string | null): FinanceReport {
   const { city } = state;
   const division = state.league.myDivision;
-  const attendance = homeOpponentId ? attendanceFor(city, matchAttraction(state, homeOpponentId)).attendance : null;
+  const attendance = homeOpponentId
+    ? Math.round(attendanceFor(city, matchAttraction(state, homeOpponentId)).attendance * attendanceFactor(state))
+    : null;
   const barsPerSpectator = barRates(city).reduce((sum, b) => sum + b.perSpectator, 0);
   return {
     income: {
       tickets: attendance ? attendance * E.ticketPrice[division] : 0,
       bars: attendance ? Math.round(attendance * barsPerSpectator) : 0,
       shop: Math.round(shopWeeklyRevenue(city)),
-      sponsors: Math.round(E.sponsorBase[division] * sponsorCoefficient(state)),
+      sponsors:
+        Math.round(E.sponsorBase[division] * sponsorCoefficient(state) * state.club.sponsorMultiplier) +
+        sponsorBonusPerWeek(state),
+      other: 0,
     },
     expenses: {
       wages: weeklyWagesRounded(state),
       upkeep: weeklyUpkeep(city),
       running: E.runningCosts,
       fines: city.residentSatisfaction < E.fineBelowSatisfaction ? E.finePerWeek : 0,
+      other: 0,
     },
     attendance,
   };
 }
 
-export const totalIncome = (r: FinanceReport) => r.income.tickets + r.income.bars + r.income.shop + r.income.sponsors;
-export const totalExpenses = (r: FinanceReport) => r.expenses.wages + r.expenses.upkeep + r.expenses.running + r.expenses.fines;
+export const totalIncome = (r: FinanceReport) =>
+  r.income.tickets + r.income.bars + r.income.shop + r.income.sponsors + r.income.other;
+export const totalExpenses = (r: FinanceReport) =>
+  r.expenses.wages + r.expenses.upkeep + r.expenses.running + r.expenses.fines + r.expenses.other;
 export const netResult = (r: FinanceReport) => totalIncome(r) - totalExpenses(r);
 
 export function emptyReport(): FinanceReport {
   return {
-    income: { tickets: 0, bars: 0, shop: 0, sponsors: 0 },
-    expenses: { wages: 0, upkeep: 0, running: 0, fines: 0 },
+    income: { tickets: 0, bars: 0, shop: 0, sponsors: 0, other: 0 },
+    expenses: { wages: 0, upkeep: 0, running: 0, fines: 0, other: 0 },
     attendance: null,
   };
 }
@@ -129,4 +138,28 @@ export function nextSatisfaction(city: City): number {
   const target = satisfactionTarget(city);
   const step = balance.satisfaction.maxWeeklyChange;
   return city.residentSatisfaction + clamp(target - city.residentSatisfaction, -step, step);
+}
+
+/**
+ * L'argent qui ne vient pas de la semaine (événements, transferts) : il compte pour le record de trésorerie
+ * et, pendant la saison, s'ajoute aux comptes, pour que trésorerie et récapitulatif restent d'accord.
+ */
+export function recordOtherMoney(before: GameState, after: GameState): GameState {
+  const delta = after.club.treasury - before.club.treasury;
+  if (delta === 0) return after;
+  const records = { ...after.records, bestTreasury: Math.max(after.records.bestTreasury, after.club.treasury) };
+  if (after.phase !== 'season') return { ...after, records };
+  const season = after.finance.season;
+  return {
+    ...after,
+    records,
+    finance: {
+      ...after.finance,
+      season: {
+        ...season,
+        income: { ...season.income, other: season.income.other + Math.max(0, delta) },
+        expenses: { ...season.expenses, other: season.expenses.other + Math.max(0, -delta) },
+      },
+    },
+  };
 }

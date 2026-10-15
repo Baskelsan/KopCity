@@ -329,5 +329,13 @@
   "offseason": {
     "moraleTarget": 70,
     "moraleRecovery": 0.5
+  },
+  "events": {
+    "weeklyChance": 0.3333,
+    "firstWeek": 3,
+    "noRepeat": true
+  },
+  "bankruptcy": {
+    "weeksInRed": 4
   }
 }

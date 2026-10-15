@@ -3,7 +3,7 @@ import balance from '../src/data/balance.json';
 import { netResult } from '../src/core/economy';
 import { applyAction, newGame, type Action } from '../src/core/game';
 import { myDivision, myFixture, opponentOf } from '../src/core/league';
-import { defaultDecision } from '../src/core/match';
+import { finishLiveMatch, resolvePendingEvent } from './helpers';
 import { advance, keyMatchReasons } from '../src/core/season';
 import { MY_TEAM_ID, type GameState, type TableRow } from '../src/core/state';
 
@@ -11,15 +11,7 @@ const SEASON = balance.league.seasonWeeks;
 const fresh = (seed = 2024) => newGame({ seed, now: '2026-10-15T10:00:00.000Z', clubName: 'FC Test' });
 const run = (state: GameState, ...actions: Action[]) => actions.reduce(applyAction, state);
 
-/** Termine le match en direct en cours avec les choix par défaut. */
-function finishLive(state: GameState): GameState {
-  let s = state;
-  while (!s.currentMatch!.finished) {
-    const ctx = { players: s.squad.players, formation: s.squad.formation };
-    s = applyAction(s, { type: 'matchDecision', decision: defaultDecision(s.currentMatch!, ctx) });
-  }
-  return applyAction(s, { type: 'finishMatch' });
-}
+const finishLive = finishLiveMatch;
 
 /** Joue toute la saison en appuyant sur « Avancer » ; renvoie l'état final et chaque arrêt. */
 function playSeason(start: GameState) {
@@ -28,6 +20,7 @@ function playSeason(start: GameState) {
   for (let guard = 0; guard < 100 && s.time.week <= SEASON; guard++) {
     s = applyAction(s, { type: 'advance' });
     stops.push(s);
+    if (s.events.pending) s = resolvePendingEvent(s);
     if (s.currentMatch) s = finishLive(s);
   }
   return { final: s, stops };
@@ -158,7 +151,7 @@ describe('une saison complète', () => {
     expect(final.time.week).toBe(SEASON + 1);
     expect(division.fixtures.every((f) => f.result !== null)).toBe(true);
     expect(division.table.every((r) => r.played === SEASON)).toBe(true);
-    expect(stops.at(-1)!.alerts.some((a) => a.key === 'seasonOver')).toBe(true);
+    expect(final.alerts.some((a) => a.key === 'seasonOver')).toBe(true);
     // Avancer après la dernière journée ouvre l'intersaison.
     expect(run(final, { type: 'advance' }).phase).toBe('offseason');
   });
@@ -189,8 +182,12 @@ describe('une saison complète', () => {
 describe('sur 100 saisons simulées', () => {
   const results = Array.from({ length: 100 }, (_, i) => playSeason(fresh(i + 1)));
 
-  it('la marge tourne autour de 200 000 € par saison', () => {
-    const average = results.reduce((sum, r) => sum + netResult(r.final.finance.season), 0) / results.length;
+  it('la marge tourne autour de 200 000 € par saison (hors transferts et événements)', () => {
+    const weekly = (r: (typeof results)[number]) => {
+      const f = r.final.finance.season;
+      return netResult(f) - f.income.other + f.expenses.other;
+    };
+    const average = results.reduce((sum, r) => sum + weekly(r), 0) / results.length;
     expect(average).toBeGreaterThan(120_000);
     expect(average).toBeLessThan(320_000);
   });

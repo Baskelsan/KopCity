@@ -36,6 +36,8 @@ export interface NewMatchOptions {
   onField: string[];
   bench: string[];
   style: PlayStyle;
+  /** Multiplicateur de force du club (1 par défaut). */
+  strengthFactor?: number;
 }
 
 const sigmoid = (x: number) => 1 / (1 + Math.exp(-x));
@@ -94,6 +96,7 @@ export function createMatch(options: NewMatchOptions): MatchState {
       subsUsed: 0,
       style: options.style,
       late: 'keep',
+      strengthFactor: options.strengthFactor ?? 1,
     },
     plan,
     minute: 0,
@@ -114,9 +117,10 @@ export function currentStrength(match: MatchState, side: Side, ctx: ClubContext)
   if (team.strength) {
     return applyModifiers(team.strength, { style: 'balanced', late: 'keep', morale: 50, home });
   }
-  const { onField, style, late } = match.club;
+  const { onField, style, late, strengthFactor } = match.club;
   const base = lineupStrength(ctx.players, ctx.formation, onField);
-  return applyModifiers(base, { style, late, morale: averageMorale(ctx.players, onField), home });
+  const s = applyModifiers(base, { style, late, morale: averageMorale(ctx.players, onField), home });
+  return { att: s.att * strengthFactor, mid: s.mid * strengthFactor, def: s.def * strengthFactor, gk: s.gk * strengthFactor };
 }
 
 /** Choisit un joueur du club sur le terrain avec un tirage dans [0, 1), pondéré par ligne. */

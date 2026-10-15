@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import balance from '../src/data/balance.json';
 import { applyAction, newGame, type Action } from '../src/core/game';
 import { DIVISIONS, myDivision, rankOf, standings } from '../src/core/league';
-import { defaultDecision } from '../src/core/match';
+import { advanceAndHandle, finishLiveMatch, resolvePendingEvent } from './helpers';
 import {
   agePlayer,
   canStartSeason,
@@ -26,14 +26,7 @@ function playToOffseason(start: GameState): GameState {
   let s = start;
   for (let guard = 0; guard < 200; guard++) {
     if (s.phase === 'offseason') return s;
-    s = applyAction(s, { type: 'advance' });
-    if (s.currentMatch) {
-      while (!s.currentMatch!.finished) {
-        const ctx = { players: s.squad.players, formation: s.squad.formation };
-        s = applyAction(s, { type: 'matchDecision', decision: defaultDecision(s.currentMatch!, ctx) });
-      }
-      s = applyAction(s, { type: 'finishMatch' });
-    }
+    s = advanceAndHandle(s);
   }
   throw new Error("L'intersaison n'arrive jamais");
 }
@@ -43,6 +36,13 @@ function defaultOffseason(state: GameState): GameState {
   let s = state;
   for (const p of expiringPlayers(s)) s = run(s, { type: 'renewContract', playerId: p.id, years: 2 });
   for (const p of s.offseason!.prospects) s = run(s, { type: 'signProspect', playerId: p.id });
+  // Si des départs ont trop réduit l'effectif, on complète avec les joueurs les moins chers du marché.
+  const cheapest = [...s.market.offers].sort((a, b) => a.price - b.price);
+  for (const offer of cheapest) {
+    if (canStartSeason(s).ok) break;
+    s = { ...s, club: { ...s.club, treasury: Math.max(s.club.treasury, offer.price) } };
+    s = run(s, { type: 'buyPlayer', playerId: offer.player.id });
+  }
   return run(s, { type: 'startSeason' });
 }
 
@@ -97,8 +97,8 @@ describe('championnat sur 3 divisions', () => {
   });
 
   it('chaque semaine se joue dans les 3 divisions', () => {
-    let next = run(s, { type: 'advance' });
-    if (next.currentMatch) next = playToOffseason(next);
+    let next = s;
+    while (next.time.week === 1) next = advanceAndHandle(next);
     for (const d of next.league.divisions) {
       expect(d.fixtures.filter((f) => f.week === 1).every((f) => f.result !== null)).toBe(true);
     }
@@ -119,7 +119,8 @@ describe('fin de saison', () => {
     expect(after.phase).toBe('offseason');
     expect(after.league.myDivision).toBe('D2');
     expect(after.offseason!.summary).toMatchObject({ rank: 2, movement: 'promoted', division: 'D3' });
-    expect(after.club.treasury).toBe(s.club.treasury + seasonBonus('D3', 2, 10));
+    const rewards = after.offseason!.objectiveResults.reduce((sum, r) => sum + r.reward, 0);
+    expect(after.club.treasury).toBe(s.club.treasury + seasonBonus('D3', 2, 10) + rewards);
   });
 
   it('le 3e reste en Division 3', () => {
@@ -345,15 +346,11 @@ describe('mercato', () => {
   it('pendant la saison, le mercato n’ouvre qu’en semaine 9 et se referme en repartant', () => {
     let s = fresh();
     expect(run(s, { type: 'sellPlayer', playerId: s.squad.players[0]!.id })).toBe(s);
-    for (let guard = 0; guard < 30 && !s.market.open; guard++) {
+    for (let guard = 0; guard < 60 && !s.market.open; guard++) {
       s = run(s, { type: 'advance' });
-      if (s.currentMatch) {
-        while (!s.currentMatch!.finished) {
-          const ctx = { players: s.squad.players, formation: s.squad.formation };
-          s = run(s, { type: 'matchDecision', decision: defaultDecision(s.currentMatch!, ctx) });
-        }
-        s = run(s, { type: 'finishMatch' });
-      }
+      if (s.market.open) break;
+      if (s.events.pending) s = resolvePendingEvent(s);
+      if (s.currentMatch) s = finishLiveMatch(s);
     }
     expect(s.market.open).toBe(true);
     expect(s.time.week).toBe(balance.market.winterWeek);

@@ -48,6 +48,8 @@ export interface ClubInMatch {
   subsUsed: number;
   style: PlayStyle;
   late: LateChoice;
+  /** Multiplicateur de force du club (pelouse abîmée…) (ajouté en v7). */
+  strengthFactor: number;
 }
 
 export interface MatchState {

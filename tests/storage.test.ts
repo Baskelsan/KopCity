@@ -253,3 +253,31 @@ describe('migration v5 → v6', () => {
     expect(v5ToV6({ schemaVersion: 5, offseason: null })).toEqual({ schemaVersion: 5, offseason: null });
   });
 });
+
+describe('migration v6 → v7', () => {
+  it('ajoute objectifs, événements, effets et palmarès détaillé, sans perdre les records', () => {
+    const v7 = newGame({ seed: 42, now: NOW, clubName: 'FC Test' });
+    const { effects: _e, gameOver: _g, ...rest } = v7;
+    const v6 = {
+      ...rest,
+      schemaVersion: 6,
+      club: { name: 'FC Test', colors: v7.club.colors, treasury: 640000, weeksInRed: 0 },
+      events: { pending: null, history: [] },
+      objectives: [],
+      records: { titles: 1, promotions: 2, bestAttendance: 5400, bestTreasury: 900000 },
+      finance: {
+        lastWeek: null,
+        season: { income: { tickets: 1, bars: 0, shop: 0, sponsors: 0 }, expenses: { wages: 0, upkeep: 0, running: 0, fines: 0 }, attendance: null },
+      },
+    };
+    const state = parseSave(JSON.stringify(v6));
+    expect(state.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(state.objectives).toHaveLength(3);
+    expect(state.club.sponsorMultiplier).toBe(1);
+    expect(state.events).toEqual({ pending: null, history: [], lastRoll: null });
+    expect(state.records).toMatchObject({ titles: [], promotions: 2, bestAttendance: 5400, bestTreasury: 900000 });
+    expect(state.finance.season.income.other).toBe(0);
+    expect(state.effects).toEqual([]);
+    expect(state.gameOver).toBeNull();
+  });
+});

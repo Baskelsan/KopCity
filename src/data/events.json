@@ -1,0 +1,127 @@
+[
+  {
+    "id": "starInjured",
+    "condition": { "type": "random" },
+    "target": "bestStarter",
+    "choices": [
+      {
+        "id": "play",
+        "effects": [{ "type": "risk", "chance": 0.4, "effects": [{ "type": "injureTarget", "weeksMin": 3, "weeksMax": 5 }] }]
+      },
+      { "id": "rest", "effects": [{ "type": "injureTarget", "weeksMin": 1, "weeksMax": 1 }] }
+    ]
+  },
+  {
+    "id": "angryNeighbours",
+    "condition": { "type": "satisfactionBelow", "value": 50 },
+    "choices": [
+      {
+        "id": "wall",
+        "effects": [
+          { "type": "treasury", "amount": -30000 },
+          { "type": "satisfaction", "amount": 10 }
+        ]
+      },
+      { "id": "ignore", "effects": [{ "type": "satisfaction", "amount": -10 }] }
+    ]
+  },
+  {
+    "id": "cityGrant",
+    "condition": { "type": "rankAtMost", "value": 5 },
+    "choices": [
+      {
+        "id": "accept",
+        "effects": [
+          { "type": "treasury", "amount": 80000 },
+          { "type": "commitTransport", "repay": 80000, "satisfaction": -10 }
+        ]
+      },
+      { "id": "refuse", "effects": [] }
+    ]
+  },
+  {
+    "id": "playerOffer",
+    "condition": { "type": "playerAboveDivision", "margin": 2 },
+    "target": "bestPlayer",
+    "choices": [
+      { "id": "sell", "effects": [{ "type": "sellTarget", "valueFactor": 1.2 }] },
+      { "id": "refuse", "effects": [{ "type": "moraleTarget", "amount": 15 }] }
+    ]
+  },
+  {
+    "id": "shirtSponsor",
+    "condition": { "type": "winStreak", "value": 4 },
+    "choices": [
+      { "id": "short", "effects": [{ "type": "sponsorBonus", "perWeek": 6000, "weeks": 8 }] },
+      { "id": "exclusive", "effects": [{ "type": "sponsorBonus", "perWeek": 3000, "weeks": 25 }] }
+    ]
+  },
+  {
+    "id": "prodigy",
+    "condition": { "type": "academyLevelAtLeast", "value": 1 },
+    "choices": [
+      { "id": "sign", "effects": [{ "type": "signProdigy", "potentialBonus": 3 }] },
+      { "id": "letGo", "effects": [] }
+    ]
+  },
+  {
+    "id": "dressingRoom",
+    "condition": { "type": "averageMoraleBelow", "value": 50 },
+    "choices": [
+      { "id": "meeting", "effects": [{ "type": "moraleAll", "amount": 10 }] },
+      {
+        "id": "fine",
+        "effects": [
+          { "type": "treasury", "amount": 20000 },
+          { "type": "moraleAll", "amount": -5 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "damagedPitch",
+    "condition": { "type": "random" },
+    "choices": [
+      { "id": "repair", "effects": [{ "type": "treasury", "amount": -20000 }] },
+      { "id": "playOn", "effects": [{ "type": "homeStrength", "factor": 0.95, "matches": 2 }] }
+    ]
+  },
+  {
+    "id": "paidFriendly",
+    "condition": { "type": "random" },
+    "choices": [
+      {
+        "id": "accept",
+        "effects": [
+          { "type": "treasury", "amount": 30000 },
+          { "type": "risk", "chance": 0.25, "effects": [{ "type": "injureRandom", "weeksMin": 1, "weeksMax": 3 }] }
+        ]
+      },
+      { "id": "refuse", "effects": [] }
+    ]
+  },
+  {
+    "id": "transportStrike",
+    "condition": { "type": "hasBuilding", "building": "transport" },
+    "choices": [
+      { "id": "endure", "effects": [{ "type": "attendance", "factor": 0.7, "matches": 1 }] },
+      { "id": "shuttles", "effects": [{ "type": "treasury", "amount": -15000 }] }
+    ]
+  },
+  {
+    "id": "safetyInspection",
+    "condition": { "type": "capacityAbove", "value": 8000 },
+    "choices": [
+      { "id": "upgrade", "effects": [{ "type": "treasury", "amount": -40000 }] },
+      { "id": "gamble", "effects": [{ "type": "risk", "chance": 0.5, "effects": [{ "type": "treasury", "amount": -80000 }] }] }
+    ]
+  },
+  {
+    "id": "losingStreak",
+    "condition": { "type": "lossStreak", "value": 3 },
+    "choices": [
+      { "id": "defend", "effects": [{ "type": "moraleAll", "amount": 10 }] },
+      { "id": "apologise", "effects": [{ "type": "supporters", "points": 1 }] }
+    ]
+  }
+]

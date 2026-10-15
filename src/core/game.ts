@@ -1,6 +1,9 @@
 import balance from '../data/balance.json';
 import { build, demolish, extendStadium, initialDistricts, upgradeBuilding } from './city';
-import { emptyReport } from './economy';
+import { emptyReport, recordOtherMoney } from './economy';
+import { resolveEvent } from './events';
+import { drawObjectives } from './objectives';
+import { emptyRecords } from './records';
 import { newLeague } from './league';
 import { autoLineup, swapInLineup } from './lineup';
 import { decide, type ClubContext } from './match';
@@ -54,10 +57,11 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
   const division = start.division as DivisionId;
   const squad = startingSquad(seedToState(seed), division, start.formation as Formation, start.style as PlayStyle);
   const league = newLeague(squad.rngState, division);
+  const objectives = drawObjectives(league.rngState);
   return {
     schemaVersion: SCHEMA_VERSION,
     phase: 'season',
-    meta: { createdAt: now, lastSavedAt: now, seed, rngState: league.rngState },
+    meta: { createdAt: now, lastSavedAt: now, seed, rngState: objectives.rngState },
     settings: { alwaysLiveMatches: false },
     time: { season: 1, week: 1 },
     club: {
@@ -65,6 +69,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
       colors: clubColors ?? (start.clubColors as [string, string]),
       treasury: start.treasury,
       weeksInRed: 0,
+      sponsorMultiplier: 1,
     },
     squad: squad.squad,
     city: {
@@ -77,14 +82,16 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
     },
     league: league.value,
     market: { offers: [], open: false, lastWinterSeason: 0 },
-    events: { pending: null, history: [] },
-    objectives: [],
-    records: { titles: 0, promotions: 0, bestAttendance: 0, bestTreasury: start.treasury },
+    events: { pending: null, history: [], lastRoll: null },
+    objectives: objectives.value,
+    records: emptyRecords(start.treasury),
     log: [],
     currentMatch: null,
     finance: { lastWeek: null, season: emptyReport() },
     alerts: [],
     offseason: null,
+    effects: [],
+    gameOver: null,
   };
 }
 
@@ -107,7 +114,8 @@ export type Action =
   | { type: 'declineProspect'; playerId: string }
   | { type: 'buyPlayer'; playerId: string }
   | { type: 'sellPlayer'; playerId: string }
-  | { type: 'startSeason' };
+  | { type: 'startSeason' }
+  | { type: 'resolveEvent'; choiceId: string };
 
 const clubContext = (state: GameState): ClubContext => ({
   players: state.squad.players,
@@ -165,10 +173,12 @@ export function applyAction(state: GameState, action: Action): GameState {
     case 'declineProspect':
       return declineProspect(state, action.playerId);
     case 'buyPlayer':
-      return buyPlayer(state, action.playerId);
+      return recordOtherMoney(state, buyPlayer(state, action.playerId));
     case 'sellPlayer':
-      return sellPlayer(state, action.playerId);
+      return recordOtherMoney(state, sellPlayer(state, action.playerId));
     case 'startSeason':
       return startSeason(state);
+    case 'resolveEvent':
+      return recordOtherMoney(state, resolveEvent(state, action.choiceId));
   }
 }

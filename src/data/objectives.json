@@ -1,0 +1,20 @@
+{
+  "pools": {
+    "sport": [
+      { "id": "top5", "type": "rankAtMost", "value": 5 },
+      { "id": "top3", "type": "rankAtMost", "value": 3 },
+      { "id": "homeUnbeaten", "type": "homeUnbeatenStreak", "value": 5 }
+    ],
+    "finance": [
+      { "id": "treasury300", "type": "treasuryAtLeast", "value": 300000 },
+      { "id": "positiveSeason", "type": "seasonNetPositive", "value": 0 }
+    ],
+    "city": [
+      { "id": "satisfaction60", "type": "satisfactionAtLeast", "value": 60 },
+      { "id": "build2", "type": "buildingsDelivered", "value": 2 }
+    ]
+  },
+  "reward": 50000,
+  "rewardDivisionFactor": { "D3": 1, "D2": 1.5, "D1": 2 },
+  "allAchievedSponsorBonus": 0.1
+}
