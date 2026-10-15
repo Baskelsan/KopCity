@@ -385,6 +385,16 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Mesuré sur 100 saisons : marge moyenne d'environ 200 000 €, 7 à 8 matchs à enjeu par saison.
 - Le marché des transferts (et donc l'arrêt du mercato en semaine 9) est rattaché à M5, avec l'intersaison.
 
+**Divisions, saisons et intersaison (M5)**
+- Les 3 divisions se jouent chaque semaine. Chaque équipe a un niveau caché qui dérive un peu à chaque intersaison, avec un rappel vers le niveau de sa division (une équipe promue reste d'abord plus faible).
+- Effectif de 16 à 22 joueurs (18 au départ).
+- Prime de fin de saison : 100 000 € (Division 3), 200 000 € (Division 2), 400 000 € (Élite) pour le premier, puis régulièrement jusqu'à 20 % pour le dernier.
+- Âge : jusqu'à 23 ans, +1 à +2 par stat et par saison sans dépasser le potentiel (+1 par niveau du centre pour les jeunes formés au club) ; stable de 24 à 30 ans ; −1 à −2 dès 31 ans ; retraite possible dès 35 ans (35 %), obligatoire à 38.
+- Contrats : le joueur en fin de contrat se prolonge de 1 à 3 saisons avec un salaire recalculé (+10 %) ; sinon il part au lancement de la saison.
+- Centre de formation : 1 jeune au niveau 0, 1 à 2 au niveau 1, 2 à 3 au niveau 2, 3 au niveau 3, de 16 à 18 ans ; le potentiel monte avec le niveau et la population ; le niveau réduit l'erreur sur les étoiles (−25 % par niveau).
+- Mercato : 6 à 8 joueurs à l'intersaison et en semaine 9 (fenêtre d'hiver, qui se referme en repartant). Valeur selon la note et l'âge (note 10 à 25 ans : 150 000 €) ; une vente rapporte 80 % de la valeur, tout de suite.
+- À l'intersaison, les blessés sont guéris et le moral se rapproche de 70.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**
