@@ -124,7 +124,7 @@ La ville est faite de 4 quartiers, chacun avec un nombre fixe d'emplacements. On
 | --- | --- | --- | --- |
 | Quartier du stade | 4 | Dès le départ | Seul quartier où bars et boutique donnent leur plein effet (50 % ailleurs) |
 | Faubourg | 5 | 26 000 habitants | Pas de nuisance pour les riverains du stade, idéal pour les logements |
-| Quartier de la gare | 4 | Montée en Division 2 | Un parking ou arrêt de transport y compte double |
+| Quartier de la gare | 4 | Montée en Division 2 | Un parking ou arrêt de transport y compte double (plafond d'accès et satisfaction) |
 | Nouveau quartier | 6 | Montée en Élite et 40 000 habitants | Le plus grand, pour la fin de partie |
 
 **Les 6 bâtiments** (valeurs de départ, à équilibrer en test)
@@ -132,8 +132,8 @@ La ville est faite de 4 quartiers, chacun avec un nombre fixe d'emplacements. On
 | Bâtiment | Coût (€) | Entretien (€/sem.) | Chantier | Effet | Contrepartie |
 | --- | --- | --- | --- | --- | --- |
 | Stade (3 paliers, sans emplacement) | 400 000 par palier | 5 000 par palier | 6 semaines | +2 000 places par palier | Riverains −5 par palier |
-| Bar / brasserie | 60 000 | 800 | 2 semaines | affluence × 1,5 € par match à domicile | Riverains −2 s'il est dans le quartier du stade |
-| Boutique du club | 90 000 | 1 200 | 3 semaines | supporters × 1 € par semaine | Aucune |
+| Bar / brasserie (un par quartier) | 60 000 | 800 | 2 semaines | affluence × 1,5 € par match à domicile | Riverains −2 s'il est dans le quartier du stade |
+| Boutique du club (une seule) | 90 000 | 1 200 | 3 semaines | supporters × 1 € par semaine | Aucune |
 | Logements | 150 000 | 1 500 | 4 semaines | +2 000 habitants | Riverains −2 s'ils sont dans le quartier du stade |
 | Parking / arrêt de transport | 200 000 | 2 000 | 4 semaines | +2 500 au plafond d'accès | Occupe un emplacement |
 | Centre de formation (3 niveaux, un seul) | 250 000 par niveau | 3 000 par niveau | 6 semaines | Meilleurs jeunes, progression plus rapide | Aucune |
@@ -142,7 +142,9 @@ La ville est faite de 4 quartiers, chacun avec un nombre fixe d'emplacements. On
 
 - Le coût est payé au lancement du chantier, et un achat ne peut jamais faire passer la trésorerie sous zéro.
 - 2 chantiers au maximum en même temps. La livraison d'un chantier est une semaine clé.
-- Démolir libère l'emplacement tout de suite et rembourse 25 % du coût.
+- Un seul exemplaire pour la boutique et le centre de formation dans toute la ville, un seul bar par quartier. Logements et transports sont libres.
+- Démolir libère l'emplacement tout de suite et rembourse 25 % de tout ce qui a été investi (tous niveaux compris).
+- Un chantier lancé ne s'annule pas : il faut attendre sa livraison, puis démolir.
 
 **Habitants et supporters.** Population de départ : 20 000 habitants, plus 2 000 par immeuble de logements. Part de supporters au départ : 20 %, +1 point par victoire, −0,5 point par défaite, bornée entre 10 % et 60 %. Les supporters déterminent l'affluence au stade.
 

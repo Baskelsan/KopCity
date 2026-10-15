@@ -14,14 +14,16 @@
     "maxLevel": 1,
     "revenuePerSpectator": 1.5,
     "nextBarFactor": 0.6,
-    "nuisance": -2
+    "nuisance": -2,
+    "maxPerDistrict": 1
   },
   "shop": {
     "cost": 90000,
     "upkeep": 1200,
     "weeks": 3,
     "maxLevel": 1,
-    "revenuePerSupporter": 1
+    "revenuePerSupporter": 1,
+    "unique": true
   },
   "housing": {
     "cost": 150000,

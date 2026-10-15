@@ -105,9 +105,9 @@ describe('chantiers', () => {
       { type: 'build', slotId: 'stade-1', building: 'bar' },
       { type: 'build', slotId: 'stade-2', building: 'shop' },
     );
-    expect(canBuild(s, 'stade-3', 'bar')).toMatchObject({ ok: false, reason: 'maxConstructions' });
+    expect(canBuild(s, 'stade-3', 'housing')).toMatchObject({ ok: false, reason: 'maxConstructions' });
     expect(canExtendStadium(s)).toMatchObject({ ok: false, reason: 'maxConstructions' });
-    expect(run(s, { type: 'build', slotId: 'stade-3', building: 'bar' })).toBe(s);
+    expect(run(s, { type: 'build', slotId: 'stade-3', building: 'housing' })).toBe(s);
   });
 
   it('un emplacement en chantier ou occupé est refusé', () => {
@@ -150,6 +150,29 @@ describe('chantiers', () => {
     expect(canExtendStadium(angry)).toMatchObject({ ok: false, reason: 'lowSatisfaction' });
     const ok = { ...s, city: { ...s.city, residentSatisfaction: C.stadiumExtensionMinSatisfaction } };
     expect(canExtendStadium(ok).ok).toBe(true);
+  });
+
+  it('une seule boutique dans toute la ville, même en chantier', () => {
+    const s = run(unlockAll(fresh()), { type: 'build', slotId: 'stade-1', building: 'shop' });
+    expect(canBuild(s, 'faubourg-1', 'shop')).toMatchObject({ ok: false, reason: 'uniqueBuilding' });
+    const built = weeks(s, buildings.shop.weeks);
+    expect(canBuild(built, 'faubourg-1', 'shop')).toMatchObject({ ok: false, reason: 'uniqueBuilding' });
+    const demolished = run(built, { type: 'demolish', slotId: 'stade-1' });
+    expect(canBuild(demolished, 'faubourg-1', 'shop').ok).toBe(true);
+  });
+
+  it('un seul bar par quartier, mais un bar dans chaque quartier', () => {
+    const s = run(unlockAll(fresh()), { type: 'build', slotId: 'stade-1', building: 'bar' });
+    expect(canBuild(s, 'stade-2', 'bar')).toMatchObject({ ok: false, reason: 'onePerDistrict' });
+    expect(canBuild(weeks(s, 2), 'stade-2', 'bar')).toMatchObject({ ok: false, reason: 'onePerDistrict' });
+    expect(canBuild(s, 'faubourg-1', 'bar').ok).toBe(true);
+  });
+
+  it('logements et transports restent libres', () => {
+    const s = run(fresh(), { type: 'build', slotId: 'stade-1', building: 'housing' });
+    expect(canBuild(s, 'stade-2', 'housing').ok).toBe(true);
+    const t = run(fresh(), { type: 'build', slotId: 'stade-1', building: 'transport' });
+    expect(canBuild(t, 'stade-2', 'transport').ok).toBe(true);
   });
 
   it('un seul centre de formation, qui monte jusqu’au niveau 3', () => {
@@ -245,12 +268,12 @@ describe('effets chiffrés', () => {
     const s = place(unlockAll(fresh()), [
       ['faubourg-1', 'bar'],
       ['stade-1', 'bar'],
-      ['stade-2', 'bar'],
+      ['gare-1', 'bar'],
     ]);
     const rates = barRates(s.city);
-    expect(rates.map((r) => r.slotId)).toEqual(['stade-1', 'stade-2', 'faubourg-1']);
+    expect(rates.map((r) => r.slotId)).toEqual(['stade-1', 'faubourg-1', 'gare-1']);
     expect(rates[0]!.perSpectator).toBeCloseTo(1.5);
-    expect(rates[1]!.perSpectator).toBeCloseTo(0.9);
+    expect(rates[1]!.perSpectator).toBeCloseTo(1.5 * 0.5 * 0.6);
     expect(rates[2]!.perSpectator).toBeCloseTo(1.5 * 0.5 * 0.36);
   });
 

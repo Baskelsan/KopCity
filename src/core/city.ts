@@ -31,6 +31,7 @@ export interface BuildingSpec {
   accessCap?: number;
   nuisance?: number;
   unique?: boolean;
+  maxPerDistrict?: number;
 }
 
 export interface DistrictSpec {
@@ -153,6 +154,7 @@ export type BuildRefusal =
   | 'maxConstructions'
   | 'notEnoughMoney'
   | 'uniqueBuilding'
+  | 'onePerDistrict'
   | 'maxLevel'
   | 'lowSatisfaction'
   | 'unknownSlot';
@@ -175,10 +177,17 @@ export function canBuild(state: GameState, slotId: string, type: BuildingType): 
   if (!found.district.unlocked) return { ok: false, reason: 'districtLocked', cost };
   if (found.slot.building) return { ok: false, reason: 'slotOccupied', cost };
   if (isBusy(state.city, slotId)) return { ok: false, reason: 'underConstruction', cost };
-  if (BUILDINGS[type].unique) {
-    const exists =
-      countIn(state.city, type) > 0 || state.city.constructions.some((c) => c.type === type);
+  const spec = BUILDINGS[type];
+  if (spec.unique) {
+    const exists = countIn(state.city, type) > 0 || state.city.constructions.some((c) => c.type === type);
     if (exists) return { ok: false, reason: 'uniqueBuilding', cost };
+  }
+  if (spec.maxPerDistrict !== undefined) {
+    const districtSlots = new Set(found.district.slots.map((s) => s.id));
+    const inDistrict =
+      found.district.slots.filter((s) => s.building?.type === type).length +
+      state.city.constructions.filter((c) => c.type === type && c.slotId !== null && districtSlots.has(c.slotId)).length;
+    if (inDistrict >= spec.maxPerDistrict) return { ok: false, reason: 'onePerDistrict', cost };
   }
   return commonChecks(state, cost) ?? { ok: true, cost };
 }

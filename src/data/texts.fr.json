@@ -237,10 +237,11 @@
       "underConstruction": "Un chantier est déjà en cours ici.",
       "maxConstructions": "Déjà 2 chantiers en cours.",
       "notEnoughMoney": "Trésorerie insuffisante.",
-      "uniqueBuilding": "Un seul centre de formation par ville.",
+      "uniqueBuilding": "Il ne peut y en avoir qu'un dans toute la ville.",
       "maxLevel": "Niveau maximum atteint.",
       "lowSatisfaction": "Riverains trop mécontents (moins de 40) pour agrandir le stade.",
-      "unknownSlot": "Emplacement introuvable."
+      "unknownSlot": "Emplacement introuvable.",
+      "onePerDistrict": "Un seul par quartier."
     }
   }
 }
