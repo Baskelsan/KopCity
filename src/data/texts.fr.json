@@ -56,7 +56,7 @@
     "age": "{age} ans",
     "stars": "{stars} ★",
     "injured": "Blessé {weeks} sem.",
-    "swapHint": "Touche un autre joueur pour l'échanger.",
+    "swapHint": "Touche un autre joueur pour l'échanger, ou une place vide pour l'y mettre. Un titulaire blessé peut être remplacé.",
     "close": "Fermer",
     "salary": "Salaire",
     "perMonth": "{amount} / mois",
@@ -69,7 +69,8 @@
       "def": "Défense",
       "pas": "Passes",
       "phy": "Physique"
-    }
+    },
+    "expiringHidden": "{count} joueur(s) en fin de contrat n'apparaissent plus ici tant qu'ils ne sont pas prolongés (écran d'intersaison)."
   },
   "match": {
     "speedNormal": "×1",
@@ -226,7 +227,11 @@
       "lowSatisfaction": "Riverains trop mécontents (moins de 40) pour agrandir le stade.",
       "unknownSlot": "Emplacement introuvable.",
       "onePerDistrict": "Un seul par quartier."
-    }
+    },
+    "shopRevenue": "Recettes de la boutique",
+    "barsRevenue": "Recettes des bars",
+    "perHomeMatch": "≈ {amount} par match à domicile",
+    "buildingRevenue": "Rapporte : {amount}"
   },
   "home": {
     "rank": "{rank}e sur {teams}",
@@ -340,7 +345,11 @@
     "squadSize": "Effectif au lancement : {count} joueurs (de {min} à {max})",
     "start": "Lancer la saison {season}",
     "squadTooSmall": "Il faut au moins {min} joueurs pour lancer la saison.",
-    "squadFull": "{max} joueurs au maximum pour lancer la saison."
+    "squadFull": "{max} joueurs au maximum pour lancer la saison.",
+    "ratingsTitle": "Évolution des joueurs",
+    "ratingsNone": "Aucune note n'a bougé.",
+    "ratingChange": "{before} → {after}",
+    "ratingsAge": "{age} ans"
   },
   "market": {
     "title": "Mercato",

@@ -4,6 +4,7 @@ import { v1ToV2 } from './v1-to-v2';
 import { v2ToV3 } from './v2-to-v3';
 import { v3ToV4 } from './v3-to-v4';
 import { v4ToV5 } from './v4-to-v5';
+import { v5ToV6 } from './v5-to-v6';
 
 /** Une migration fait passer une sauvegarde de la version N à la version N + 1. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
@@ -17,6 +18,7 @@ export const migrations: Readonly<Record<number, Migration>> = {
   2: v2ToV3,
   3: v3ToV4,
   4: v4ToV5,
+  5: v5ToV6,
 };
 
 /** Amène une sauvegarde brute jusqu'à la version cible en appliquant les migrations dans l'ordre. */

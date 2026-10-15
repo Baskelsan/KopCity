@@ -244,3 +244,12 @@ describe('migration v4 → v5', () => {
     expect(state.squad.players.every((p) => p.homegrown === false)).toBe(true);
   });
 });
+
+describe('migration v5 → v6', () => {
+  it('ajoute une évolution des notes vide à une intersaison déjà ouverte', async () => {
+    const { v5ToV6 } = await import('../src/storage/migrations/v5-to-v6');
+    const out = v5ToV6({ schemaVersion: 5, offseason: { prospects: [], retired: [] } }) as { offseason: { ratingChanges: unknown[] } };
+    expect(out.offseason.ratingChanges).toEqual([]);
+    expect(v5ToV6({ schemaVersion: 5, offseason: null })).toEqual({ schemaVersion: 5, offseason: null });
+  });
+});

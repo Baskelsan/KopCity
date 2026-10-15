@@ -11,6 +11,7 @@ import {
   generatePlayer,
   monthlySalary,
   lineRating,
+  overall,
   saleValue,
   transferValue,
   weightedPosition,
@@ -26,6 +27,7 @@ import {
   type Movement,
   type Player,
   type PlayerStats,
+  type RatingChange,
   type Squad,
   type Team,
 } from './state';
@@ -194,14 +196,17 @@ export function endSeason(state: GameState): GameState {
   // Joueurs : âge, progression, retraite ; contrats qui avancent d'une saison.
   const academy = academyLevel(state.city);
   const retired: string[] = [];
+  const ratingChanges: RatingChange[] = [];
   const players: Player[] = [];
   for (const p of state.squad.players) {
     const aged = agePlayer(rng, p, academy);
     rng = aged.rngState;
+    ratingChanges.push({ playerId: p.id, name: p.name, age: aged.value.age, before: overall(p), after: overall(aged.value) });
     const retire = retires(rng, aged.value);
     rng = retire.rngState;
     if (retire.value) {
       retired.push(p.name);
+      ratingChanges.pop();
       continue;
     }
     const target = balance.offseason.moraleTarget;
@@ -240,16 +245,25 @@ export function endSeason(state: GameState): GameState {
       summary: { season: state.time.season, division: myDiv, rank, bonus, movement, net: netResult(state.finance.season) },
       prospects: prospects.value,
       retired,
+      ratingChanges,
     },
     log,
     alerts,
   };
 }
 
-/** Retire de la composition les joueurs partis, et la recalcule si elle est automatique. */
+/** Joueurs sous contrat : un joueur en fin de contrat non prolongé ne compte plus dans l'effectif. */
+export function contractedPlayers(players: readonly Player[]): Player[] {
+  return players.filter((p) => p.contractYears > 0);
+}
+
+/**
+ * Retire de la composition les joueurs partis ou en fin de contrat, et la recalcule si elle est automatique.
+ */
 function cleanLineup(squad: Squad): Squad {
-  const ids = new Set(squad.players.map((p) => p.id));
-  if (squad.autoLineup) return { ...squad, lineup: autoLineup(squad.players, squad.formation) };
+  const active = contractedPlayers(squad.players);
+  const ids = new Set(active.map((p) => p.id));
+  if (squad.autoLineup) return { ...squad, lineup: autoLineup(active, squad.formation) };
   return { ...squad, lineup: squad.lineup.map((id) => (ids.has(id) ? id : '')) };
 }
 
@@ -280,19 +294,19 @@ export function renewContract(state: GameState, playerId: string, years: number)
   const players = state.squad.players.map((p) =>
     p.id === playerId ? { ...p, contractYears: years, monthlySalary: renewalSalary(p) } : p,
   );
-  return { ...state, squad: { ...state.squad, players } };
+  return { ...state, squad: cleanLineup({ ...state.squad, players }) };
 }
 
 export function canAddPlayer(state: GameState, price = 0): SquadCheck {
   if (!(state.phase === 'offseason' || state.market.open)) return { ok: false, reason: 'marketClosed' };
-  if (state.squad.players.length >= SZ.max) return { ok: false, reason: 'squadFull' };
+  if (contractedPlayers(state.squad.players).length >= SZ.max) return { ok: false, reason: 'squadFull' };
   if (state.club.treasury - price < 0) return { ok: false, reason: 'notEnoughMoney' };
   return { ok: true };
 }
 
 export function canRemovePlayer(state: GameState): SquadCheck {
   if (!(state.phase === 'offseason' || state.market.open)) return { ok: false, reason: 'marketClosed' };
-  if (state.squad.players.length <= SZ.min) return { ok: false, reason: 'squadTooSmall' };
+  if (contractedPlayers(state.squad.players).length <= SZ.min) return { ok: false, reason: 'squadTooSmall' };
   return { ok: true };
 }
 
@@ -328,7 +342,7 @@ export function buyPlayer(state: GameState, playerId: string): GameState {
 
 export function sellPlayer(state: GameState, playerId: string): GameState {
   const player = state.squad.players.find((p) => p.id === playerId);
-  if (!player || !canRemovePlayer(state).ok) return state;
+  if (!player || player.contractYears <= 0 || !canRemovePlayer(state).ok) return state;
   return {
     ...state,
     club: { ...state.club, treasury: state.club.treasury + saleValue(player) },

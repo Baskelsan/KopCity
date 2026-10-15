@@ -38,6 +38,9 @@ export function OffseasonScreen({ state, dispatch }: { state: GameState; dispatc
   const start = canStartSeason(state);
   const addCheck = canAddPlayer(state);
   const { min, max } = balance.squadSize;
+  const changes = offseason.ratingChanges
+    .filter((c) => c.after !== c.before)
+    .sort((a, b) => b.after - b.before - (a.after - a.before));
 
   return (
     <div class="screen home-screen">
@@ -54,6 +57,29 @@ export function OffseasonScreen({ state, dispatch }: { state: GameState; dispatc
         <p>{format(O.bonus, { bonus: formatEuros(summary.bonus) })}</p>
         <p class="muted">{format(O.net, { net: signed(summary.net) })}</p>
         {offseason.retired.length > 0 && <p class="muted">{format(O.retired, { names: offseason.retired.join(', ') })}</p>}
+      </section>
+
+      <section class="card">
+        <h2>{O.ratingsTitle}</h2>
+        {changes.length === 0 ? (
+          <p class="muted">{O.ratingsNone}</p>
+        ) : (
+          <ul class="plain rating-changes">
+            {changes.map((c) => {
+              const delta = c.after - c.before;
+              return (
+                <li key={c.playerId}>
+                  <span>
+                    {c.name} <small class="muted">· {format(O.ratingsAge, { age: c.age })}</small>
+                  </span>
+                  <span class={delta > 0 ? 'positive' : 'negative'}>
+                    {format(O.ratingChange, { before: c.before, after: c.after })} ({delta > 0 ? `+${delta}` : delta})
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section class="card">

@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -194,6 +194,16 @@ export interface Offseason {
   prospects: Player[];
   /** Noms des joueurs partis à la retraite. */
   retired: string[];
+  /** Évolution des notes pendant l'intersaison (ajouté en v6). */
+  ratingChanges: RatingChange[];
+}
+
+export interface RatingChange {
+  playerId: string;
+  name: string;
+  age: number;
+  before: number;
+  after: number;
 }
 
 export type Phase = 'season' | 'offseason';

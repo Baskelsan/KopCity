@@ -94,6 +94,7 @@ export type Action =
   | { type: 'setStyle'; style: PlayStyle }
   | { type: 'setAutoLineup'; value: boolean }
   | { type: 'swapPlayers'; a: string; b: string }
+  | { type: 'placePlayer'; slot: number; playerId: string }
   | { type: 'advance' }
   | { type: 'matchDecision'; decision: Decision }
   | { type: 'finishMatch' }
@@ -134,6 +135,14 @@ export function applyAction(state: GameState, action: Action): GameState {
         ...state,
         squad: { ...state.squad, autoLineup: false, lineup: swapInLineup(state.squad.lineup, action.a, action.b) },
       };
+    case 'placePlayer': {
+      const player = state.squad.players.find((p) => p.id === action.playerId);
+      if (!player || player.injuryWeeks > 0 || player.contractYears <= 0) return state;
+      if (action.slot < 0 || action.slot >= state.squad.lineup.length) return state;
+      const lineup = state.squad.lineup.map((id) => (id === action.playerId ? '' : id));
+      lineup[action.slot] = action.playerId;
+      return { ...state, squad: { ...state.squad, autoLineup: false, lineup } };
+    }
     case 'advance':
       return advance(state);
     case 'matchDecision':

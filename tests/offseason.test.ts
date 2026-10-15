@@ -46,6 +46,13 @@ function defaultOffseason(state: GameState): GameState {
   return run(s, { type: 'startSeason' });
 }
 
+/** Prolonge d'une saison tous les joueurs en fin de contrat. */
+function defaultOffseasonRenewals(state: GameState): GameState {
+  let s = state;
+  for (const p of expiringPlayers(s)) s = run(s, { type: 'renewContract', playerId: p.id, years: 1 });
+  return s;
+}
+
 /** Place le club au rang voulu de sa division, en fin de saison. */
 function finishedAt(rank: number): GameState {
   const s = fresh();
@@ -317,19 +324,21 @@ describe('mercato', () => {
     const poor = { ...off, club: { ...off.club, treasury: offer.price - 1 } };
     expect(run(poor, { type: 'buyPlayer', playerId: offer.player.id })).toBe(poor);
 
-    const sold = off.squad.players[5]!;
-    const after = run(off, { type: 'sellPlayer', playerId: sold.id });
-    expect(after.club.treasury).toBe(off.club.treasury + saleValue(sold));
+    // On prolonge tout le monde pour avoir assez de joueurs sous contrat avant de vendre.
+    const renewed = defaultOffseasonRenewals(off);
+    const sold = renewed.squad.players[5]!;
+    const after = run(renewed, { type: 'sellPlayer', playerId: sold.id });
+    expect(after.club.treasury).toBe(renewed.club.treasury + saleValue(sold));
     expect(after.squad.players.map((p) => p.id)).not.toContain(sold.id);
   });
 
   it('pas d’achat au-delà de 22 joueurs, pas de vente en dessous de 16', () => {
     const off = endSeason(finishedAt(5));
     const offer = off.market.offers[0]!;
-    const filler = Array.from({ length: SZ.max - off.squad.players.length }, (_, i) => ({ ...off.squad.players[0]!, id: `x${i}` }));
-    const full = { ...off, club: { ...off.club, treasury: 10_000_000 }, squad: { ...off.squad, players: [...off.squad.players, ...filler] } };
+    const filler = Array.from({ length: SZ.max }, (_, i) => ({ ...off.squad.players[0]!, id: `x${i}`, contractYears: 2 }));
+    const full = { ...off, club: { ...off.club, treasury: 10_000_000 }, squad: { ...off.squad, players: filler } };
     expect(run(full, { type: 'buyPlayer', playerId: offer.player.id })).toBe(full);
-    const small = { ...off, squad: { ...off.squad, players: off.squad.players.slice(0, SZ.min) } };
+    const small = { ...off, squad: { ...off.squad, players: filler.slice(0, SZ.min) } };
     expect(run(small, { type: 'sellPlayer', playerId: small.squad.players[0]!.id })).toBe(small);
   });
 
@@ -379,4 +388,37 @@ describe('3 saisons enchaînées', () => {
     expect(movements).toContain('relegated');
     expect(divisionsReached).toContain('D2');
   }, 120_000);
+});
+
+describe('retours de jeu (après M5)', () => {
+  it('l’intersaison enregistre l’évolution de la note de chaque joueur', () => {
+    const s = finishedAt(5);
+    const off = endSeason(s);
+    const changes = off.offseason!.ratingChanges;
+    expect(changes).toHaveLength(off.squad.players.length);
+    for (const c of changes) {
+      const before = s.squad.players.find((p) => p.id === c.playerId)!;
+      const after = off.squad.players.find((p) => p.id === c.playerId)!;
+      expect(c.before).toBe(overall(before));
+      expect(c.after).toBe(overall(after));
+      expect(c.age).toBe(before.age + 1);
+    }
+  });
+
+  it('un joueur en fin de contrat sort de la composition et ne peut pas être vendu', () => {
+    const off = endSeason(finishedAt(5));
+    const expiring = expiringPlayers(off);
+    expect(expiring.length).toBeGreaterThan(0);
+    for (const p of expiring) expect(off.squad.lineup).not.toContain(p.id);
+    expect(run(off, { type: 'sellPlayer', playerId: expiring[0]!.id })).toBe(off);
+  });
+
+  it('prolongé, il revient dans la composition automatique s’il est parmi les meilleurs', () => {
+    const off = endSeason(finishedAt(5));
+    const best = [...expiringPlayers(off)].sort((a, b) => overall(b) - overall(a))[0]!;
+    const renewed = run(off, { type: 'renewContract', playerId: best.id, years: 1 });
+    const candidates = renewed.squad.players.filter((p) => p.contractYears > 0 && p.pos === best.pos);
+    const isTop = [...candidates].sort((a, b) => overall(b) - overall(a))[0]!.id === best.id;
+    if (isTop) expect(renewed.squad.lineup).toContain(best.id);
+  });
 });

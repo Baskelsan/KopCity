@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { Action } from '../../core/game';
 import { FORMATIONS, formationSlots } from '../../core/lineup';
-import { canRemovePlayer } from '../../core/offseason';
+import { canRemovePlayer, contractedPlayers } from '../../core/offseason';
 import { overall, saleValue, weeklyWages } from '../../core/players';
 import type { Formation, GameState, Player, PlayStyle, Position } from '../../core/state';
 import { formatEuros, formatStars } from '../formatters';
@@ -20,19 +20,28 @@ export function SquadScreen({ state, dispatch }: SquadScreenProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [showMarket, setShowMarket] = useState(false);
   const marketOpen = state.market.open;
-  const byId = new Map(squad.players.map((p) => [p.id, p]));
+  // Pendant l'intersaison, les joueurs en fin de contrat ne font plus partie de l'effectif tant qu'ils ne sont pas prolongés.
+  const players = contractedPlayers(squad.players);
+  const expiringCount = squad.players.length - players.length;
+  const byId = new Map(players.map((p) => [p.id, p]));
   const slots = formationSlots(squad.formation);
   const starters = new Set(squad.lineup);
-  const bench = squad.players.filter((p) => !starters.has(p.id) && p.injuryWeeks <= 0);
-  const unavailable = squad.players.filter((p) => !starters.has(p.id) && p.injuryWeeks > 0);
+  const bench = players.filter((p) => !starters.has(p.id) && p.injuryWeeks <= 0);
+  const unavailable = players.filter((p) => !starters.has(p.id) && p.injuryWeeks > 0);
   const selectedPlayer = selected ? byId.get(selected) : undefined;
 
+  /**
+   * Toucher deux joueurs les échange. Un titulaire blessé peut être sorti : seul le joueur
+   * qui entre dans le onze doit être disponible.
+   */
   const handleTap = (player: Player) => {
     if (!selected) return setSelected(player.id);
     if (selected === player.id) return setSelected(null);
-    const oneIsStarter = starters.has(selected) || starters.has(player.id);
-    const bothAvailable = player.injuryWeeks <= 0 && (selectedPlayer?.injuryWeeks ?? 0) <= 0;
-    if (oneIsStarter && bothAvailable) {
+    const selectedStarts = starters.has(selected);
+    const tappedStarts = starters.has(player.id);
+    const incoming = selectedStarts && !tappedStarts ? player : !selectedStarts && tappedStarts ? selectedPlayer : null;
+    const allowed = (selectedStarts || tappedStarts) && (incoming === null || (incoming?.injuryWeeks ?? 1) <= 0);
+    if (allowed) {
       dispatch({ type: 'swapPlayers', a: selected, b: player.id });
       setSelected(null);
     } else {
@@ -40,12 +49,22 @@ export function SquadScreen({ state, dispatch }: SquadScreenProps) {
     }
   };
 
+  /** Une place vide se remplit avec le joueur sélectionné (s'il est disponible). */
+  const handleEmptySlot = (slot: number) => {
+    if (!selectedPlayer || selectedPlayer.injuryWeeks > 0) return;
+    dispatch({ type: 'placePlayer', slot, playerId: selectedPlayer.id });
+    setSelected(null);
+  };
+
   const row = (player: Player | undefined, line: Position | null, key: string) => {
     if (!player) {
+      const slot = Number(key.slice(1));
       return (
-        <li key={key} class="player-row empty">
-          <span class="pos">{line ? texts.positions[line] : ''}</span>
-          <span class="name">{texts.squad.emptySlot}</span>
+        <li key={key}>
+          <button type="button" class="player-row empty" onClick={() => handleEmptySlot(slot)}>
+            <span class="pos">{line ? texts.positions[line] : ''}</span>
+            <span class="name">{texts.squad.emptySlot}</span>
+          </button>
         </li>
       );
     }
@@ -121,10 +140,13 @@ export function SquadScreen({ state, dispatch }: SquadScreenProps) {
           />
         </label>
         <p class="muted small">
-          {texts.game.wages} : {format(texts.game.perWeek, { amount: formatEuros(weeklyWages(squad.players)) })}
+          {texts.game.wages} : {format(texts.game.perWeek, { amount: formatEuros(weeklyWages(players)) })}
         </p>
       </div>
 
+      {expiringCount > 0 && (
+        <p class="muted small">{format(texts.squad.expiringHidden, { count: expiringCount })}</p>
+      )}
       <h2>{texts.squad.starters}</h2>
       <ul class="player-list">{slots.map((line, i) => row(byId.get(squad.lineup[i] ?? ''), line, `s${i}`))}</ul>
 

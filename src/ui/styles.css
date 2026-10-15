@@ -995,3 +995,12 @@ select {
 .home-screen > .muted {
   margin: 8px 4px 12px;
 }
+
+.rating-changes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}

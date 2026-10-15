@@ -216,3 +216,28 @@ it('une ancienne entrée du journal portant le même numéro de semaine ne décl
   const s = run(old, { type: 'advance' });
   expect(s.alerts.some((a) => a.key === 'constructionDelivered')).toBe(false);
 });
+
+describe('composition à la main', () => {
+  it('un titulaire blessé peut être remplacé par un remplaçant disponible', () => {
+    const s0 = fresh();
+    const starter = s0.squad.lineup[3]!;
+    const hurt: GameState = {
+      ...s0,
+      squad: { ...s0.squad, players: s0.squad.players.map((p) => (p.id === starter ? { ...p, injuryWeeks: 2 } : p)) },
+    };
+    const benchId = hurt.squad.players.find((p) => !hurt.squad.lineup.includes(p.id))!.id;
+    const s = run(hurt, { type: 'swapPlayers', a: starter, b: benchId });
+    expect(s.squad.lineup[3]).toBe(benchId);
+  });
+
+  it('une place vide se remplit avec un joueur disponible, et pas avec un blessé', () => {
+    const s0 = fresh();
+    const lineup = [...s0.squad.lineup];
+    lineup[4] = '';
+    const s = { ...s0, squad: { ...s0.squad, autoLineup: false, lineup } };
+    const benchId = s.squad.players.find((p) => !lineup.includes(p.id))!.id;
+    expect(run(s, { type: 'placePlayer', slot: 4, playerId: benchId }).squad.lineup[4]).toBe(benchId);
+    const hurt = { ...s, squad: { ...s.squad, players: s.squad.players.map((p) => (p.id === benchId ? { ...p, injuryWeeks: 1 } : p)) } };
+    expect(run(hurt, { type: 'placePlayer', slot: 4, playerId: benchId })).toBe(hurt);
+  });
+});

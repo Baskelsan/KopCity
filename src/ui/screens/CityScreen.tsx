@@ -19,14 +19,32 @@ import {
   withBuilding,
   type BuildCheck,
 } from '../../core/city';
+import { attendanceFor, matchAttraction } from '../../core/economy';
 import type { Action } from '../../core/game';
-import type { BuildingType, City, District, DivisionId, GameState } from '../../core/state';
+import { myDivision, opponentOf } from '../../core/league';
+import { MY_TEAM_ID, type BuildingType, type City, type District, type DivisionId, type GameState } from '../../core/state';
 import { formatEuros, formatInteger } from '../formatters';
 import { format, texts } from '../i18n';
 import { Sheet } from '../Sheet';
 
 const T = texts.city;
 const E = T.effects;
+
+/** Affluence attendue au prochain match à domicile (attrait de base hors saison). */
+function expectedAttendance(state: GameState): number {
+  const next = myDivision(state.league)
+    .fixtures.filter((f) => f.home === MY_TEAM_ID && !f.result && f.week >= state.time.week)
+    .sort((a, b) => a.week - b.week)[0];
+  const attraction =
+    state.phase === 'season' && next ? matchAttraction(state, opponentOf(next)) : balance.attraction.base;
+  return attendanceFor(state.city, attraction).attendance;
+}
+
+/** Recette d'un bar par match à domicile, avec l'affluence attendue. */
+function barRevenue(state: GameState, slotId: string): number {
+  const rate = barRates(state.city).find((r) => r.slotId === slotId)?.perSpectator ?? 0;
+  return Math.round(rate * expectedAttendance(state));
+}
 
 type Selection = { kind: 'slot'; slotId: string } | { kind: 'stadium' } | null;
 
@@ -54,6 +72,13 @@ export function CityScreen({ state, dispatch }: CityScreenProps) {
         <Row
           label={T.satisfaction}
           value={format(T.satisfactionValue, { current: city.residentSatisfaction, target: satisfactionTarget(city) })}
+        />
+        <Row label={T.shopRevenue} value={format(T.perWeek, { amount: formatEuros(Math.round(shopWeeklyRevenue(city))) })} />
+        <Row
+          label={T.barsRevenue}
+          value={format(T.perHomeMatch, {
+            amount: formatEuros(barRates(city).reduce((sum, b) => sum + barRevenue(state, b.slotId), 0)),
+          })}
         />
         <Row label={T.upkeep} value={format(T.perWeek, { amount: formatEuros(weeklyUpkeep(city)) })} />
         <Row
@@ -269,6 +294,16 @@ function SlotSheet({
           {districtName}
           {spec.maxLevel > 1 && ` · ${format(T.level, { level: building.level })}`}
         </p>
+        {building.type === 'bar' && (
+          <p>{format(T.buildingRevenue, { amount: format(T.perHomeMatch, { amount: formatEuros(barRevenue(state, slotId)) }) })}</p>
+        )}
+        {building.type === 'shop' && (
+          <p>
+            {format(T.buildingRevenue, {
+              amount: format(T.perWeek, { amount: formatEuros(Math.round(shopWeeklyRevenue(city))) }),
+            })}
+          </p>
+        )}
         {construction ? (
           <p>{format(T.inProgress, { weeks: construction.weeksLeft })}</p>
         ) : (
