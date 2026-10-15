@@ -25,7 +25,8 @@ describe('newGame', () => {
   it('enregistre la graine et la date fournies', () => {
     const state = newGame(options);
     expect(state.meta.seed).toBe(1234);
-    expect(state.meta.rngState).toBe(1234);
+    // Le générateur a déjà servi à créer l'effectif.
+    expect(state.meta.rngState).not.toBe(1234);
     expect(state.meta.createdAt).toBe(options.now);
   });
 

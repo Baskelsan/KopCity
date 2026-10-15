@@ -110,3 +110,47 @@ describe('migrations', () => {
     expect(errorCode(() => migrate({ schemaVersion: 4 }, fake, 3))).toBe('futureVersion');
   });
 });
+
+describe('migration v1 → v2', () => {
+  /** Une sauvegarde telle que l'écrivait M1 : pas d'effectif, pas de gardien, pas de match en cours. */
+  function v1Save(): Record<string, unknown> {
+    const { currentMatch: _ignored, ...rest } = newGame({ seed: 42, now: NOW, clubName: 'FC Test' });
+    return {
+      ...rest,
+      schemaVersion: 1,
+      meta: { ...rest.meta, rngState: 42 },
+      squad: { ...rest.squad, lineup: [], players: [] },
+      league: {
+        myDivision: 'D3',
+        divisions: [{ id: 'D3', teams: [{ id: 't1', name: 'AS Test', strength: { att: 30, mid: 40, def: 50 } }], fixtures: [], table: [] }],
+      },
+    };
+  }
+
+  it('génère un effectif complet et une composition', () => {
+    const state = parseSave(JSON.stringify(v1Save()));
+    expect(state.schemaVersion).toBe(2);
+    expect(state.squad.players).toHaveLength(18);
+    expect(state.squad.lineup.filter(Boolean)).toHaveLength(11);
+    expect(state.currentMatch).toBeNull();
+  });
+
+  it('est déterministe et fait avancer le générateur', () => {
+    const a = parseSave(JSON.stringify(v1Save()));
+    const b = parseSave(JSON.stringify(v1Save()));
+    expect(a).toEqual(b);
+    expect(a.meta.rngState).not.toBe(42);
+  });
+
+  it('ajoute un gardien aux équipes existantes', () => {
+    const state = parseSave(JSON.stringify(v1Save()));
+    expect(state.league.divisions[0]!.teams[0]!.strength.gk).toBe(10);
+  });
+
+  it('garde un effectif déjà présent', () => {
+    const save = v1Save();
+    const players = newGame({ seed: 1, now: NOW, clubName: 'X' }).squad.players;
+    save.squad = { ...(save.squad as object), players, lineup: [] };
+    expect(parseSave(JSON.stringify(save)).squad.players).toEqual(players);
+  });
+});

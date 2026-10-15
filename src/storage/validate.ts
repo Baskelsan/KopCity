@@ -45,5 +45,8 @@ export function assertGameState(save: unknown): GameState {
   }
   if (!isArray(save.objectives)) throw new SaveError('invalidFormat', 'objectives invalide');
   if (!isArray(save.log)) throw new SaveError('invalidFormat', 'log invalide');
+  if (save.currentMatch !== null && !isObject(save.currentMatch)) {
+    throw new SaveError('invalidFormat', 'currentMatch invalide');
+  }
   return save as unknown as GameState;
 }

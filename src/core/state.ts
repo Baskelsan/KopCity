@@ -1,7 +1,9 @@
 // Type de l'état de jeu : un seul objet JSON sérialisable (voir docs/CADRAGE.md, « Modèle de données »).
 // Toute modification de structure incrémente SCHEMA_VERSION et ajoute une migration dans src/storage/migrations.
 
-export const SCHEMA_VERSION = 1;
+import type { MatchState } from './matchTypes';
+
+export const SCHEMA_VERSION = 2;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -105,6 +107,8 @@ export interface TeamStrength {
   att: number;
   mid: number;
   def: number;
+  /** Gardien (ajouté en v2). */
+  gk: number;
 }
 
 export interface Team {
@@ -207,4 +211,6 @@ export interface GameState {
   objectives: Objective[];
   records: Records;
   log: LogEntry[];
+  /** Match en cours, sauvegardé pour reprendre là où on en était (ajouté en v2). */
+  currentMatch: MatchState | null;
 }

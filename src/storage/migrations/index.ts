@@ -1,5 +1,6 @@
 import { SCHEMA_VERSION } from '../../core/state';
 import { SaveError } from '../errors';
+import { v1ToV2 } from './v1-to-v2';
 
 /** Une migration fait passer une sauvegarde de la version N à la version N + 1. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
@@ -8,7 +9,9 @@ export type Migration = (save: Record<string, unknown>) => Record<string, unknow
  * Migrations indexées par version de départ : migrations[1] fait passer de v1 à v2.
  * Ajouter une entrée (dans un fichier vN-to-vN+1.ts) à chaque incrément de SCHEMA_VERSION.
  */
-export const migrations: Readonly<Record<number, Migration>> = {};
+export const migrations: Readonly<Record<number, Migration>> = {
+  1: v1ToV2,
+};
 
 /** Amène une sauvegarde brute jusqu'à la version cible en appliquant les migrations dans l'ordre. */
 export function migrate(
