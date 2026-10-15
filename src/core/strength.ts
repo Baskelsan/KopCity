@@ -55,13 +55,19 @@ export function averageMorale(players: readonly Player[], lineup: readonly strin
 
 /**
  * Adversaire généré : un effectif virtuel au niveau donné (± un écart), aligné en 4-4-2.
- * Seule sa force est gardée, sur la même échelle que celle du club.
+ * Seule sa force est gardée, sur la même échelle que celle du club. La ville est tirée hors de `excludedTowns`.
  */
-export function generateOpponent(rngState: number, level: number, id: string): Draw<Team> {
+export function generateOpponent(
+  rngState: number,
+  level: number,
+  id: string,
+  excludedTowns: readonly string[] = [],
+): Draw<Team & { town: string }> {
   let rng = rngState;
   const prefix = pick(rng, names.clubPrefixes);
   rng = prefix.rngState;
-  const town = pick(rng, names.towns);
+  const towns = names.towns.filter((t) => !excludedTowns.includes(t));
+  const town = pick(rng, towns.length > 0 ? towns : names.towns);
   rng = town.rngState;
   const spread = nextFloat(rng);
   rng = spread.rngState;
@@ -70,5 +76,5 @@ export function generateOpponent(rngState: number, level: number, id: string): D
   rng = squad.rngState;
   const formation: Formation = '4-4-2';
   const strength = lineupStrength(squad.value, formation, autoLineup(squad.value, formation));
-  return { value: { id, name: `${prefix.value} ${town.value}`, strength }, rngState: rng };
+  return { value: { id, name: `${prefix.value} ${town.value}`, strength, town: town.value }, rngState: rng };
 }
