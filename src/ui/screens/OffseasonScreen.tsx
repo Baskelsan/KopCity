@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import balance from '../../data/balance.json';
 import type { Action } from '../../core/game';
 import { canAddPlayer, canStartSeason, expiringPlayers, renewalSalary, squadSizeAtStart } from '../../core/offseason';
+import { averageRating } from '../../core/playerStats';
 import { overall } from '../../core/players';
 import type { GameState, Player } from '../../core/state';
 import { formatEuros, formatStars } from '../formatters';
@@ -204,6 +205,16 @@ export function OffseasonScreen({
                   <p class="muted">
                     {format(texts.squad.age, { age: p.age })} ·{' '}
                     {format(O.newSalary, { salary: formatEuros(renewalSalary(p, state.league.myDivision)) })}
+                  </p>
+                  <p class="muted">
+                    {p.seasonStats.apps === 0
+                      ? O.seasonLineNone
+                      : format(O.seasonLine, {
+                          apps: p.seasonStats.apps,
+                          goals: p.seasonStats.goals,
+                          assists: p.seasonStats.assists,
+                          rating: (averageRating(p.seasonStats) ?? 0).toFixed(1).replace('.', ','),
+                        })}
                   </p>
                   <div class="segmented">
                     {YEARS.map((years) => (

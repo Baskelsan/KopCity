@@ -7,6 +7,7 @@ import { format, texts } from '../i18n';
 import type { UnlockedAchievement } from '../../storage/achievements';
 import { AchievementsView } from '../AchievementsView';
 import { isStandalone } from '../InstallHelp';
+import { RulesView } from '../RulesView';
 import { PastGames, RecordsView } from '../RecordsView';
 import { TicketPriceCard } from '../TicketPriceCard';
 
@@ -63,6 +64,7 @@ export function ClubScreen({ state, dispatch, replace, notify, onNewGame, onShow
 
   return (
     <div class="screen">
+      <RulesView />
       <TicketPriceCard state={state} dispatch={dispatch} />
       <RecordsView state={state} />
       <AchievementsView unlocked={achievements} />

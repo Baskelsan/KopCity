@@ -372,7 +372,9 @@
     "raisesHint": "Après une bonne saison, ces joueurs veulent être mieux payés. Sans réponse, la demande est refusée au lancement de la saison (moral −20).",
     "raiseLine": "Note moyenne {rating}/10 · salaire {from} → {to} / mois",
     "acceptRaise": "Accepter",
-    "refuseRaise": "Refuser (moral −20)"
+    "refuseRaise": "Refuser (moral −20)",
+    "seasonLine": "Saison : {apps} match(s) · {goals} but(s) · {assists} passe(s) déc. · note {rating}/10",
+    "seasonLineNone": "Saison : aucun match joué"
   },
   "market": {
     "title": "Mercato",
@@ -734,5 +736,60 @@
         "description": "Sortir du rouge après au moins 3 semaines."
       }
     }
+  },
+  "matchStats": {
+    "title": "Statistiques du match",
+    "domination": "Domination au milieu",
+    "chances": "Occasions",
+    "onTarget": "Tirs cadrés",
+    "cards": "Cartons",
+    "percent": "{value} %",
+    "hint": "La domination au milieu décide qui se crée les occasions. Le style et les choix de fin de match, eux, font passer de la force de la défense à l'attaque (ou l'inverse) : plus de buts marqués, mais aussi encaissés."
+  },
+  "rules": {
+    "title": "Comment ça marche",
+    "intro": "Les règles du jeu en bref. Touche une rubrique pour la lire.",
+    "sections": [
+      {
+        "title": "Le principe",
+        "body": "Tu diriges un club de football et tu fais grandir la ville autour de son stade. Le club fait vivre la ville (victoires, affluence, sponsors) et la ville fait vivre le club (supporters, jeunes, argent). Pars de la Division 3 et vise l'Élite."
+      },
+      {
+        "title": "Avancer",
+        "body": "Le bouton Avancer enchaîne les semaines calmes : tes matchs s'y jouent en résumé. Le jeu s'arrête de lui-même quand une décision compte : match à enjeu (derby, concurrent direct, montée ou maintien en jeu, coupe à partir des quarts), événement, mercato d'hiver (semaine 9), chantier livré, titulaire blessé, trésorerie négative, riverains mécontents."
+      },
+      {
+        "title": "Les matchs",
+        "body": "Ton équipe a une force en attaque, au milieu, en défense et dans les buts, calculée d'après les joueurs alignés, la formation, le style, le moral et le terrain. Le milieu décide qui se crée les occasions, l'attaque contre la défense décide si le tir est cadré, puis le tir affronte le gardien. En direct, tu choisis la consigne à la mi-temps, tu peux forcer ou gérer vers la 70e minute, et tu remplaces les blessés."
+      },
+      {
+        "title": "L'effectif",
+        "body": "De 16 à 22 joueurs. La composition se fait toute seule avec la meilleure équipe disponible, ou à la main dans l'onglet Effectif (touche deux joueurs pour les échanger). Les jeunes progressent vers leur potentiel (les étoiles ne sont qu'une estimation), les joueurs déclinent après 31 ans et prennent leur retraite entre 35 et 38 ans. Le moral monte avec les victoires et baisse pour ceux qui ne jouent pas."
+      },
+      {
+        "title": "Contrats et mercato",
+        "body": "Un contrat dure quelques saisons ; à son terme, prolonge le joueur à l'intersaison ou il partira. Les nouveaux contrats coûtent plus cher dans les divisions supérieures, et un joueur qui brille demande une augmentation. Le mercato ouvre à l'intersaison et en semaine 9 : tu achètes au prix affiché et tu vends à 80 % de la valeur."
+      },
+      {
+        "title": "L'argent",
+        "body": "Recettes : billetterie (affluence × prix du billet, réglable dans l'onglet Club), bars, boutique, sponsors (selon ton classement), coupe. Dépenses : salaires, entretien des bâtiments, frais de fonctionnement, amendes si les riverains sont très mécontents. L'affluence est limitée par la capacité du stade, le plafond d'accès (transports) et le nombre de supporters. Touche ta trésorerie sur l'Accueil pour voir les comptes détaillés."
+      },
+      {
+        "title": "La ville",
+        "body": "Construis sur les emplacements des quartiers : logements (habitants donc supporters), parkings et arrêts (plafond d'accès, riverains contents), bars et boutique (recettes, améliorables), centre de formation (jeunes). Agrandis le stade pour accueillir plus de monde. Attention aux riverains : stade et bars près du stade les agacent, et sous 40 tu ne peux plus agrandir le stade. De nouveaux quartiers s'ouvrent avec la population et les montées."
+      },
+      {
+        "title": "La saison",
+        "body": "18 journées en aller-retour dans une division de 10 clubs, 3 points la victoire. Les 2 premiers montent, les 2 derniers descendent. En parallèle, la coupe nationale se joue en 5 tours à élimination directe. À la fin de la saison : prime selon ton classement, objectifs, progression des joueurs, contrats, jeunes du centre et mercato."
+      },
+      {
+        "title": "Événements et objectifs",
+        "body": "Des événements tombent de temps en temps et proposent deux choix, avec leurs effets affichés avant de décider. Chaque saison fixe 3 objectifs (sportif, financier, urbain) : chacun rapporte une prime, et les trois atteints augmentent les sponsors de la saison suivante."
+      },
+      {
+        "title": "Faillite et sauvegarde",
+        "body": "Si la trésorerie reste négative 4 semaines de suite, c'est la faillite et la partie s'arrête ; son palmarès est gardé dans les parties précédentes. La partie est sauvegardée automatiquement, mais iOS peut effacer les données : exporte ta sauvegarde de temps en temps (onglet Club, ou au rappel de fin de saison)."
+      }
+    ]
   }
 }

@@ -12,6 +12,7 @@ import { CupView } from '../CupView';
 import { StatsView } from '../StatsView';
 import { cupRoundName } from '../cupText';
 import { describeEvent, scoreAt, scoreLine } from '../matchText';
+import { MatchStats } from '../MatchStats';
 import { Sheet } from '../Sheet';
 
 /** Durée d'affichage d'une minute de match en direct (90 minutes ≈ 1 minute réelle). */
@@ -71,6 +72,7 @@ function LiveMatch({
         <span class="team">{match.away.name}</span>
         <span class="clock">{format(texts.match.minute, { minute: shown })}</span>
       </div>
+      <MatchStats match={match} state={state} minute={shown} />
 
       {!match.finished || !caughtUp ? (
         <div class="segmented speed">
@@ -139,6 +141,7 @@ function DecisionSheet({
     return (
       <Sheet title={D.halftimeTitle}>
         <p>{scoreLine(match)}</p>
+        <MatchStats match={match} state={state} minute={match.minute} />
         <p class="muted">{D.halftimeText}</p>
         <div class="choice-list">
           {STYLES.map((style) => (
@@ -160,6 +163,7 @@ function DecisionSheet({
     return (
       <Sheet title={format(D.lateTitle, { minute: match.minute })}>
         <p>{scoreLine(match)}</p>
+        <MatchStats match={match} state={state} minute={match.minute} />
         <p class="muted">{D.lateText}</p>
         <div class="choice-list">
           <button type="button" class="button secondary" onClick={() => onDecide({ type: 'late', choice: 'force' })}>

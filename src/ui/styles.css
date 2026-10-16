@@ -1280,3 +1280,72 @@ select {
 .achievements .badge {
   font-size: 22px;
 }
+
+/* Statistiques du match */
+
+.match-stats {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.ms-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ms-row .ms-value:first-child {
+  text-align: left;
+  font-weight: 700;
+}
+
+.ms-row .ms-value:last-child {
+  text-align: right;
+  font-weight: 700;
+}
+
+.ms-label {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.ms-bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.ms-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.match-stats .small {
+  margin-top: 4px;
+}
+
+/* Règles */
+
+.rules details {
+  border-bottom: 1px solid var(--border);
+}
+
+.rules summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rules details p {
+  margin: 0 0 12px;
+}
