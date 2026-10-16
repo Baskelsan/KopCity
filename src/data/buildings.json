@@ -56,9 +56,20 @@
     "cost": 150000,
     "upkeep": 1500,
     "weeks": 4,
-    "maxLevel": 1,
+    "maxLevel": 3,
     "population": 2000,
-    "nuisance": -2
+    "nuisance": -2,
+    "maxPerDistrict": 1,
+    "levelCosts": [
+      150000,
+      250000,
+      400000
+    ],
+    "levelPopulations": [
+      2000,
+      2500,
+      2500
+    ]
   },
   "transport": {
     "cost": 200000,
@@ -92,5 +103,30 @@
     "maxLevel": 3,
     "unique": true,
     "minDivision": "D2"
+  },
+  "park": {
+    "cost": 120000,
+    "upkeep": 1000,
+    "weeks": 3,
+    "maxLevel": 1,
+    "maxPerDistrict": 1,
+    "satisfaction": 5,
+    "satisfactionInNuisanceDistrict": 10
+  },
+  "fanzone": {
+    "cost": 300000,
+    "upkeep": 3000,
+    "weeks": 4,
+    "maxLevel": 1,
+    "unique": true
+  },
+  "museum": {
+    "cost": 1500000,
+    "upkeep": 5000,
+    "weeks": 8,
+    "maxLevel": 1,
+    "unique": true,
+    "minDivision": "D1",
+    "revenuePerTrophy": 2000
   }
 }

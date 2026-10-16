@@ -44,6 +44,20 @@ export interface BuildingSpec {
   minDivision?: string;
   /** Division minimale pour certains niveaux (paliers 4 et 5 du stade : Élite). */
   levelMinDivision?: Record<string, string>;
+  /** Habitants ajoutés par chaque niveau (logements). */
+  levelPopulations?: number[];
+  /** Satisfaction dans le quartier du stade, là où sont les nuisances (parc). */
+  satisfactionInNuisanceDistrict?: number;
+  /** Recette hebdomadaire par trophée du palmarès (musée). */
+  revenuePerTrophy?: number;
+}
+
+/** Habitants apportés par un bâtiment à un niveau donné (somme des niveaux). */
+export function populationAt(type: ConstructionType, level: number): number {
+  const spec = BUILDINGS[type];
+  let total = 0;
+  for (let i = 0; i < level; i++) total += spec.levelPopulations?.[i] ?? spec.population ?? 0;
+  return total;
 }
 
 const DIVISION_ORDER: Record<string, number> = { D3: 1, D2: 2, D1: 3 };
@@ -89,7 +103,17 @@ export interface DistrictSpec {
 
 export const BUILDINGS = buildingsData as Record<ConstructionType, BuildingSpec>;
 export const DISTRICTS = districtsData as DistrictSpec[];
-export const SLOT_BUILDINGS: BuildingType[] = ['bar', 'shop', 'housing', 'transport', 'academy', 'training'];
+export const SLOT_BUILDINGS: BuildingType[] = [
+  'housing',
+  'bar',
+  'shop',
+  'transport',
+  'park',
+  'fanzone',
+  'academy',
+  'training',
+  'museum',
+];
 
 const DIVISION_RANK: Record<DivisionId, number> = { D3: 1, D2: 2, D1: 3 };
 
@@ -155,6 +179,9 @@ export function satisfactionTarget(city: City): number {
     const spec = BUILDINGS[b.type];
     if (spec.nuisance && b.district.nuisance) target += spec.nuisance;
     if (b.type === 'transport') target += (spec.satisfaction ?? 0) * b.district.transportFactor;
+    if (b.type === 'park') {
+      target += b.district.nuisance ? (spec.satisfactionInNuisanceDistrict ?? 0) : (spec.satisfaction ?? 0);
+    }
   }
   return Math.min(100, Math.max(0, target));
 }
@@ -190,6 +217,17 @@ export function shopWeeklyRevenue(city: City): number {
   return builtBuildings(city)
     .filter((b) => b.type === 'shop')
     .reduce((sum, b) => sum + supporters(city) * perSupporter * b.district.commerceFactor * levelRevenueFactor('shop', b.level), 0);
+}
+
+export function hasBuilding(city: City, type: BuildingType): boolean {
+  return builtBuildings(city).some((b) => b.type === type);
+}
+
+/** Recette hebdomadaire du musée : une somme par trophée (titres et coupes). */
+export function museumWeeklyRevenue(state: GameState): number {
+  if (!hasBuilding(state.city, 'museum')) return 0;
+  const trophies = state.records.titles.length + state.records.cups.length;
+  return trophies * (BUILDINGS.museum.revenuePerTrophy ?? 0);
 }
 
 export function trainingLevel(city: City): number {
@@ -331,22 +369,22 @@ function mapSlot(city: City, slotId: string, update: (slot: Slot) => Slot): City
 
 /** La ville telle qu'elle serait avec ce bâtiment livré sur cet emplacement (pour afficher l'effet avant de payer). */
 export function withBuilding(city: City, slotId: string, type: BuildingType, level: number): City {
+  const current = findSlot(city, slotId)?.slot.building;
   const next = mapSlot(city, slotId, (s) => ({ ...s, building: { type, level } }));
-  const housingNow = findSlot(city, slotId)?.slot.building?.type === 'housing';
-  const extra = type === 'housing' && !housingNow ? (BUILDINGS.housing.population ?? 0) : 0;
-  return { ...next, population: next.population + extra };
+  const before = current ? populationAt(current.type, current.level) : 0;
+  return { ...next, population: next.population + populationAt(type, level) - before };
 }
 
 /** Démolir : l'emplacement est libéré tout de suite, 25 % de l'investissement est remboursé. */
 export function demolish(state: GameState, slotId: string): GameState {
   const building = findSlot(state.city, slotId)?.slot.building;
   if (!building || isBusy(state.city, slotId)) return state;
-  const population = building.type === 'housing' ? -(BUILDINGS.housing.population ?? 0) : 0;
   const city = mapSlot(state.city, slotId, (s) => ({ ...s, building: null }));
+  const population = Math.max(0, city.population - populationAt(building.type, building.level));
   return {
     ...state,
     club: { ...state.club, treasury: state.club.treasury + demolitionRefund(building.type, building.level) },
-    city: { ...city, population: city.population + population },
+    city: { ...city, population },
   };
 }
 
@@ -383,7 +421,8 @@ export function progressConstructions(state: GameState): GameState {
     } else if (c.slotId) {
       const type = c.type;
       city = mapSlot(city, c.slotId, (s) => ({ ...s, building: { type, level: c.level } }));
-      if (type === 'housing') city = { ...city, population: city.population + (BUILDINGS.housing.population ?? 0) };
+      const added = populationAt(type, c.level) - populationAt(type, c.level - 1);
+      if (added) city = { ...city, population: city.population + added };
     }
     log.push({ ...at, key: 'constructionDelivered', params: { type: c.type, level: c.level } });
   }

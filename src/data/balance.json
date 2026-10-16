@@ -441,5 +441,10 @@
       "weeklyCost": 25000,
       "strengthFactor": 1.03
     }
+  },
+  "fanZone": {
+    "winFactor": 1.5,
+    "lossFactor": 0.5,
+    "maxShare": 0.65
   }
 }

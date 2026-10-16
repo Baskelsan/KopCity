@@ -172,7 +172,7 @@ describe('migration v2 → v3', () => {
       ['gare', false],
       ['nouveau', false],
     ]);
-    expect(state.city.districts.flatMap((d) => d.slots)).toHaveLength(19);
+    expect(state.city.districts.flatMap((d) => d.slots)).toHaveLength(14);
   });
 });
 

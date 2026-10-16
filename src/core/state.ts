@@ -3,14 +3,23 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 14;
+export const SCHEMA_VERSION = 15;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
 export type PlayStyle = 'offensive' | 'balanced' | 'defensive';
 export type DivisionId = 'D3' | 'D2' | 'D1';
 export type DistrictId = 'stade' | 'faubourg' | 'gare' | 'nouveau';
-export type BuildingType = 'bar' | 'shop' | 'housing' | 'transport' | 'academy' | 'training';
+export type BuildingType =
+  | 'bar'
+  | 'shop'
+  | 'housing'
+  | 'transport'
+  | 'academy'
+  | 'training'
+  | 'park'
+  | 'fanzone'
+  | 'museum';
 /** Le stade n'occupe pas d'emplacement mais se construit aussi en chantier. */
 export type ConstructionType = BuildingType | 'stadium';
 
@@ -397,7 +406,7 @@ export interface LogEntry {
 /** Comptes d'une semaine (ou cumul de la saison), en euros. */
 export interface FinanceReport {
   /** `other` : transferts et événements en cours de saison (ajouté en v7). */
-  income: { tickets: number; bars: number; shop: number; sponsors: number; other: number; cup: number };
+  income: { tickets: number; bars: number; shop: number; sponsors: number; other: number; cup: number; museum: number };
   expenses: { wages: number; upkeep: number; running: number; fines: number; other: number; staff: number };
   /** Affluence du match à domicile (cumul pour la saison), null sans match à domicile. */
   attendance: number | null;

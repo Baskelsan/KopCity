@@ -3,6 +3,7 @@
 import balance from '../data/balance.json';
 import eventsData from '../data/events.json';
 import { academyLevel, builtBuildings, stadiumCapacity } from './city';
+import { maxSupporterShare } from './economy';
 import { myDivision, myForm, rankOf } from './league';
 import { autoLineup } from './lineup';
 import { contractedPlayers, generateProspects } from './offseason';
@@ -273,7 +274,7 @@ function applyEffect(input: Applied, effect: EventEffect, pending: PendingEvent)
     case 'supporters':
       s = {
         ...s,
-        city: { ...s.city, supporterShare: clamp(s.city.supporterShare + effect.points / 100, sup.min, sup.max) },
+        city: { ...s.city, supporterShare: clamp(s.city.supporterShare + effect.points / 100, sup.min, maxSupporterShare(s.city)) },
       };
       break;
     case 'injureTarget':

@@ -13,6 +13,7 @@ import { v10ToV11 } from './v10-to-v11';
 import { v11ToV12 } from './v11-to-v12';
 import { v12ToV13 } from './v12-to-v13';
 import { v13ToV14 } from './v13-to-v14';
+import { v14ToV15 } from './v14-to-v15';
 
 /** Une migration fait passer une sauvegarde de la version N à la version N + 1. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
@@ -35,6 +36,7 @@ export const migrations: Readonly<Record<number, Migration>> = {
   11: v11ToV12,
   12: v12ToV13,
   13: v13ToV14,
+  14: v14ToV15,
 };
 
 /** Amène une sauvegarde brute jusqu'à la version cible en appliquant les migrations dans l'ordre. */

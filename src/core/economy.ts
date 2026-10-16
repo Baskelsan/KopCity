@@ -1,6 +1,16 @@
 // Économie de la semaine : affluence, recettes, dépenses, supporters et satisfaction (voir docs/CADRAGE.md).
 import balance from '../data/balance.json';
-import { accessCap, barRates, satisfactionTarget, shopWeeklyRevenue, stadiumCapacity, supporters, weeklyUpkeep } from './city';
+import {
+  accessCap,
+  barRates,
+  hasBuilding,
+  museumWeeklyRevenue,
+  satisfactionTarget,
+  shopWeeklyRevenue,
+  stadiumCapacity,
+  supporters,
+  weeklyUpkeep,
+} from './city';
 import { attendanceFactor, sponsorBonusPerWeek } from './effects';
 import { myDivision, myForm, rankOf } from './league';
 import { MY_TEAM_ID, type City, type FinanceReport, type GameState } from './state';
@@ -101,6 +111,7 @@ export function weekFinance(state: GameState, homeOpponentId: string | null): Fi
         sponsorBonusPerWeek(state),
       other: 0,
       cup: 0,
+      museum: museumWeeklyRevenue(state),
     },
     expenses: {
       wages: weeklyWagesRounded(state),
@@ -115,14 +126,14 @@ export function weekFinance(state: GameState, homeOpponentId: string | null): Fi
 }
 
 export const totalIncome = (r: FinanceReport) =>
-  r.income.tickets + r.income.bars + r.income.shop + r.income.sponsors + r.income.other + r.income.cup;
+  r.income.tickets + r.income.bars + r.income.shop + r.income.sponsors + r.income.other + r.income.cup + r.income.museum;
 export const totalExpenses = (r: FinanceReport) =>
   r.expenses.wages + r.expenses.upkeep + r.expenses.running + r.expenses.fines + r.expenses.other + r.expenses.staff;
 export const netResult = (r: FinanceReport) => totalIncome(r) - totalExpenses(r);
 
 export function emptyReport(): FinanceReport {
   return {
-    income: { tickets: 0, bars: 0, shop: 0, sponsors: 0, other: 0, cup: 0 },
+    income: { tickets: 0, bars: 0, shop: 0, sponsors: 0, other: 0, cup: 0, museum: 0 },
     expenses: { wages: 0, upkeep: 0, running: 0, fines: 0, other: 0, staff: 0 },
     attendance: null,
   };
@@ -139,11 +150,21 @@ export function addReports(total: FinanceReport, week: FinanceReport): FinanceRe
   };
 }
 
-/** Part de supporters après un résultat : +1 point par victoire, −0,5 par défaite, entre 10 % et 60 %. */
-export function nextSupporterShare(share: number, outcome: 'win' | 'draw' | 'loss'): number {
+/** Plafond de la part de supporters : 60 %, 65 % avec une fan zone. */
+export function maxSupporterShare(city: City): number {
+  return hasBuilding(city, 'fanzone') ? balance.fanZone.maxShare : balance.supporters.max;
+}
+
+/**
+ * Part de supporters après un résultat : +1 point par victoire, −0,5 par défaite, entre 10 % et 60 %.
+ * Avec une fan zone : +1,5 par victoire, −0,25 par défaite, jusqu'à 65 %.
+ */
+export function nextSupporterShare(share: number, outcome: 'win' | 'draw' | 'loss', fanZone = false): number {
   const S = balance.supporters;
-  const next = share + S[outcome];
-  return Math.round(clamp(next, S.min, S.max) * 10000) / 10000;
+  const FZ = balance.fanZone;
+  const factor = !fanZone ? 1 : outcome === 'win' ? FZ.winFactor : outcome === 'loss' ? FZ.lossFactor : 1;
+  const next = share + S[outcome] * factor;
+  return Math.round(clamp(next, S.min, fanZone ? FZ.maxShare : S.max) * 10000) / 10000;
 }
 
 /** Salaire hebdomadaire du staff embauché. */

@@ -53,13 +53,13 @@ const place = (state: GameState, items: [string, BuildingType, number?][]): Game
 });
 
 describe('quartiers', () => {
-  it('démarrent avec le seul quartier du stade ouvert et 19 emplacements vides', () => {
+  it('démarrent avec le seul quartier du stade ouvert et 14 emplacements vides', () => {
     const { city } = fresh();
     expect(city.districts.map((d) => [d.id, d.unlocked, d.slots.length])).toEqual([
-      ['stade', true, 4],
-      ['faubourg', false, 5],
-      ['gare', false, 4],
-      ['nouveau', false, 6],
+      ['stade', true, 3],
+      ['faubourg', false, 4],
+      ['gare', false, 3],
+      ['nouveau', false, 4],
     ]);
     expect(city.districts.every((d) => d.slots.every((s) => s.building === null))).toBe(true);
   });
@@ -68,13 +68,15 @@ describe('quartiers', () => {
     expect(canBuild(fresh(), 'faubourg-1', 'housing')).toMatchObject({ ok: false, reason: 'districtLocked' });
   });
 
-  it('le Faubourg se débloque à 26 000 habitants', () => {
-    let s = run(fresh(), { type: 'build', slotId: 'stade-1', building: 'housing' }, { type: 'build', slotId: 'stade-2', building: 'housing' });
-    s = weeks(s, buildings.housing.weeks);
-    expect(s.city.population).toBe(24000);
+  it('le Faubourg se débloque à 26 000 habitants (logement du stade au niveau 3)', () => {
+    let s = weeks(run(fresh(), { type: 'build', slotId: 'stade-1', building: 'housing' }), buildings.housing.weeks);
+    expect(s.city.population).toBe(22000);
     expect(s.city.districts[1]!.unlocked).toBe(false);
-    s = weeks(run(s, { type: 'build', slotId: 'stade-3', building: 'housing' }), buildings.housing.weeks);
-    expect(s.city.population).toBe(26000);
+    s = weeks(run(s, { type: 'upgradeBuilding', slotId: 'stade-1' }), buildings.housing.weeks);
+    expect(s.city.population).toBe(24500);
+    expect(s.city.districts[1]!.unlocked).toBe(false);
+    s = weeks(run(s, { type: 'upgradeBuilding', slotId: 'stade-1' }), buildings.housing.weeks);
+    expect(s.city.population).toBe(27000);
     expect(s.city.districts[1]!.unlocked).toBe(true);
     expect(s.log.some((e) => e.key === 'districtUnlocked' && e.params?.district === 'faubourg')).toBe(true);
   });
@@ -177,9 +179,9 @@ describe('chantiers', () => {
     expect(canBuild(s, 'faubourg-1', 'bar').ok).toBe(true);
   });
 
-  it('logements et transports restent libres', () => {
+  it('un logement par quartier, les transports restent libres', () => {
     const s = run(fresh(), { type: 'build', slotId: 'stade-1', building: 'housing' });
-    expect(canBuild(s, 'stade-2', 'housing').ok).toBe(true);
+    expect(canBuild(s, 'stade-2', 'housing')).toMatchObject({ ok: false, reason: 'onePerDistrict' });
     const t = run(fresh(), { type: 'build', slotId: 'stade-1', building: 'transport' });
     expect(canBuild(t, 'stade-2', 'transport').ok).toBe(true);
   });
@@ -196,7 +198,7 @@ describe('chantiers', () => {
   });
 
   it('les bâtiments à un seul niveau ne s’améliorent pas', () => {
-    const s = weeks(run(fresh(), { type: 'build', slotId: 'stade-1', building: 'housing' }), buildings.housing.weeks);
+    const s = weeks(run(fresh(), { type: 'build', slotId: 'stade-1', building: 'transport' }), buildings.transport.weeks);
     expect(run(s, { type: 'upgradeBuilding', slotId: 'stade-1' })).toBe(s);
   });
 

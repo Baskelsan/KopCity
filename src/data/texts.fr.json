@@ -172,7 +172,10 @@
     "housing": "Logements",
     "transport": "Parking / arrêt de transport",
     "academy": "Centre de formation",
-    "training": "Centre d'entraînement"
+    "training": "Centre d'entraînement",
+    "park": "Parc",
+    "fanzone": "Fan zone",
+    "museum": "Musée du club"
   },
   "city": {
     "summary": "La ville",
@@ -228,7 +231,9 @@
       "academy": "Centre de formation niveau {level} : meilleurs jeunes, progression plus rapide",
       "upkeep": "Entretien : {before} → {after} / sem.",
       "training": "Centre d'entraînement niveau {level} : chaque joueur de 29 ans ou moins a {chance} de chances de gagner +1 par stat à chaque intersaison",
-      "trainingVeterans": "Au niveau 3, les plus de 31 ans perdent 1 point de moins par saison"
+      "trainingVeterans": "Au niveau 3, les plus de 31 ans perdent 1 point de moins par saison",
+      "fanzone": "Supporters : +{win} point par victoire (au lieu de +{baseWin}), −{loss} par défaite (au lieu de −{baseLoss}), jusqu'à {max} des habitants",
+      "museum": "{amount} par semaine et par trophée (titres et coupes) : {count} trophée(s) aujourd'hui"
     },
     "refusals": {
       "districtLocked": "Ce quartier n'est pas encore débloqué.",
@@ -241,7 +246,7 @@
       "lowSatisfaction": "Riverains trop mécontents (moins de 40) pour agrandir le stade.",
       "unknownSlot": "Emplacement introuvable.",
       "onePerDistrict": "Un seul par quartier.",
-      "divisionTooLow": "Pas encore disponible : il faut monter de division (Division 2 pour le centre d'entraînement, Élite pour les paliers 4 et 5 du stade)."
+      "divisionTooLow": "Pas encore disponible : il faut monter de division (Division 2 pour le centre d'entraînement, Élite pour le musée et les paliers 4 et 5 du stade)."
     },
     "shopRevenue": "Recettes de la boutique",
     "barsRevenue": "Recettes des bars",
@@ -331,7 +336,8 @@
     "otherIncome": "Transferts et événements",
     "otherExpenses": "Transferts et événements",
     "cup": "Coupe (billetterie et primes)",
-    "staff": "Staff"
+    "staff": "Staff",
+    "museum": "Musée du club"
   },
   "league": {
     "calendar": "Calendrier",

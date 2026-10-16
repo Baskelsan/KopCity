@@ -25,7 +25,7 @@ La v1 est une partie sans fin jouable sur plusieurs saisons, avec un club, une v
 - Création du club en début de partie : nom et couleurs ; un seul niveau de difficulté, plutôt tranquille
 - 3 divisions de 10 équipes, avec montée et descente
 - Une ville de 4 quartiers qui se débloquent, avec des emplacements prédéfinis
-- 6 types de bâtiments, construits en chantiers de plusieurs semaines
+- 6 types de bâtiments, construits en chantiers de plusieurs semaines (10 depuis le plan B et la refonte de la ville)
 - Effectif de 18 joueurs, 5 formations, 3 styles de jeu
 - Matchs en fil minute par minute avec 2 ou 3 décisions, ou en résumé rapide
 - Marché des transferts et centre de formation
@@ -122,37 +122,40 @@ La ville est faite de 4 quartiers, chacun avec un nombre fixe d'emplacements. On
 
 | Quartier | Emplacements | Se débloque | Particularité |
 | --- | --- | --- | --- |
-| Quartier du stade | 4 | Dès le départ | Seul quartier où bars et boutique donnent leur plein effet (50 % ailleurs) |
-| Faubourg | 5 | 26 000 habitants | Pas de nuisance pour les riverains du stade, idéal pour les logements |
-| Quartier de la gare | 4 | Montée en Division 2 | Un parking ou arrêt de transport y compte double (plafond d'accès et satisfaction) |
-| Nouveau quartier | 6 | Montée en Élite et 40 000 habitants | Le plus grand, pour la fin de partie |
+| Quartier du stade | 3 | Dès le départ | Seul quartier où bars et boutique donnent leur plein effet (50 % ailleurs) |
+| Faubourg | 4 | 26 000 habitants | Pas de nuisance pour les riverains du stade, idéal pour les logements |
+| Quartier de la gare | 3 | Montée en Division 2 | Un parking ou arrêt de transport y compte double (plafond d'accès et satisfaction) |
+| Nouveau quartier | 4 | Montée en Élite et 40 000 habitants | Pour la fin de partie |
 
-**Les 6 bâtiments** (valeurs de départ, à équilibrer en test)
+**Les bâtiments** (6 dans la v1, 10 depuis le plan B et la refonte de la ville)
 
 | Bâtiment | Coût (€) | Entretien (€/sem.) | Chantier | Effet | Contrepartie |
 | --- | --- | --- | --- | --- | --- |
 | Stade (3 paliers, puis 2 en Élite, sans emplacement) | 400 000 par palier (4e : 2 M€, 5e : 4 M€) | 5 000 par palier (4e : 15 000, 5e : 25 000) | 6 semaines | +2 000 places par palier (4e et 5e : +3 000) | Riverains −5 par palier |
 | Bar / brasserie (un par quartier) | 60 000 | 800 | 2 semaines | affluence × 1,5 € par match à domicile | Riverains −2 s'il est dans le quartier du stade |
 | Boutique du club (une seule) | 90 000 | 1 200 | 3 semaines | supporters × 1 € par semaine | Aucune |
-| Logements | 150 000 | 1 500 | 4 semaines | +2 000 habitants | Riverains −2 s'ils sont dans le quartier du stade |
+| Logements (3 niveaux, un par quartier) | 150 000, 250 000, 400 000 | 1 500 par niveau | 4 semaines | +2 000, +2 500, +2 500 habitants (7 000 au niveau 3) | Riverains −2 s'ils sont dans le quartier du stade |
 | Parking / arrêt de transport | 200 000 | 2 000 | 4 semaines | +2 500 au plafond d'accès | Occupe un emplacement |
 | Centre de formation (3 niveaux, un seul) | 250 000 par niveau | 3 000 par niveau | 6 semaines | Meilleurs jeunes, progression plus rapide | Aucune |
 | Centre d'entraînement (3 niveaux, un seul, dès la Division 2) | 1 M€, 2 M€, 4 M€ | 25 000, 50 000, 100 000 au total | 8 semaines | Progression de tout l'effectif (voir plan B) | Aucune |
+| Parc (un par quartier) | 120 000 | 1 000 | 3 semaines | Riverains +5 (+10 dans le quartier du stade) | Occupe un emplacement |
+| Fan zone (une seule) | 300 000 | 3 000 | 4 semaines | Supporters +1,5 point par victoire, −0,25 par défaite, plafond 65 % | Aucune |
+| Musée du club (un seul, en Élite) | 1,5 M€ | 5 000 | 8 semaines | 2 000 € par semaine et par trophée (titres et coupes) | Aucune |
 
 **Règles de construction**
 
 - Le coût est payé au lancement du chantier, et un achat ne peut jamais faire passer la trésorerie sous zéro.
 - 2 chantiers au maximum en même temps. La livraison d'un chantier est une semaine clé.
-- Un seul exemplaire pour la boutique et le centre de formation dans toute la ville, un seul bar par quartier. Logements et transports sont libres.
+- Un seul exemplaire pour la boutique, la fan zone, le musée et les centres de formation et d'entraînement dans toute la ville ; un seul bar, un seul logement et un seul parc par quartier. Les transports sont libres.
 - Démolir libère l'emplacement tout de suite et rembourse 25 % de tout ce qui a été investi (tous niveaux compris).
 - Un chantier lancé ne s'annule pas : il faut attendre sa livraison, puis démolir.
 
-**Habitants et supporters.** Population de départ : 20 000 habitants, plus 2 000 par immeuble de logements. Part de supporters au départ : 20 %, +1 point par victoire, −0,5 point par défaite, bornée entre 10 % et 60 %. Les supporters déterminent l'affluence au stade.
+**Habitants et supporters.** Population de départ : 20 000 habitants, plus ceux des logements (2 000, 4 500 puis 7 000 selon le niveau). Part de supporters au départ : 20 %, +1 point par victoire, −0,5 point par défaite, bornée entre 10 % et 60 %. Les supporters déterminent l'affluence au stade.
 
 **Satisfaction des riverains (0 à 100).** Elle tend chaque semaine, de 2 points au plus, vers une valeur cible ; les événements la font bouger ponctuellement.
 
 ```latex
-\text{cible} = 70 - 5 \times \text{paliers du stade} - 2 \times \text{bars et logements du quartier du stade} + 5 \times \text{transports}
+\text{cible} = 70 - 5 \times \text{paliers du stade} - 2 \times \text{bars et logements du quartier du stade} + 5 \times \text{transports} + 5 \times \text{parcs} \;(+10 \text{ dans le quartier du stade})
 ```
 
 - En dessous de 40 : plus aucune extension du stade n'est autorisée.
@@ -447,6 +450,13 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Vedettes : en Division 2 et en Élite, 1 ou 2 joueurs en plus à chaque mercato, au niveau de la division +3 à +5 (20 au plus), vendus 1,5 fois leur valeur, payés au salaire du marché.
 - Sauvegarde en version 14 (staff, ligne Staff des comptes).
 - Mesuré sur 15 saisons avec une stratégie « à fond » : la trésorerie plafonne autour de 2 à 3 M€ (au lieu de 12,7 M€), note du onze autour de 14, titres d'Élite toujours rares. La stratégie équilibrée reste à 1 % de faillites. Le bot « à fond » fait faillite dans 20 % des parties sur 15 saisons (10 % avant) : il garde 22 joueurs, accepte toutes les augmentations et ne vend jamais, et ses charges fixes (centre d'entraînement) restent après une descente.
+
+**Après la v1 — ville : moins d'emplacements, des bâtiments qui comptent**
+- 14 emplacements au lieu de 19 (3 / 4 / 3 / 4) : chaque place devient un choix.
+- Logements à 3 niveaux, un par quartier (150 000, 250 000 et 400 000 € ; +2 000, +2 500 et +2 500 habitants). Le Faubourg s'ouvre avec le logement du stade au niveau 3, le Nouveau quartier avec trois logements au maximum (41 000 habitants). Valeurs réduites par rapport à la proposition (+3 000 et +4 000) : la population montait à 56 000 et l'argent repartait à la hausse en fin de partie.
+- Trois nouveaux bâtiments : parc (riverains), fan zone (supporters), musée du club (Élite, revenus selon le palmarès). Ligne « Musée du club » dans les comptes.
+- Sauvegarde en version 15 : les logements d'un même quartier fusionnent en un seul, au niveau de leur nombre (3 au plus), sans changer la population ; ce qui ne tient plus dans les nouveaux emplacements (et les logements en chantier) est remboursé à 100 %.
+- Simulation : stratégie équilibrée à 4 % de faillites (1 % avant, le bot dépense aussi en parcs et fan zone), riverains plus satisfaits (74 en moyenne, 56 avant) et affluence plus haute ; le bot « à fond » plafonne entre 3 et 5 M€ sur les dernières saisons, avec 13 % de faillites sur 15 saisons.
 
 ## Décisions ouvertes et risques
 

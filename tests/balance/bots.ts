@@ -112,15 +112,15 @@ export const STRATEGIES: Record<StrategyName, Strategy> = {
     build: (state) => {
       let s = state;
       const reserve = 250000;
-      const order: BuildingType[] = ['shop', 'housing', 'transport', 'academy', 'bar'];
+      const order: BuildingType[] = ['shop', 'housing', 'transport', 'academy', 'bar', 'park', 'fanzone'];
       s = buildFirst(s, order, reserve);
       // Agrandir le stade quand il limite l'affluence.
       const d = attendanceForCheck(s);
       const check = canExtendStadium(s);
       if (d.limitedBy === 'capacity' && check.ok && s.club.treasury - check.cost >= reserve) s = run(s, { type: 'extendStadium' });
-      // Monter le centre de formation.
+      // Monter le centre de formation et les logements.
       for (const { slot } of allSlots(s.city)) {
-        if (slot.building?.type !== 'academy') continue;
+        if (slot.building?.type !== 'academy' && slot.building?.type !== 'housing') continue;
         const up = canUpgrade(s, slot.id);
         if (up.ok && s.club.treasury - up.cost >= reserve * 2) s = run(s, { type: 'upgradeBuilding', slotId: slot.id });
       }
@@ -143,8 +143,9 @@ export const STRATEGIES: Record<StrategyName, Strategy> = {
       const reserve = 100000;
       // Prudent : garde de quoi payer une demi-saison du nouvel entretien.
       const keep = (type: ConstructionType, level: number) => reserve + 26 * (upkeepAt(type, level) - upkeepAt(type, level - 1));
-      s = buildFirst(s, ['academy', 'shop', 'housing', 'transport', 'bar'], reserve);
+      s = buildFirst(s, ['academy', 'shop', 'housing', 'transport', 'bar', 'fanzone', 'park'], reserve);
       s = buildFirst(s, ['training'], keep('training', 1));
+      s = buildFirst(s, ['museum'], keep('museum', 1));
       for (const { slot } of allSlots(s.city)) {
         if (!slot.building) continue;
         const up = canUpgrade(s, slot.id);

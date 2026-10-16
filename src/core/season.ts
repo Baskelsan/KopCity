@@ -1,7 +1,7 @@
 // La semaine de jeu : match du club (résumé ou direct), autres matchs, argent, ville, effectif,
 // et les arrêts automatiques du bouton « Avancer » (voir docs/CADRAGE.md, « Boucle de jeu »).
 import balance from '../data/balance.json';
-import { progressConstructions } from './city';
+import { hasBuilding, progressConstructions } from './city';
 import {
   addReports,
   netResult,
@@ -211,7 +211,7 @@ export function completeWeek(state: GameState, match: MatchState): { state: Game
       ...next.city,
       supporterShare: Math.max(
         balance.supporters.min,
-        nextSupporterShare(next.city.supporterShare, clubOutcome(match)) - ticketPriceSupporterPenalty(state, home),
+        nextSupporterShare(next.city.supporterShare, clubOutcome(match), hasBuilding(next.city, 'fanzone')) - ticketPriceSupporterPenalty(state, home),
       ),
       residentSatisfaction: nextSatisfaction(next.city),
     },

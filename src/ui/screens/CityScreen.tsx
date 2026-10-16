@@ -11,6 +11,7 @@ import {
   districtSpec,
   findSlot,
   levelCost,
+  museumWeeklyRevenue,
   satisfactionTarget,
   shopWeeklyRevenue,
   SLOT_BUILDINGS,
@@ -164,7 +165,21 @@ function DistrictCard({ district, city, onSlot }: { district: District; city: Ci
 }
 
 /** Ce que change le bâtiment : comparaison de la ville avant et après sa livraison. */
-function EffectList({ before, after, slotId, type, level }: { before: City; after: City; slotId: string; type: BuildingType; level: number }) {
+function EffectList({
+  before,
+  after,
+  slotId,
+  type,
+  level,
+  trophies,
+}: {
+  before: City;
+  after: City;
+  slotId: string;
+  type: BuildingType;
+  level: number;
+  trophies: number;
+}) {
   const lines: string[] = [];
   const diff = (template: string, a: number, b: number, fmt = formatInteger) => {
     if (a !== b) lines.push(format(template, { before: fmt(a), after: fmt(b) }));
@@ -175,6 +190,23 @@ function EffectList({ before, after, slotId, type, level }: { before: City; afte
   }
   if (type === 'shop') lines.push(format(E.shopRevenue, { amount: formatEuros(shopWeeklyRevenue(after) - shopWeeklyRevenue(before)) }));
   if (type === 'academy') lines.push(format(E.academy, { level }));
+  if (type === 'fanzone') {
+    const S = balance.supporters;
+    const FZ = balance.fanZone;
+    const pts = (share: number) => formatDecimal(share * 100);
+    lines.push(
+      format(E.fanzone, {
+        win: pts(S.win * FZ.winFactor),
+        baseWin: pts(S.win),
+        loss: pts(-S.loss * FZ.lossFactor),
+        baseLoss: pts(-S.loss),
+        max: `${Math.round(FZ.maxShare * 100)} %`,
+      }),
+    );
+  }
+  if (type === 'museum') {
+    lines.push(format(E.museum, { amount: formatEuros(BUILDINGS.museum.revenuePerTrophy ?? 0), count: trophies }));
+  }
   if (type === 'training') {
     const chance = `${Math.round(level * balance.training.chancePerLevel * 100)} %`;
     lines.push(format(E.training, { level, chance }));
@@ -195,6 +227,8 @@ function EffectList({ before, after, slotId, type, level }: { before: City; afte
 
 const cents = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
 const formatCents = (value: number) => cents.format(value);
+const decimal = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+const formatDecimal = (value: number) => decimal.format(value);
 
 function Facts({ cost, weeks }: { cost: number; weeks: number }) {
   return (
@@ -269,6 +303,7 @@ function SlotSheet({
   onAct: (a: Action) => void;
 }) {
   const { city } = state;
+  const trophies = state.records.titles.length + state.records.cups.length;
   const found = findSlot(city, slotId);
   if (!found) return null;
   const building = found.slot.building;
@@ -303,6 +338,13 @@ function SlotSheet({
         {building.type === 'bar' && (
           <p>{format(T.buildingRevenue, { amount: format(T.perHomeMatch, { amount: formatEuros(barRevenue(state, slotId)) }) })}</p>
         )}
+        {building.type === 'museum' && (
+          <p>
+            {format(T.buildingRevenue, {
+              amount: format(T.perWeek, { amount: formatEuros(museumWeeklyRevenue(state)) }),
+            })}
+          </p>
+        )}
         {building.type === 'shop' && (
           <p>
             {format(T.buildingRevenue, {
@@ -321,6 +363,7 @@ function SlotSheet({
                 slotId={slotId}
                 type={building.type}
                 level={nextLevel}
+                trophies={trophies}
               />
               <Facts cost={upgrade.cost} weeks={spec.weeks} />
               <CheckButton
@@ -360,7 +403,14 @@ function SlotSheet({
           return (
             <section key={type} class={`build-option b-${type}`}>
               <h3>{texts.buildings[type]}</h3>
-              <EffectList before={city} after={withBuilding(city, slotId, type, 1)} slotId={slotId} type={type} level={1} />
+              <EffectList
+                before={city}
+                after={withBuilding(city, slotId, type, 1)}
+                slotId={slotId}
+                type={type}
+                level={1}
+                trophies={trophies}
+              />
               <Facts cost={levelCost(type, 1)} weeks={spec.weeks} />
               <CheckButton
                 check={check}
