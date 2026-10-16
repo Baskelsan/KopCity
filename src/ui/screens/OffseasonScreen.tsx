@@ -169,6 +169,7 @@ export function OffseasonScreen({
                     to: formatEuros(request.salary),
                   })}
                 </p>
+                {player.refusedRaises >= 1 && <p class="refusal">{O.lastWarning}</p>}
                 <div class="actions">
                   <button
                     type="button"

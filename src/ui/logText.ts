@@ -50,6 +50,8 @@ export function describeLog(entry: LogEntry, state: GameState): string {
     }
     case 'cupResult':
       return describeCupResult(params, state);
+    case 'playerLeft':
+      return format(texts.log.playerLeft, { name: String(params.name), fee: formatEuros(Number(params.fee)) });
     case 'matchResult': {
       const scored = Number(params.scored);
       const conceded = Number(params.conceded);
@@ -97,6 +99,8 @@ export function describeAlert(alert: Alert, state: GameState): string {
       return A.winterMarket;
     case 'cupResult':
       return describeCupResult(params, state);
+    case 'playerLeft':
+      return format(A.playerLeft, { name: String(params.name), fee: formatEuros(Number(params.fee)) });
     case 'event':
       return format(A.event, { title: eventTexts(String(params.eventId)).title });
     case 'bankruptcy':

@@ -4,7 +4,7 @@ import { attendanceFor, priceDemandFactor, ticketPrice, weekFinance } from '../s
 import { applyAction, newGame, type Action } from '../src/core/game';
 import { myDivision } from '../src/core/league';
 import { endSeason, generateMarket, generateProspects, renewalSalary, startSeason } from '../src/core/offseason';
-import { contractSalary, overall } from '../src/core/players';
+import { contractSalary, overall, transferValue } from '../src/core/players';
 import { seedToState } from '../src/core/rng';
 import type { GameState } from '../src/core/state';
 import { advanceAndHandle } from './helpers';
@@ -71,13 +71,47 @@ describe('salaires', () => {
     return { ...s, squad: { ...s.squad, players }, time: { season: 1, week: 19 } };
   };
 
-  it('après une bonne saison (note ≥ 7 sur 10 matchs), un joueur demande +20 %', () => {
+  it('après une bonne saison (note ≥ 7 sur 10 matchs), un joueur demande au moins +20 % et son salaire juste', () => {
     const start = withGoodSeason();
     const off = endSeason(start);
     const star = start.squad.players[0]!;
+    const aged = off.squad.players.find((p) => p.id === star.id)!;
     const request = off.offseason!.raiseRequests.find((r) => r.playerId === star.id);
-    expect(request?.salary).toBe(Math.round((star.monthlySalary * 1.2) / 100) * 100);
-    expect(off.offseason!.raiseRequests).toHaveLength(1);
+    expect(request?.salary).toBe(
+      Math.max(contractSalary(aged, off.league.myDivision), Math.round((star.monthlySalary * 1.2) / 100) * 100),
+    );
+  });
+
+  it('un joueur sous-payé (moins de 75 % de son salaire juste) réclame son salaire juste', () => {
+    const s = fresh();
+    const cheap = { ...s.squad.players[2]!, monthlySalary: 1000 };
+    const start = { ...s, time: { season: 1, week: 19 }, squad: { ...s.squad, players: s.squad.players.map((p, i) => (i === 2 ? cheap : p)) } };
+    const off = endSeason(start);
+    const aged = off.squad.players.find((p) => p.id === cheap.id)!;
+    const request = off.offseason!.raiseRequests.find((r) => r.playerId === cheap.id);
+    expect(request?.salary).toBe(contractSalary(aged, off.league.myDivision));
+  });
+
+  it('au 2e refus, le joueur part au lancement de la saison, vendu à sa valeur', () => {
+    const off = endSeason(withGoodSeason());
+    const request = off.offseason!.raiseRequests[0]!;
+    const once = { ...off, squad: { ...off.squad, players: off.squad.players.map((p) => (p.id === request.playerId ? { ...p, refusedRaises: 1 } : p)) } };
+    const refused = run(once, { type: 'answerRaise', playerId: request.playerId, accept: false });
+    expect(refused.squad.players.find((p) => p.id === request.playerId)!.refusedRaises).toBe(2);
+    const player = refused.squad.players.find((p) => p.id === request.playerId)!;
+    const next = startSeason(refused);
+    if (next.phase !== 'season') return;
+    expect(next.squad.players.map((p) => p.id)).not.toContain(request.playerId);
+    expect(next.alerts.some((a) => a.key === 'playerLeft')).toBe(true);
+    expect(next.club.treasury).toBe(refused.club.treasury + transferValue(player));
+  });
+
+  it('accepter remet le compteur de refus à zéro', () => {
+    const off = endSeason(withGoodSeason());
+    const request = off.offseason!.raiseRequests[0]!;
+    const once = { ...off, squad: { ...off.squad, players: off.squad.players.map((p) => (p.id === request.playerId ? { ...p, refusedRaises: 1 } : p)) } };
+    const accepted = run(once, { type: 'answerRaise', playerId: request.playerId, accept: true });
+    expect(accepted.squad.players.find((p) => p.id === request.playerId)!.refusedRaises).toBe(0);
   });
 
   it('accepter paie le nouveau salaire, refuser coûte 20 de moral', () => {
@@ -85,7 +119,7 @@ describe('salaires', () => {
     const request = off.offseason!.raiseRequests[0]!;
     const accepted = run(off, { type: 'answerRaise', playerId: request.playerId, accept: true });
     expect(accepted.squad.players.find((p) => p.id === request.playerId)!.monthlySalary).toBe(request.salary);
-    expect(accepted.offseason!.raiseRequests).toHaveLength(0);
+    expect(accepted.offseason!.raiseRequests.map((r) => r.playerId)).not.toContain(request.playerId);
     const refused = run(off, { type: 'answerRaise', playerId: request.playerId, accept: false });
     const before = off.squad.players.find((p) => p.id === request.playerId)!;
     expect(refused.squad.players.find((p) => p.id === request.playerId)!.morale).toBe(

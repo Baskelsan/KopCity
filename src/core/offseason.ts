@@ -72,13 +72,29 @@ function promoteAndRelegate(divisions: Division[]): { divisions: Map<DivisionId,
   return { divisions: next };
 }
 
-/** Le niveau d'une équipe dérive un peu, avec un rappel vers celui de sa (nouvelle) division. */
-function evolveTeam(rngState: number, team: Team, division: DivisionId): Draw<Team> {
+/**
+ * Le niveau d'une équipe dérive un peu, avec un rappel vers un niveau cible : celui de sa division,
+ * ou, en Élite, celui du club moins 1,5 quand il domine (plafonné à 19) — les gros clubs recrutent.
+ */
+function evolveTeam(rngState: number, team: Team, division: DivisionId, clubLevel: number): Draw<Team> {
   const T = balance.teams;
   const noise = floatBetween(rngState, -T.levelNoise, T.levelNoise);
-  const level = team.level + T.levelReversion * (divisionLevel(division) - team.level) + noise.value;
+  const target =
+    division === 'D1'
+      ? Math.min(T.eliteMaxLevel, Math.max(divisionLevel(division), clubLevel - T.eliteChaseGap))
+      : divisionLevel(division);
+  const level = team.level + T.levelReversion * (target - team.level) + noise.value;
   const strength = strengthForLevel(noise.rngState, level);
   return { value: { ...team, level, strength: strength.value }, rngState: strength.rngState };
+}
+
+/** Niveau du club : note moyenne de son meilleur onze (sous contrat). */
+export function startingElevenLevel(state: GameState): number {
+  const players = contractedPlayers(state.squad.players);
+  const lineup = autoLineup(players, state.squad.formation);
+  const byId = new Map(players.map((p) => [p.id, p]));
+  const ratings = lineup.map((id) => byId.get(id)).filter((p): p is Player => p !== undefined).map((p) => overall(p));
+  return ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
 }
 
 // ——— Joueurs ———
@@ -89,11 +105,18 @@ export function agePlayer(rngState: number, player: Player, academy: number): Dr
   const age = player.age + 1;
   const stats = { ...player.stats };
   if (age <= AG.youngMaxAge) {
-    const bonus = player.homegrown ? academy * AG.academyBonusPerLevel : 0;
+    // Les jeunes formés au club ont, par stat, une chance de +1 en plus selon le niveau du centre (15 % par niveau).
+    const bonusChance = player.homegrown ? academy * AG.academyBonusChancePerLevel : 0;
     for (const key of STAT_KEYS) {
       const gain = nextInt(rng, AG.youngGainMin, AG.youngGainMax);
       rng = gain.rngState;
-      stats[key] = clamp(stats[key] + gain.value + bonus, 1, 20);
+      let extra = 0;
+      if (bonusChance > 0) {
+        const lucky = nextChance(rng, bonusChance);
+        rng = lucky.rngState;
+        if (lucky.value) extra = 1;
+      }
+      stats[key] = clamp(stats[key] + gain.value + extra, 1, 20);
     }
     // On ne dépasse pas le potentiel : la progression est ramenée à ce qu'il permet.
     const before = lineRating(player, player.pos);
@@ -191,12 +214,13 @@ export function endSeason(state: GameState): GameState {
   const movement: Movement =
     newDivision === divisionAbove(myDiv) ? 'promoted' : newDivision === divisionBelow(myDiv) ? 'relegated' : 'stayed';
 
+  const clubLevel = startingElevenLevel(state);
   const divisions: Division[] = [];
   for (const id of DIVISIONS) {
     const teams: Team[] = [];
     for (const teamId of members.get(id)!) {
       if (teamId === MY_TEAM_ID) continue;
-      const evolved = evolveTeam(rng, allTeams.get(teamId)!, id);
+      const evolved = evolveTeam(rng, allTeams.get(teamId)!, id, clubLevel);
       rng = evolved.rngState;
       teams.push(evolved.value);
     }
@@ -230,11 +254,19 @@ export function endSeason(state: GameState): GameState {
     });
   }
 
+  // Augmentations : un joueur sous-payé réclame son salaire juste (celui du marché pour sa note et la division),
+  // et après une bonne saison, au moins +20 %.
   const R = balance.raises;
-  const raiseRequests: RaiseRequest[] = players
-    .filter((p) => p.contractYears > 0 && p.seasonStats.apps >= R.minApps)
-    .filter((p) => p.seasonStats.ratingTotal / p.seasonStats.apps >= R.minAverageRating)
-    .map((p) => ({ playerId: p.id, salary: Math.round((p.monthlySalary * R.factor) / 100) * 100 }));
+  const raiseRequests: RaiseRequest[] = players.flatMap((p) => {
+    if (p.contractYears <= 0) return [];
+    const fair = contractSalary(p, newDivision);
+    const goodSeason =
+      p.seasonStats.apps >= R.minApps && p.seasonStats.ratingTotal / p.seasonStats.apps >= R.minAverageRating;
+    const underpaid = p.monthlySalary < fair * R.underpaidThreshold;
+    if (!goodSeason && !underpaid) return [];
+    const salary = goodSeason ? Math.max(fair, Math.round((p.monthlySalary * R.factor) / 100) * 100) : fair;
+    return salary > p.monthlySalary ? [{ playerId: p.id, salary }] : [];
+  });
 
   const prospects = generateProspects(rng, academy, state.city.population);
   rng = prospects.rngState;
@@ -327,7 +359,7 @@ export function expiringPlayers(state: GameState): Player[] {
 
 /** Effectif au lancement de la saison : sans les contrats non prolongés. */
 export function squadSizeAtStart(state: GameState): number {
-  return state.squad.players.length - expiringPlayers(state).length;
+  return state.squad.players.length - expiringPlayers(state).length - leavingAfterRefusals(state).length;
 }
 
 export function renewalSalary(player: Player, division: DivisionId): number {
@@ -398,9 +430,23 @@ export function sellPlayer(state: GameState, playerId: string): GameState {
   };
 }
 
+/** Refus d'augmentation : moral −20, et un refus de plus au compteur. */
 function refuseRaiseMorale(player: Player): Player {
   const m = balance.morale;
-  return { ...player, morale: Math.min(m.max, Math.max(m.min, player.morale + balance.raises.refusedMorale)) };
+  return {
+    ...player,
+    morale: Math.min(m.max, Math.max(m.min, player.morale + balance.raises.refusedMorale)),
+    refusedRaises: player.refusedRaises + 1,
+  };
+}
+
+/** Joueurs qui partiront au lancement de la saison parce qu'on a refusé (ou qu'on refusera) leur 2e demande. */
+export function leavingAfterRefusals(state: GameState): Player[] {
+  const limit = balance.raises.leaveAfterRefusals;
+  const pending = new Set((state.offseason?.raiseRequests ?? []).map((r) => r.playerId));
+  return state.squad.players.filter(
+    (p) => p.contractYears > 0 && (p.refusedRaises >= limit || (pending.has(p.id) && p.refusedRaises + 1 >= limit)),
+  );
 }
 
 /** Répondre à une demande d'augmentation : accepter (nouveau salaire) ou refuser (moral −20). */
@@ -408,7 +454,7 @@ export function answerRaise(state: GameState, playerId: string, accept: boolean)
   const request = state.offseason?.raiseRequests.find((r) => r.playerId === playerId);
   if (!request || !state.offseason) return state;
   const players = state.squad.players.map((p) =>
-    p.id !== playerId ? p : accept ? { ...p, monthlySalary: request.salary } : refuseRaiseMorale(p),
+    p.id !== playerId ? p : accept ? { ...p, monthlySalary: request.salary, refusedRaises: 0 } : refuseRaiseMorale(p),
   );
   return {
     ...state,
@@ -431,10 +477,22 @@ export function startSeason(state: GameState): GameState {
   let rng = state.meta.rngState;
   const leaving = new Set(expiringPlayers(state).map((p) => p.id));
   const unanswered = new Set((state.offseason?.raiseRequests ?? []).map((r) => r.playerId));
-  const players = state.squad.players
+  const afterAnswers = state.squad.players
     .filter((p) => !leaving.has(p.id))
-    .map((p) => (unanswered.has(p.id) ? refuseRaiseMorale(p) : p))
+    .map((p) => (unanswered.has(p.id) ? refuseRaiseMorale(p) : p));
+  // Au 2e refus, le joueur part : il est vendu à sa valeur de transfert.
+  const limit = balance.raises.leaveAfterRefusals;
+  const departed = afterAnswers.filter((p) => p.refusedRaises >= limit);
+  const fees = departed.reduce((sum, p) => sum + transferValue(p), 0);
+  const players = afterAnswers
+    .filter((p) => p.refusedRaises < limit)
     .map((p) => ({ ...p, seasonStats: { apps: 0, goals: 0, assists: 0, ratingTotal: 0 } }));
+  const departureEntries = departed.map((p) => ({
+    season: state.time.season + 1,
+    week: 1,
+    key: 'playerLeft',
+    params: { name: p.name, fee: transferValue(p) },
+  }));
 
   const divisions: Division[] = [];
   for (const old of state.league.divisions) {
@@ -463,7 +521,13 @@ export function startSeason(state: GameState): GameState {
       playTime: { ...state.meta.playTime, season: 0, lastSeason: state.meta.playTime.season },
     },
     time: { season: state.time.season + 1, week: 1 },
-    club: { ...state.club, weeksInRed: state.club.treasury < 0 ? state.club.weeksInRed : 0, sponsorMultiplier },
+    club: {
+      ...state.club,
+      treasury: state.club.treasury + fees,
+      weeksInRed: state.club.treasury + fees < 0 ? state.club.weeksInRed : 0,
+      sponsorMultiplier,
+    },
+    log: [...state.log, ...departureEntries],
     objectives: objectives.value,
     records: markSeasonStart(state.records),
     squad: cleanLineup({ ...state.squad, players }),
@@ -471,7 +535,7 @@ export function startSeason(state: GameState): GameState {
     market: { ...state.market, offers: [], open: false },
     finance: { lastWeek: null, season: emptyReport() },
     offseason: null,
-    alerts: [],
+    alerts: departed.map((p) => ({ key: 'playerLeft' as const, params: { name: p.name, fee: transferValue(p) } })),
     cup: cup.value,
   };
 }

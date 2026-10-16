@@ -177,7 +177,12 @@ describe('joueurs entre deux saisons', () => {
     const young = playerAged(19, { stats: { att: 8, def: 8, pas: 8, phy: 8 } });
     const aged = agePlayer(seedToState(1), young, 0).value;
     expect(aged.age).toBe(20);
-    for (const k of ['att', 'def', 'pas', 'phy'] as const) expect(aged.stats[k]).toBeGreaterThan(young.stats[k]);
+    for (const k of ['att', 'def', 'pas', 'phy'] as const) expect(aged.stats[k]).toBeGreaterThanOrEqual(young.stats[k]);
+    // En moyenne, +1 par stat et par saison (de 0 à +2).
+    let gain = 0;
+    for (let seed = 1; seed <= 200; seed++) gain += overall(agePlayer(seedToState(seed), young, 0).value) - overall(young);
+    expect(gain / 200).toBeGreaterThan(0.6);
+    expect(gain / 200).toBeLessThan(1.4);
     const capped = agePlayer(seedToState(1), { ...young, potential: overall(young) }, 0).value;
     expect(overall(capped)).toBeLessThanOrEqual(overall(young));
   });
@@ -285,7 +290,7 @@ describe('centre de formation', () => {
       return total / count;
     };
     expect(avg(3, 20000)).toBeGreaterThan(avg(0, 20000) + 2);
-    expect(avg(0, 40000)).toBeGreaterThan(avg(0, 20000) + 1);
+    expect(avg(0, 40000)).toBeGreaterThan(avg(0, 20000) + 0.5);
   });
 
   it('signer un jeune l’ajoute à l’effectif ; le laisser partir le retire de la liste', () => {

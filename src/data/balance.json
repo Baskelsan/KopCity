@@ -247,19 +247,21 @@
   },
   "teams": {
     "levelNoise": 0.8,
-    "levelReversion": 0.3
+    "levelReversion": 0.3,
+    "eliteChaseGap": 1.5,
+    "eliteMaxLevel": 19
   },
   "aging": {
     "youngMaxAge": 23,
-    "youngGainMin": 1,
+    "youngGainMin": 0,
     "youngGainMax": 2,
-    "academyBonusPerLevel": 1,
     "declineFromAge": 31,
     "declineMin": 1,
     "declineMax": 2,
     "retireFromAge": 35,
     "retireChance": 0.35,
-    "retireAge": 38
+    "retireAge": 38,
+    "academyBonusChancePerLevel": 0.15
   },
   "academy": {
     "prospectsByLevel": [
@@ -283,9 +285,9 @@
     "ageMin": 16,
     "ageMax": 18,
     "currentLevel": 6,
-    "potentialBase": 11,
-    "potentialPerLevel": 2,
-    "potentialPerPopulation": 0.0001,
+    "potentialBase": 9,
+    "potentialPerLevel": 1.5,
+    "potentialPerPopulation": 5e-05,
     "potentialSpread": 3,
     "starsErrorReductionPerLevel": 0.25,
     "contractYears": 3,
@@ -377,7 +379,9 @@
     "minApps": 10,
     "minAverageRating": 7,
     "factor": 1.2,
-    "refusedMorale": -20
+    "refusedMorale": -20,
+    "underpaidThreshold": 0.75,
+    "leaveAfterRefusals": 2
   },
   "cup": {
     "weeks": [

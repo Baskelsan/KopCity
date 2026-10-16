@@ -12,6 +12,7 @@ const NAMES: Record<StrategyName, string> = {
   stadium: 'Tout sur le stade',
   players: 'Tout sur les joueurs',
   balanced: 'Équilibrée',
+  max: 'À fond',
 };
 
 // Estimation de durée d'une saison (secondes), à confirmer en jouant pour de vrai.
@@ -99,6 +100,27 @@ it(
         .map(([k, v]) => `| ${k} | ${v.toFixed(1)} |`),
       '',
     ];
+    // Fin de partie : la stratégie « à fond » sur 15 saisons.
+    const LONG_GAMES = Number(process.env.SIM_LONG_GAMES ?? 30);
+    const LONG_SEASONS = 15;
+    const long = Array.from({ length: LONG_GAMES }, (_, i) => playGame(i + 1, STRATEGIES.max, LONG_SEASONS));
+    lines.push(
+      '## Fin de partie : stratégie « à fond » sur 15 saisons',
+      '',
+      `${LONG_GAMES} parties : centre de formation au maximum le plus tôt possible, toute la ville améliorée, tous les jeunes signés, les meilleurs joueurs achetés, toutes les augmentations acceptées.`,
+      '',
+      '| Saison | Note moyenne du onze | Trésorerie (médiane) | En Élite | Titre d\'Élite (parmi les clubs en Élite) | Faillites cumulées |',
+      '| --- | --- | --- | --- | --- | --- |',
+    );
+    for (let season = 1; season <= LONG_SEASONS; season++) {
+      const rows = long.map((r) => r.perSeason[season - 1]).filter((x) => x !== undefined);
+      const inElite = rows.filter((r) => r.division === 'D1');
+      const bankrupt = long.filter((r) => r.bankrupt && r.seasonsPlayed <= season).length;
+      lines.push(
+        `| ${season} | ${mean(rows.map((r) => r.level)).toFixed(1)} | ${eur(median(rows.map((r) => r.treasury)))} | ${pct(inElite.length / LONG_GAMES)} | ${inElite.length ? pct(inElite.filter((r) => r.champion).length / inElite.length) : '–'} | ${pct(bankrupt / LONG_GAMES)} |`,
+      );
+    }
+    lines.push('');
     writeFileSync(new URL('../../docs/EQUILIBRAGE.md', import.meta.url), lines.join('\n'));
     console.log(lines.join('\n'));
   },

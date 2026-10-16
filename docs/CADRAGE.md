@@ -433,6 +433,12 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Onglet Stats (dans Matchs) : buteurs, passeurs et meilleures notes de la saison (au moins 5 matchs), saison par saison (rang, coupe, trésorerie, affluence moyenne), bilan face à chaque adversaire (championnat et coupe).
 - 15 succès gardés d'une partie à l'autre (stockés à part, avec la date et le club) : première victoire, première montée, premier titre, atteindre l'Élite, titre en Élite, coupe, petit poucet (battre en coupe un club de deux divisions au-dessus), 10 000 spectateurs, 1 M€ en caisse, centre de formation niveau 3, 4 quartiers, 50 buts pour un joueur, 10 matchs sans défaite, 3 objectifs d'une saison, sortir du rouge après 3 semaines. Notification au déblocage, liste dans l'onglet Club.
 
+**Fin de partie — plan A : progression, salaires, Élite**
+- Progression des jeunes : 0 à +2 par stat et par saison ; le centre de formation donne, par niveau, 15 % de chance de +1 sur chaque stat (au lieu de +1 par stat et par niveau). Potentiel des jeunes du centre : 9 + 1,5 par niveau + population ÷ 20 000 ± 3.
+- Salaire juste = celui du marché pour la note et la division. Un joueur payé moins de 75 % de ce salaire le réclame ; après une bonne saison, il demande au moins +20 %. Refuser coûte 20 de moral ; au 2e refus d'affilée, le joueur part au lancement de la saison, vendu à sa valeur.
+- En Élite, les clubs visent le niveau du onze du joueur moins 1,5 (au moins 16, au plus 19) : plus il domine, plus ils recrutent.
+- Mesuré sur 15 saisons avec une stratégie « à fond » : note moyenne du onze autour de 14, titres d'Élite rares (environ 10 % des saisons en Élite). Reste à traiter : la trésorerie continue de grimper faute de dépenses utiles en fin de partie.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**

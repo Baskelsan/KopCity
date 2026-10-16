@@ -162,7 +162,8 @@
     "districtUnlocked": "Nouveau quartier débloqué : {district} !",
     "matchResult": "{outcome} {scored}-{conceded} contre {opponent} ({venue}).",
     "seasonEnd": "Fin de saison : {rank} en {division}. {movement}",
-    "eventResolved": "{title} : {choice}."
+    "eventResolved": "{title} : {choice}.",
+    "playerLeft": "{name} quitte le club après deux refus d'augmentation (vendu {fee})."
   },
   "buildings": {
     "stadium": "Stade",
@@ -285,7 +286,8 @@
     "event": "Événement : {title}.",
     "bankruptcy": "Faillite : 4 semaines de suite dans le rouge.",
     "eventOutcome": "{title} : {choice}. {detail}",
-    "cupResult": "{text}"
+    "cupResult": "{text}",
+    "playerLeft": "{name} est parti après deux refus d'augmentation (vendu {fee})."
   },
   "outcomes": {
     "win": "Victoire",
@@ -369,12 +371,13 @@
     "ratingChange": "{before} → {after}",
     "ratingsAge": "{age} ans",
     "raisesTitle": "Demandes d'augmentation",
-    "raisesHint": "Après une bonne saison, ces joueurs veulent être mieux payés. Sans réponse, la demande est refusée au lancement de la saison (moral −20).",
+    "raisesHint": "Ces joueurs veulent être payés à leur juste valeur. Refuser coûte 20 de moral ; au 2e refus, le joueur part au lancement de la saison. Sans réponse, la demande est refusée.",
     "raiseLine": "Note moyenne {rating}/10 · salaire {from} → {to} / mois",
     "acceptRaise": "Accepter",
     "refuseRaise": "Refuser (moral −20)",
     "seasonLine": "Saison : {apps} match(s) · {goals} but(s) · {assists} passe(s) déc. · note {rating}/10",
-    "seasonLineNone": "Saison : aucun match joué"
+    "seasonLineNone": "Saison : aucun match joué",
+    "lastWarning": "Déjà un refus : s'il est refusé encore, il partira."
   },
   "market": {
     "title": "Mercato",

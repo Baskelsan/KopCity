@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -73,6 +73,8 @@ export interface Player {
   /** Statistiques de la saison en cours et de toute la carrière au club (ajouté en v9). */
   seasonStats: PlayerSeasonStats;
   careerStats: PlayerSeasonStats;
+  /** Demandes d'augmentation refusées d'affilée ; au 2e refus, il part (ajouté en v13). */
+  refusedRaises: number;
 }
 
 export interface PlayerSeasonStats {
@@ -411,7 +413,8 @@ export type AlertKey =
   | 'event'
   | 'bankruptcy'
   | 'eventOutcome'
-  | 'cupResult';
+  | 'cupResult'
+  | 'playerLeft';
 
 /** Raison pour laquelle « Avancer » s'est arrêté. Texte dans texts.fr.json (alerts). */
 export interface Alert {

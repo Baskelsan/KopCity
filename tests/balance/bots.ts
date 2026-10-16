@@ -12,11 +12,11 @@ import { choiceRefusal, eventSpec } from '../../src/core/events';
 import { applyAction, newGame, type Action } from '../../src/core/game';
 import { formationSlots } from '../../src/core/lineup';
 import { defaultDecision } from '../../src/core/match';
-import { canAddPlayer, contractedPlayers, expiringPlayers } from '../../src/core/offseason';
+import { canAddPlayer, contractedPlayers, expiringPlayers, startingElevenLevel } from '../../src/core/offseason';
 import { divisionLevel, lineRating, overall } from '../../src/core/players';
 import type { BuildingType, GameState, Position } from '../../src/core/state';
 
-export type StrategyName = 'stadium' | 'players' | 'balanced';
+export type StrategyName = 'stadium' | 'players' | 'balanced' | 'max';
 
 export interface Strategy {
   name: StrategyName;
@@ -28,6 +28,8 @@ export interface Strategy {
   recruit: (state: GameState) => GameState;
   /** Réponse à un événement. */
   eventChoice: (state: GameState) => string;
+  /** Accepte les demandes d'augmentation à l'intersaison. */
+  acceptRaises: boolean;
 }
 
 const run = (state: GameState, action: Action) => applyAction(state, action);
@@ -88,6 +90,7 @@ export const STRATEGIES: Record<StrategyName, Strategy> = {
     },
     recruit: (state) => state,
     eventChoice: (state) => (state.events.pending!.eventId === 'playerOffer' ? 'sell' : firstAllowedChoice(state)),
+    acceptRaises: false,
   },
 
   /** Tout sur les joueurs : chaque euro va au mercato, rien n'est construit. */
@@ -97,6 +100,7 @@ export const STRATEGIES: Record<StrategyName, Strategy> = {
     build: (state) => state,
     recruit: (state) => buyUpgrades(state, 0, 0.5),
     eventChoice: (state) => (state.events.pending!.eventId === 'playerOffer' ? 'refuse' : firstAllowedChoice(state)),
+    acceptRaises: true,
   },
 
   /** Équilibré : une ville qui grandit, un stade agrandi quand il est plein, des renforts ciblés, une réserve. */
@@ -122,6 +126,33 @@ export const STRATEGIES: Record<StrategyName, Strategy> = {
     },
     recruit: (state) => buyUpgrades(state, 250000, 0.5),
     eventChoice: (state) => (state.events.pending!.eventId === 'playerOffer' ? 'refuse' : firstAllowedChoice(state)),
+    acceptRaises: true,
+  },
+
+  /**
+   * À fond : centre de formation au maximum le plus tôt possible, toute la ville améliorée,
+   * tous les jeunes signés, les meilleurs joueurs achetés, toutes les augmentations acceptées.
+   */
+  max: {
+    name: 'max',
+    reserve: 100000,
+    build: (state) => {
+      let s = state;
+      const reserve = 100000;
+      s = buildFirst(s, ['academy', 'shop', 'housing', 'transport', 'bar'], reserve);
+      for (const { slot } of allSlots(s.city)) {
+        if (!slot.building) continue;
+        const up = canUpgrade(s, slot.id);
+        if (up.ok && s.club.treasury - up.cost >= reserve) s = run(s, { type: 'upgradeBuilding', slotId: slot.id });
+      }
+      const d = attendanceForCheck(s);
+      const check = canExtendStadium(s);
+      if (d.limitedBy === 'capacity' && check.ok && s.club.treasury - check.cost >= reserve) s = run(s, { type: 'extendStadium' });
+      return s;
+    },
+    recruit: (state) => buyUpgrades(state, 100000, 0.5),
+    eventChoice: (state) => (state.events.pending!.eventId === 'playerOffer' ? 'refuse' : firstAllowedChoice(state)),
+    acceptRaises: true,
   },
 };
 
@@ -147,6 +178,8 @@ export interface GameResult {
   capacity: number;
   population: number;
   seasons: SeasonStats[];
+  /** Fin de chaque saison : niveau du onze, trésorerie, division, champion ou non. */
+  perSeason: { level: number; treasury: number; division: string; champion: boolean }[];
 }
 
 /** Intersaison : prolonger les bons joueurs, signer les jeunes, recruter, compléter si besoin, lancer la saison. */
@@ -155,6 +188,9 @@ function playOffseason(state: GameState, strategy: Strategy): GameState {
   const level = divisionLevel(s.league.myDivision);
   for (const p of expiringPlayers(s)) {
     if (p.age <= 33 && overall(p) >= level - 3) s = run(s, { type: 'renewContract', playerId: p.id, years: 2 });
+  }
+  for (const r of [...s.offseason!.raiseRequests]) {
+    s = run(s, { type: 'answerRaise', playerId: r.playerId, accept: strategy.acceptRaises });
   }
   for (const p of s.offseason!.prospects) s = run(s, { type: 'signProspect', playerId: p.id });
   s = strategy.recruit(s);
@@ -175,6 +211,7 @@ function playOffseason(state: GameState, strategy: Strategy): GameState {
 export function playGame(seed: number, strategy: Strategy, seasons: number): GameResult {
   let s = applyAction(newGameFor(seed), { type: 'setAlwaysLiveMatches', value: false });
   const stats: SeasonStats[] = [];
+  const perSeason: GameResult['perSeason'] = [];
   let current: SeasonStats = { stops: 0, liveMatches: 0, events: 0, reasons: {} };
   const rank = { D3: 1, D2: 2, D1: 3 } as const;
   let best = s.league.myDivision;
@@ -183,6 +220,12 @@ export function playGame(seed: number, strategy: Strategy, seasons: number): Gam
     if (s.phase === 'gameOver') break;
     if (s.phase === 'offseason') {
       stats.push(current);
+      perSeason.push({
+        level: startingElevenLevel(s),
+        treasury: s.club.treasury,
+        division: s.offseason!.summary.division,
+        champion: s.offseason!.summary.rank === 1,
+      });
       current = { stops: 0, liveMatches: 0, events: 0, reasons: {} };
       if (stats.length >= seasons) break;
       s = playOffseason(s, strategy);
@@ -224,6 +267,7 @@ export function playGame(seed: number, strategy: Strategy, seasons: number): Gam
     capacity: stadiumCapacity(s.city),
     population: s.city.population,
     seasons: stats,
+    perSeason,
   };
 }
 
