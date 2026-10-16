@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import { texts } from './i18n';
+import { format, texts } from './i18n';
 import { CityScreen } from './screens/CityScreen';
 import { ClubScreen } from './screens/ClubScreen';
 import { GameOverScreen } from './screens/GameOverScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MatchScreen } from './screens/MatchScreen';
 import { InstallHelp, rememberInstallHelpDismissed, shouldOfferInstallHelp } from './InstallHelp';
+import { achievementsMet } from '../core/achievements';
+import { loadAchievements, unlockAchievements, type UnlockedAchievement } from '../storage/achievements';
+import { achievementTitle } from './AchievementsView';
 import { NewClubScreen } from './screens/NewClubScreen';
 import { OffseasonScreen } from './screens/OffseasonScreen';
 import { SquadScreen } from './screens/SquadScreen';
@@ -28,6 +31,25 @@ export function App() {
     rememberInstallHelpDismissed();
     setShowInstall(false);
   }, []);
+
+  // Succès : dès qu'une condition est remplie, le succès est gardé pour toujours et signalé.
+  const [achievements, setAchievements] = useState<UnlockedAchievement[]>([]);
+  useEffect(() => {
+    void loadAchievements().then(setAchievements).catch(() => setAchievements([]));
+  }, []);
+  useEffect(() => {
+    if (!state || creating) return;
+    const met = achievementsMet(state);
+    if (met.every((id) => achievements.some((a) => a.id === id))) return;
+    void unlockAchievements(met, state.club.name, new Date().toISOString())
+      .then(({ all, added }) => {
+        setAchievements(all);
+        if (added.length > 0) {
+          setMessage(added.map((a) => format(texts.achievements.toast, { title: achievementTitle(a.id) })).join(' '));
+        }
+      })
+      .catch(() => undefined);
+  }, [state, creating, achievements]);
 
   // Temps de jeu : compté par tranches, seulement quand l'app est à l'écran.
   const playing = state !== null && !creating;
@@ -101,6 +123,7 @@ export function App() {
             notify={setMessage}
             onNewGame={startNewGame}
             onShowInstall={() => setShowInstall(true)}
+            achievements={achievements}
           />
         )}
       </main>

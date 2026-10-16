@@ -10,7 +10,7 @@ import { barRates } from './city';
 import { autoLineup, benchOf, effectiveLineup } from './lineup';
 import { nextFloat, nextInt, shuffle, type Draw } from './rng';
 import { lineupStrength } from './strength';
-import { addGoals } from './records';
+import { addGoals, addHeadToHead } from './records';
 import {
   MY_TEAM_ID,
   type Cup,
@@ -189,6 +189,8 @@ export function completeCupRound(state: GameState, clubMatch: MatchState | null)
   const entries: LogEntry[] = [];
   const at = { season: s.time.season, week: s.time.week };
   let money = 0;
+  const h2h: { opponent: string; myGoals: number; theirGoals: number }[] = [];
+  let giantKillings = 0;
 
   const ties = round.ties.map((tie): CupTie => {
     const mine = tie.home === MY_TEAM_ID || tie.away === MY_TEAM_ID;
@@ -227,6 +229,12 @@ export function completeCupRound(state: GameState, clubMatch: MatchState | null)
     const winner = homeWins ? tie.home : tie.away;
     if (mine) {
       const opponent = tie.home === MY_TEAM_ID ? tie.away : tie.home;
+      const myGoals = tie.home === MY_TEAM_ID ? homeGoals : awayGoals;
+      const theirGoals = tie.home === MY_TEAM_ID ? awayGoals : homeGoals;
+      h2h.push({ opponent, myGoals, theirGoals });
+      if (winner === MY_TEAM_ID && RANK[divisionOf(s.league, opponent)] - RANK[s.league.myDivision] >= C.giantKillingGap) {
+        giantKillings++;
+      }
       if (tie.home === MY_TEAM_ID) money += cupHomeRevenue(s, opponent).revenue;
       if (winner === MY_TEAM_ID) money += C.prizes[round.round - 1] ?? 0;
       entries.push({
@@ -266,6 +274,8 @@ export function completeCupRound(state: GameState, clubMatch: MatchState | null)
     winner = winners[0] ?? null;
   }
 
+  for (const r of h2h) s = { ...s, records: addHeadToHead(s.records, r.opponent, r.myGoals, r.theirGoals) };
+  s = { ...s, records: { ...s.records, giantKillings: s.records.giantKillings + giantKillings } };
   const treasury = s.club.treasury + money;
   const season = s.finance.season;
   const cupRuns = [...s.records.cupRuns.filter((r) => r.season !== s.time.season)];

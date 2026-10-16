@@ -1,0 +1,17 @@
+[
+  { "id": "firstWin", "type": "anyWin" },
+  { "id": "firstPromotion", "type": "promotionsAtLeast", "value": 1 },
+  { "id": "firstTitle", "type": "titlesAtLeast", "value": 1 },
+  { "id": "reachElite", "type": "divisionReached", "value": "D1" },
+  { "id": "eliteTitle", "type": "titleInDivision", "value": "D1" },
+  { "id": "cupWinner", "type": "cupsAtLeast", "value": 1 },
+  { "id": "giantKiller", "type": "giantKillingsAtLeast", "value": 1 },
+  { "id": "fullHouse", "type": "bestAttendanceAtLeast", "value": 10000 },
+  { "id": "millionaire", "type": "bestTreasuryAtLeast", "value": 1000000 },
+  { "id": "academyMax", "type": "academyLevelAtLeast", "value": 3 },
+  { "id": "allDistricts", "type": "allDistrictsUnlocked" },
+  { "id": "goalMachine", "type": "playerGoalsAtLeast", "value": 50 },
+  { "id": "unbeatenRun", "type": "unbeatenStreakAtLeast", "value": 10 },
+  { "id": "allObjectives", "type": "allObjectivesAchieved" },
+  { "id": "survivor", "type": "redRecoveriesAtLeast", "value": 1 }
+]

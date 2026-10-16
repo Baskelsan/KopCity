@@ -19,7 +19,7 @@ import { homeStrengthFactor, wearEffects } from './effects';
 import { rollEvent, settleCommitments } from './events';
 import { endSeason, generateMarket } from './offseason';
 import { applyMatchStats } from './playerStats';
-import { addGoals } from './records';
+import { addGoals, addHeadToHead } from './records';
 import { nextInt } from './rng';
 import { MY_TEAM_ID, type Alert, type Division, type GameState, type LogEntry, type Player, type Squad, type Team } from './state';
 
@@ -185,10 +185,16 @@ export function completeWeek(state: GameState, match: MatchState): { state: Game
   // Palmarès : buts du club, meilleure affluence, plus grosse trésorerie.
   const names = new Map(state.squad.players.map((p) => [p.id, p.name]));
   const scored = addGoals(state.records, match, names);
+  const opponent = opponentOf(fixture);
+  const myGoals = match.score[match.club.side];
+  const theirGoals = match.score[match.club.side === 'home' ? 'away' : 'home'];
+  const withH2h = addHeadToHead(scored, opponent, myGoals, theirGoals);
+  const recovered = state.club.weeksInRed >= balance.records.redRecoveryWeeks && weeksInRed === 0;
   const records = {
-    ...scored,
+    ...withH2h,
     bestAttendance: Math.max(scored.bestAttendance, report.attendance ?? 0),
     bestTreasury: Math.max(scored.bestTreasury, treasury),
+    redRecoveries: withH2h.redRecoveries + (recovered ? 1 : 0),
   };
 
   let next = playRound(state, match);

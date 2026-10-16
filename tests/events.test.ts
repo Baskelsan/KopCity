@@ -361,7 +361,7 @@ describe('palmarès et records', () => {
     const after = endSeason(champion);
     expect(after.records.titles).toEqual([{ season: 1, division: 'D3' }]);
     expect(after.records.promotions).toBe(1);
-    expect(after.records.history).toEqual([{ season: 1, division: 'D3', rank: 1 }]);
+    expect(after.records.history).toMatchObject([{ season: 1, division: 'D3', rank: 1, treasury: after.club.treasury }]);
   });
 });
 

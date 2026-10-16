@@ -258,7 +258,10 @@ export function endSeason(state: GameState): GameState {
     ...state.records,
     titles: rank === 1 ? [...state.records.titles, { season: state.time.season, division: myDiv }] : state.records.titles,
     promotions: state.records.promotions + (movement === 'promoted' ? 1 : 0),
-    history: [...state.records.history, { season: state.time.season, division: myDiv, rank }],
+    history: [
+      ...state.records.history,
+      { season: state.time.season, division: myDiv, rank, treasury, averageAttendance: averageHomeAttendance(state) },
+    ],
     bestTreasury: Math.max(state.records.bestTreasury, treasury),
   };
 
@@ -290,6 +293,16 @@ export function endSeason(state: GameState): GameState {
 /** Joueurs sous contrat : un joueur en fin de contrat non prolongé ne compte plus dans l'effectif. */
 export function contractedPlayers(players: readonly Player[]): Player[] {
   return players.filter((p) => p.contractYears > 0);
+}
+
+/** Affluence moyenne des matchs de championnat à domicile de la saison. */
+function averageHomeAttendance(state: GameState): number {
+  const homeMatches = mine(state).fixtures.filter((f) => f.home === MY_TEAM_ID && f.result).length;
+  return homeMatches > 0 ? Math.round((state.finance.season.attendance ?? 0) / homeMatches) : 0;
+}
+
+function mine(state: GameState): Division {
+  return state.league.divisions.find((d) => d.id === state.league.myDivision)!;
 }
 
 /**

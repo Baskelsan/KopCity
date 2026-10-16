@@ -10,6 +10,7 @@ import { v7ToV8 } from './v7-to-v8';
 import { v8ToV9 } from './v8-to-v9';
 import { v9ToV10 } from './v9-to-v10';
 import { v10ToV11 } from './v10-to-v11';
+import { v11ToV12 } from './v11-to-v12';
 
 /** Une migration fait passer une sauvegarde de la version N à la version N + 1. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
@@ -29,6 +30,7 @@ export const migrations: Readonly<Record<number, Migration>> = {
   8: v8ToV9,
   9: v9ToV10,
   10: v10ToV11,
+  11: v11ToV12,
 };
 
 /** Amène une sauvegarde brute jusqu'à la version cible en appliquant les migrations dans l'ordre. */

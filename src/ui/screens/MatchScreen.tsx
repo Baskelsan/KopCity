@@ -9,6 +9,7 @@ import { MY_TEAM_ID, type DivisionId, type GameState, type Player, type PlayStyl
 import { format, texts } from '../i18n';
 import { teamName } from '../logText';
 import { CupView } from '../CupView';
+import { StatsView } from '../StatsView';
 import { cupRoundName } from '../cupText';
 import { describeEvent, scoreAt, scoreLine } from '../matchText';
 import { Sheet } from '../Sheet';
@@ -207,7 +208,7 @@ function DecisionSheet({
 }
 
 function LeagueView({ state }: { state: GameState }) {
-  const [view, setView] = useState<'calendar' | 'table' | 'cup'>('calendar');
+  const [view, setView] = useState<'calendar' | 'table' | 'cup' | 'stats'>('calendar');
   const [shownDivision, setShownDivision] = useState<DivisionId>(state.league.myDivision);
   const division = myDivision(state.league);
   const tableDivision = state.league.divisions.find((d) => d.id === shownDivision) ?? division;
@@ -228,11 +229,15 @@ function LeagueView({ state }: { state: GameState }) {
         <button type="button" class={view === 'cup' ? 'active' : ''} onClick={() => setView('cup')}>
           {texts.cup.tab}
         </button>
+        <button type="button" class={view === 'stats' ? 'active' : ''} onClick={() => setView('stats')}>
+          {texts.stats.tab}
+        </button>
       </div>
 
       {view === 'cup' && <CupView state={state} />}
+      {view === 'stats' && <StatsView state={state} />}
 
-      {view === 'cup' ? null : view === 'calendar' ? (
+      {view === 'cup' || view === 'stats' ? null : view === 'calendar' ? (
         <ol class="calendar">
           {mine.map((f) => {
             const home = f.home === MY_TEAM_ID;

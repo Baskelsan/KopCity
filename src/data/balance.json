@@ -397,6 +397,13 @@
       250000
     ],
     "penaltyGoalkeeperSlope": 1.5,
-    "attractionPerDivision": 0.2
+    "attractionPerDivision": 0.2,
+    "giantKillingGap": 2
+  },
+  "records": {
+    "redRecoveryWeeks": 3
+  },
+  "stats": {
+    "minAppsForRating": 5
   }
 }

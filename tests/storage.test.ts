@@ -338,3 +338,16 @@ describe('migration v10 → v11', () => {
     expect(out.finance.season.income.cup).toBe(0);
   });
 });
+
+describe('migration v11 → v12', () => {
+  it('complète l’historique et ajoute le face-à-face et les compteurs des succès', async () => {
+    const { v11ToV12 } = await import('../src/storage/migrations/v11-to-v12');
+    const out = v11ToV12({ schemaVersion: 11, records: { history: [{ season: 1, division: 'D3', rank: 4 }] } }) as {
+      records: Record<string, unknown> & { history: Record<string, unknown>[] };
+    };
+    expect(out.records.history[0]).toEqual({ season: 1, division: 'D3', rank: 4, treasury: null, averageAttendance: null });
+    expect(out.records.headToHead).toEqual({});
+    expect(out.records.redRecoveries).toBe(0);
+    expect(out.records.giantKillings).toBe(0);
+  });
+});

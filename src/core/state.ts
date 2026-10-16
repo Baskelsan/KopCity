@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -301,6 +301,19 @@ export interface SeasonRecord {
   season: number;
   division: DivisionId;
   rank: number;
+  /** Trésorerie en fin de saison (prime comprise) et affluence moyenne à domicile ; null si inconnues (ajouté en v12). */
+  treasury: number | null;
+  averageAttendance: number | null;
+}
+
+/** Bilan face à un adversaire, championnat et coupe (ajouté en v12). */
+export interface HeadToHead {
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
 }
 
 export interface Records {
@@ -315,6 +328,12 @@ export interface Records {
   cups: number[];
   /** Parcours en coupe : dernier tour joué par le club chaque saison (ajouté en v11). */
   cupRuns: CupRun[];
+  /** Bilan face à chaque adversaire (ajouté en v12). */
+  headToHead: Record<string, HeadToHead>;
+  /** Fois où le club est sorti du rouge après au moins 3 semaines (ajouté en v12). */
+  redRecoveries: number;
+  /** Victoires en coupe contre un club d'au moins deux divisions au-dessus (ajouté en v12). */
+  giantKillings: number;
   /** Records au début de la saison, pour signaler ceux battus pendant la saison. */
   seasonStart: { bestAttendance: number; bestTreasury: number; topScorer: ScorerRecord | null };
 }

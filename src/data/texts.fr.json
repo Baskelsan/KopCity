@@ -647,5 +647,92 @@
     "history": " · coupe : {round}",
     "historyWon": " · coupe gagnée",
     "trophies": "Coupes"
+  },
+  "stats": {
+    "tab": "Stats",
+    "seasonTitle": "Cette saison",
+    "scorers": "Buteurs",
+    "assists": "Passeurs",
+    "ratings": "Meilleures notes (au moins {min} matchs)",
+    "none": "Rien pour l'instant.",
+    "historyTitle": "Saison par saison",
+    "noHistory": "L'historique se remplit à la fin de chaque saison.",
+    "seasonLine": "Saison {season}",
+    "treasury": "Trésorerie : {value}",
+    "attendance": "Affluence moyenne : {value}",
+    "h2hTitle": "Face à chaque adversaire",
+    "opponent": "Adversaire",
+    "won": "V",
+    "drawn": "N",
+    "lost": "D",
+    "goals": "Buts"
+  },
+  "achievements": {
+    "title": "Succès",
+    "count": "{count} sur {total} débloqués, toutes parties confondues",
+    "unlockedOn": "Débloqué le {date} avec {club}",
+    "toast": "🏅 Succès débloqué : {title}",
+    "items": {
+      "firstWin": {
+        "title": "Premier succès",
+        "description": "Gagner un match."
+      },
+      "firstPromotion": {
+        "title": "Ça monte !",
+        "description": "Monter en division supérieure."
+      },
+      "firstTitle": {
+        "title": "Champion",
+        "description": "Finir premier de sa division."
+      },
+      "reachElite": {
+        "title": "Au sommet",
+        "description": "Jouer en Élite."
+      },
+      "eliteTitle": {
+        "title": "Champion de l'Élite",
+        "description": "Gagner le championnat d'Élite."
+      },
+      "cupWinner": {
+        "title": "Coupe en main",
+        "description": "Gagner la coupe nationale."
+      },
+      "giantKiller": {
+        "title": "Petit poucet",
+        "description": "En coupe, battre un club de deux divisions au-dessus."
+      },
+      "fullHouse": {
+        "title": "Guichets fermés",
+        "description": "Accueillir 10 000 spectateurs pour un match."
+      },
+      "millionaire": {
+        "title": "Millionnaire",
+        "description": "Avoir 1 000 000 € en caisse."
+      },
+      "academyMax": {
+        "title": "Pépinière",
+        "description": "Monter le centre de formation au niveau 3."
+      },
+      "allDistricts": {
+        "title": "Ville complète",
+        "description": "Débloquer les 4 quartiers."
+      },
+      "goalMachine": {
+        "title": "Légende du club",
+        "description": "Un joueur marque 50 buts pour le club."
+      },
+      "unbeatenRun": {
+        "title": "Invincibles",
+        "description": "10 matchs de championnat de suite sans défaite."
+      },
+      "allObjectives": {
+        "title": "Sans faute",
+        "description": "Atteindre les 3 objectifs d'une saison."
+      },
+      "survivor": {
+        "title": "Miraculé",
+        "description": "Sortir du rouge après au moins 3 semaines."
+      }
+    }
   }
 }

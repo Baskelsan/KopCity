@@ -1199,3 +1199,84 @@ select {
   font-weight: 700;
   color: var(--accent);
 }
+
+/* Statistiques et historique */
+
+.stats-view h2 {
+  margin-top: 16px;
+}
+
+.stats-view .card {
+  margin-bottom: 10px;
+}
+
+.stats-view h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.leaders {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.leaders li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.season-block {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.season-block p {
+  margin: 0 0 4px;
+}
+
+.bar-row {
+  display: grid;
+  gap: 2px;
+  margin: 4px 0;
+}
+
+.bar {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--accent);
+}
+
+.bar-row span {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.h2h td,
+.h2h th {
+  padding: 8px 4px;
+}
+
+/* Succès */
+
+.achievements li {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.achievements li span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.achievements li.locked {
+  opacity: 0.6;
+}
+
+.achievements .badge {
+  font-size: 22px;
+}

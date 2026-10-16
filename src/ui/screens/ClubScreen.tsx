@@ -4,6 +4,8 @@ import type { GameState } from '../../core/state';
 import { SaveError } from '../../storage/errors';
 import { exportSaveFile, readSaveFile } from '../../storage/files';
 import { format, texts } from '../i18n';
+import type { UnlockedAchievement } from '../../storage/achievements';
+import { AchievementsView } from '../AchievementsView';
 import { isStandalone } from '../InstallHelp';
 import { PastGames, RecordsView } from '../RecordsView';
 import { TicketPriceCard } from '../TicketPriceCard';
@@ -15,9 +17,10 @@ interface ClubScreenProps {
   notify: (message: string) => void;
   onNewGame: () => void;
   onShowInstall: () => void;
+  achievements: UnlockedAchievement[];
 }
 
-export function ClubScreen({ state, dispatch, replace, notify, onNewGame, onShowInstall }: ClubScreenProps) {
+export function ClubScreen({ state, dispatch, replace, notify, onNewGame, onShowInstall, achievements }: ClubScreenProps) {
   const minutes = (seconds: number) =>
     seconds > 0 ? format(texts.playTime.value, { minutes: Math.round(seconds / 60) }) : texts.playTime.none;
   const time = state.meta.playTime;
@@ -62,6 +65,7 @@ export function ClubScreen({ state, dispatch, replace, notify, onNewGame, onShow
     <div class="screen">
       <TicketPriceCard state={state} dispatch={dispatch} />
       <RecordsView state={state} />
+      <AchievementsView unlocked={achievements} />
       <PastGames />
 
       <section class="card">

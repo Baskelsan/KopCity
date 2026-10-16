@@ -12,6 +12,9 @@ export function emptyRecords(treasury: number): Records {
     history: [],
     cups: [],
     cupRuns: [],
+    headToHead: {},
+    redRecoveries: 0,
+    giantKillings: 0,
     seasonStart: { bestAttendance: 0, bestTreasury: treasury, topScorer: null },
   };
 }
@@ -42,6 +45,25 @@ export function addGoals(records: Records, match: MatchState, names: Map<string,
     else scorers.push({ playerId: event.playerId, name: names.get(event.playerId) ?? '', goals: 1 });
   }
   return { ...records, scorers };
+}
+
+/** Ajoute un résultat au bilan face à un adversaire. */
+export function addHeadToHead(records: Records, opponentId: string, scored: number, conceded: number): Records {
+  const h = records.headToHead[opponentId] ?? { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0 };
+  return {
+    ...records,
+    headToHead: {
+      ...records.headToHead,
+      [opponentId]: {
+        played: h.played + 1,
+        won: h.won + (scored > conceded ? 1 : 0),
+        drawn: h.drawn + (scored === conceded ? 1 : 0),
+        lost: h.lost + (scored < conceded ? 1 : 0),
+        goalsFor: h.goalsFor + scored,
+        goalsAgainst: h.goalsAgainst + conceded,
+      },
+    },
+  };
 }
 
 /** Records battus depuis le début de la saison (signalés au bilan de fin de saison). */

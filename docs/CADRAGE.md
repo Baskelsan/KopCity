@@ -429,6 +429,10 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Recettes : billetterie et bars à domicile (attrait +0,2 par division d'écart avec l'adversaire) ; primes 20 000, 40 000, 60 000, 100 000 €, et 250 000 € pour le vainqueur. Ligne « Coupe » dans les comptes.
 - La coupe gagnée et le parcours de chaque saison entrent au palmarès. Pour une partie en cours, la coupe commence à la saison suivante.
 
+**Après la v1 — lot C : historique et succès**
+- Onglet Stats (dans Matchs) : buteurs, passeurs et meilleures notes de la saison (au moins 5 matchs), saison par saison (rang, coupe, trésorerie, affluence moyenne), bilan face à chaque adversaire (championnat et coupe).
+- 15 succès gardés d'une partie à l'autre (stockés à part, avec la date et le club) : première victoire, première montée, premier titre, atteindre l'Élite, titre en Élite, coupe, petit poucet (battre en coupe un club de deux divisions au-dessus), 10 000 spectateurs, 1 M€ en caisse, centre de formation niveau 3, 4 quartiers, 50 buts pour un joueur, 10 matchs sans défaite, 3 objectifs d'une saison, sortir du rouge après 3 semaines. Notification au déblocage, liste dans l'onglet Club.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**
