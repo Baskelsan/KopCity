@@ -272,7 +272,8 @@
       "derby": "derby",
       "directRival": "concurrent direct",
       "promotion": "montée en jeu",
-      "relegation": "maintien en jeu"
+      "relegation": "maintien en jeu",
+      "cup": "match de coupe"
     },
     "constructionDelivered": "Chantier livré : {building}.",
     "districtUnlocked": "Nouveau quartier débloqué : {district} !",
@@ -283,7 +284,8 @@
     "winterMarket": "Mercato d'hiver ouvert : des joueurs sont à vendre dans l'onglet Effectif. Il se referme quand tu repars.",
     "event": "Événement : {title}.",
     "bankruptcy": "Faillite : 4 semaines de suite dans le rouge.",
-    "eventOutcome": "{title} : {choice}. {detail}"
+    "eventOutcome": "{title} : {choice}. {detail}",
+    "cupResult": "{text}"
   },
   "outcomes": {
     "win": "Victoire",
@@ -321,7 +323,8 @@
     "close": "Fermer",
     "seasonAttendance": "{total} spectateurs sur {matches} match(s) à domicile, soit {average} en moyenne",
     "otherIncome": "Transferts et événements",
-    "otherExpenses": "Transferts et événements"
+    "otherExpenses": "Transferts et événements",
+    "cup": "Coupe (billetterie et primes)"
   },
   "league": {
     "calendar": "Calendrier",
@@ -615,5 +618,34 @@
     "angry": "Les supporters trouvent le billet trop cher : leur nombre baisse un peu à chaque match à domicile.",
     "cheaper": "Baisser le prix",
     "dearer": "Augmenter le prix"
+  },
+  "cup": {
+    "title": "Coupe nationale",
+    "rounds": [
+      "1er tour",
+      "Huitièmes de finale",
+      "Quarts de finale",
+      "Demi-finales",
+      "Finale"
+    ],
+    "result": "Coupe, {round} : {outcome} {scored}-{conceded}{penalties} contre {opponent}.",
+    "penalties": " ({for}-{against} aux tirs au but)",
+    "qualified": "Qualifié pour le tour suivant !",
+    "eliminated": "Éliminé.",
+    "winner": "Vainqueur de la coupe !",
+    "notThisSeason": "La coupe commence la saison prochaine.",
+    "bye": "Exempté du 1er tour",
+    "out": "Éliminé",
+    "champion": "Vainqueur : {team}",
+    "nextTie": "{round} (semaine {week}) · {opponent}",
+    "week": "Semaine {week}",
+    "pending": "À jouer",
+    "penaltiesShort": "{home}-{away} tab",
+    "tab": "Coupe",
+    "liveLabel": "Coupe · {round}",
+    "titleItem": "Coupe nationale, saison {season}",
+    "history": " · coupe : {round}",
+    "historyWon": " · coupe gagnée",
+    "trophies": "Coupes"
   }
 }

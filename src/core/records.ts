@@ -10,6 +10,8 @@ export function emptyRecords(treasury: number): Records {
     bestTreasury: treasury,
     scorers: [],
     history: [],
+    cups: [],
+    cupRuns: [],
     seasonStart: { bestAttendance: 0, bestTreasury: treasury, topScorer: null },
   };
 }

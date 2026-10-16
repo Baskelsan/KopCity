@@ -22,6 +22,7 @@ function Report({ title, report, homeMatches }: { title: string; report: Finance
     [F.bars, report.income.bars],
     [F.shop, report.income.shop],
     [F.sponsors, report.income.sponsors],
+    [F.cup, report.income.cup],
     [F.otherIncome, report.income.other],
   ];
   const expenses: [string, number][] = [

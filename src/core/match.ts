@@ -83,6 +83,8 @@ export function createMatch(options: NewMatchOptions): MatchState {
   const { plan, rngState } = drawPlan(seedToState(options.seed));
   return {
     week: options.week ?? 0,
+    competition: 'league',
+    cupRound: null,
     seed: options.seed,
     rngState,
     live: options.live,

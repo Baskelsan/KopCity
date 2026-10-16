@@ -63,6 +63,10 @@ export interface ClubInMatch {
 export interface MatchState {
   /** Journée du championnat (ajouté en v4). */
   week: number;
+  /** Championnat ou coupe (ajouté en v11). */
+  competition: 'league' | 'cup';
+  /** Tour de coupe, null en championnat. */
+  cupRound: number | null;
   seed: number;
   rngState: number;
   /** true : affiché en minute par minute ; false : résumé. La simulation est identique. */

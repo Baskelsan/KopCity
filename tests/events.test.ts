@@ -303,7 +303,8 @@ describe('tirage hebdomadaire', () => {
 
   it('les effets temporaires s’usent : pelouse sur 2 matchs à domicile, sponsor chaque semaine', () => {
     let s = resolve(resolve(fresh(4), 'damagedPitch', 'playOn'), 'shirtSponsor', 'short');
-    for (let i = 0; i < 12; i++) s = advanceAndHandle(s);
+    // Assez d'appuis pour 12 semaines, matchs de coupe compris.
+    for (let i = 0; i < 40 && s.time.week <= 13; i++) s = advanceAndHandle(s);
     expect(s.effects.some((e) => e.kind === 'homeStrength')).toBe(false);
     expect(s.effects.some((e) => e.kind === 'sponsorBonus')).toBe(false);
   });

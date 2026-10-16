@@ -32,6 +32,7 @@ import {
   type Squad,
   type Team,
 } from './state';
+import { cupByes, newCup } from './cup';
 import { drawObjectives, evaluateObjectives, sponsorMultiplierFor } from './objectives';
 import { beatenRecords, markSeasonStart } from './records';
 import { strengthForLevel } from './strength';
@@ -434,6 +435,10 @@ export function startSeason(state: GameState): GameState {
   rng = rival.rngState;
   const objectives = drawObjectives(rng);
   rng = objectives.rngState;
+  // La coupe de la nouvelle saison : les deux premiers de l'Élite (classement qui vient de se finir) sont exemptés.
+  const byes = cupByes(state.league);
+  const cup = newCup(rng, { ...state.league, divisions }, state.time.season + 1, byes);
+  rng = cup.rngState;
   const sponsorMultiplier = sponsorMultiplierFor(state.offseason?.objectiveResults ?? []);
 
   return {
@@ -454,5 +459,6 @@ export function startSeason(state: GameState): GameState {
     finance: { lastWeek: null, season: emptyReport() },
     offseason: null,
     alerts: [],
+    cup: cup.value,
   };
 }

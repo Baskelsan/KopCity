@@ -5,7 +5,9 @@ import type { Action } from '../../core/game';
 import { myDivision, myFixture, opponentOf, rankOf } from '../../core/league';
 import { seasonOver } from '../../core/season';
 import { MY_TEAM_ID, type GameState } from '../../core/state';
+import { myTie } from '../../core/cup';
 import { ClubCrest } from '../clubCrest';
+import { cupRoundName } from '../cupText';
 import { EventSheet } from '../EventSheet';
 import { FinanceSheet } from '../FinanceSheet';
 import { ObjectivesCard } from '../ObjectivesCard';
@@ -37,6 +39,10 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
   const over = seasonOver(state);
   const lastWeek = state.finance.lastWeek;
   const journal = state.log.slice(-JOURNAL_SIZE).reverse();
+  // Prochain match de coupe du club, dès que le tour est tiré.
+  const cupRound = state.cup?.rounds.at(-1);
+  const cupMine = cupRound && !cupRound.played ? myTie(cupRound) : undefined;
+  const cupTie = cupRound && cupMine ? { ...cupMine, round: cupRound.round, week: cupRound.week } : undefined;
 
   return (
     <div class="screen home-screen">
@@ -89,6 +95,17 @@ export function HomeScreen({ state, dispatch, onOpenMatch }: HomeScreenProps) {
             <p>
               <strong>{format(H.fixture, { week: fixture.week, opponent: teamName(state, opponentOf(fixture)) })}</strong>
             </p>
+            {cupTie && (
+              <p class="cup-next">
+                🏆{' '}
+                {format(texts.cup.nextTie, {
+                  round: cupRoundName(cupTie.round),
+                  week: cupTie.week,
+                  opponent: teamName(state, cupTie.home === MY_TEAM_ID ? cupTie.away : cupTie.home),
+                })}{' '}
+                <small class="muted">({cupTie.home === MY_TEAM_ID ? texts.venueShort.home : texts.venueShort.away})</small>
+              </p>
+            )}
             <p class="muted">
               {fixture.home === MY_TEAM_ID ? H.venueHome : H.venueAway}
               {opponentOf(fixture) === state.league.rivalId && <span class="tag derby">{H.derby}</span>}

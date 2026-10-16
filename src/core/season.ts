@@ -14,6 +14,7 @@ import { myDivision, myFixture, opponentOf, rankOf, recordResult, standings } fr
 import { autoLineup, benchOf, effectiveLineup } from './lineup';
 import { clubOutcome, createMatch, runMatch, simulateToEnd, type ClubContext } from './match';
 import type { MatchState, Side } from './matchTypes';
+import { completeCupRound, cupRoundThisWeek, playCupRound } from './cup';
 import { homeStrengthFactor, wearEffects } from './effects';
 import { rollEvent, settleCommitments } from './events';
 import { endSeason, generateMarket } from './offseason';
@@ -26,7 +27,7 @@ const K = balance.keyMatch;
 const SEASON_WEEKS = balance.league.seasonWeeks;
 const LOG_SIZE = 150;
 
-export type KeyMatchReason = 'alwaysLive' | 'derby' | 'directRival' | 'promotion' | 'relegation';
+export type KeyMatchReason = 'alwaysLive' | 'derby' | 'directRival' | 'promotion' | 'relegation' | 'cup';
 
 const clubContext = (state: GameState): ClubContext => ({ players: state.squad.players, formation: state.squad.formation });
 
@@ -278,6 +279,12 @@ export function advance(state: GameState): GameState {
         alerts: [{ key: 'winterMarket' }],
       };
     }
+    // Le tour de coupe de la semaine se joue avant le championnat (en direct à partir des quarts).
+    if (cupRoundThisWeek(s)) {
+      const cup = playCupRound(s);
+      if (cup.live) return { ...cup.state, currentMatch: cup.live, alerts: [{ key: 'keyMatch', params: { reasons: 'cup' } }] };
+      s = cup.state;
+    }
     const reasons = keyMatchReasons(s);
     if (reasons.length > 0) {
       const prepared = prepareMyMatch(s, true);
@@ -293,10 +300,17 @@ export function advance(state: GameState): GameState {
   }
 }
 
-/** Fin d'un match joué en direct : la semaine se termine comme une semaine calme. */
+/** Fin d'un match joué en direct : la semaine se termine comme une semaine calme (ou le tour de coupe se clôt). */
 export function finishLiveMatch(state: GameState): GameState {
   const match = state.currentMatch;
   if (!match?.finished) return state;
+  if (match.competition === 'cup') {
+    const done = completeCupRound(state, match);
+    const injured = match.injuries
+      .filter((i) => match.club.played.includes(i.playerId))
+      .map((i): Alert => ({ key: 'starterInjured', params: { playerId: i.playerId, weeks: i.weeks } }));
+    return { ...done.state, alerts: [{ key: 'cupResult', params: done.entries[0]?.params }, ...injured] };
+  }
   const week = completeWeek(state, match);
   return { ...week.state, alerts: weekAlerts(state, week.state, match, week.entries) };
 }

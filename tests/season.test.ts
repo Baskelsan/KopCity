@@ -191,10 +191,10 @@ describe('une saison complète', () => {
 describe('sur 100 saisons simulées', () => {
   const results = Array.from({ length: 100 }, (_, i) => playSeason(fresh(i + 1)));
 
-  it('la marge tourne autour de 200 000 € par saison (hors transferts et événements)', () => {
+  it('la marge tourne autour de 200 000 € par saison (hors coupe, transferts et événements)', () => {
     const weekly = (r: (typeof results)[number]) => {
       const f = r.final.finance.season;
-      return netResult(f) - f.income.other + f.expenses.other;
+      return netResult(f) - f.income.other + f.expenses.other - f.income.cup;
     };
     const average = results.reduce((sum, r) => sum + weekly(r), 0) / results.length;
     expect(average).toBeGreaterThan(120_000);

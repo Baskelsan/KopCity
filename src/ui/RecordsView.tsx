@@ -5,7 +5,14 @@ import type { GameState } from '../core/state';
 import { loadHallOfFame } from '../storage/hallOfFame';
 import { formatEuros, formatInteger } from './formatters';
 import { format, texts } from './i18n';
+import { cupRoundName } from './cupText';
 import { rankText } from './logText';
+import type { CupRun } from '../core/state';
+
+function cupRunText(run: CupRun | undefined): string {
+  if (!run) return '';
+  return run.won ? texts.cup.historyWon : format(texts.cup.history, { round: cupRoundName(run.round) });
+}
 
 const R = texts.records;
 
@@ -25,6 +32,16 @@ export function RecordsView({ state }: { state: GameState }) {
             <li key={t.season}>🏆 {format(R.titleItem, { division: texts.divisions[t.division], season: t.season })}</li>
           ))}
         </ul>
+      )}
+      {records.cups.length > 0 && (
+        <>
+          <h3>{texts.cup.trophies}</h3>
+          <ul class="plain">
+            {records.cups.map((season) => (
+              <li key={season}>🏆 {format(texts.cup.titleItem, { season })}</li>
+            ))}
+          </ul>
+        </>
       )}
       <dl class="summary wide-summary">
         <div>
@@ -51,6 +68,7 @@ export function RecordsView({ state }: { state: GameState }) {
             {records.history.map((h) => (
               <li key={h.season}>
                 {format(R.historyItem, { season: h.season, rank: rankText(h.rank), division: texts.divisions[h.division] })}
+                {cupRunText(records.cupRuns.find((c) => c.season === h.season))}
               </li>
             ))}
           </ul>

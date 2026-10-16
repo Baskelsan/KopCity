@@ -95,8 +95,10 @@ describe('statistiques de la saison et de la carrière', () => {
   it('les buts du club correspondent à la somme des buts des joueurs', () => {
     let s = newGame({ seed: 12, now: 'x', clubName: 'C' });
     for (let i = 0; i < 8; i++) s = advanceAndHandle(s);
-    const goals = s.squad.players.reduce((sum, p) => sum + p.seasonStats.goals, 0);
-    expect(goals).toBe(s.records.scorers.reduce((sum, x) => sum + x.goals, 0));
+    // Les buts au palmarès du club restent même si le buteur part ; on compare sur l'effectif actuel.
+    const current = new Set(s.squad.players.map((p) => p.id));
+    const goals = s.squad.players.reduce((sum, p) => sum + p.careerStats.goals, 0);
+    expect(goals).toBe(s.records.scorers.filter((x) => current.has(x.playerId)).reduce((sum, x) => sum + x.goals, 0));
   });
 
   it('les stats de la saison repartent de zéro, celles du club restent', () => {

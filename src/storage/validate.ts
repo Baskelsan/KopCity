@@ -66,6 +66,7 @@ export function assertGameState(save: unknown): GameState {
     throw new SaveError('invalidFormat', 'phase invalide');
   }
   if (!isArray(save.effects)) throw new SaveError('invalidFormat', 'effects invalide');
+  if (save.cup !== null && !isObject(save.cup)) throw new SaveError('invalidFormat', 'cup invalide');
   if (save.gameOver !== null && !isObject(save.gameOver)) throw new SaveError('invalidFormat', 'gameOver invalide');
   if (save.offseason !== null && !isObject(save.offseason)) throw new SaveError('invalidFormat', 'offseason invalide');
   if (save.currentMatch !== null && !isObject(save.currentMatch)) {

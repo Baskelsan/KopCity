@@ -422,6 +422,13 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Nouveaux contrats (prolongations, mercato) payés ×1 en Division 3, ×1,3 en Division 2, ×1,7 en Élite. À l'intersaison, un joueur avec une note moyenne ≥ 7 sur au moins 10 matchs demande +20 % ; refuser (ou ne pas répondre) coûte 20 de moral.
 - Bar et boutique sur 3 niveaux (prix d'achat par niveau, +50 % de recettes par niveau). Centre de formation : 1, 2, 3 ou 4 jeunes selon le niveau, note de départ +1 et potentiel +2 par niveau.
 
+**Après la v1 — lot B : coupe nationale**
+- Les 30 clubs, 5 tours à élimination directe en semaines 3, 7, 11, 15 et 17 (finale), joués avant le match de championnat de la semaine. Les deux premiers de l'Élite de la saison précédente entrent au 2e tour.
+- Le club de la plus petite division reçoit ; en cas d'égalité, tirs au but (le meilleur gardien a un peu plus de chances).
+- Matchs du club en résumé jusqu'aux huitièmes, en direct à partir des quarts (ou toujours avec le réglage).
+- Recettes : billetterie et bars à domicile (attrait +0,2 par division d'écart avec l'adversaire) ; primes 20 000, 40 000, 60 000, 100 000 €, et 250 000 € pour le vainqueur. Ligne « Coupe » dans les comptes.
+- La coupe gagnée et le parcours de chaque saison entrent au palmarès. Pour une partie en cours, la coupe commence à la saison suivante.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**

@@ -323,3 +323,18 @@ describe('migration v9 → v10', () => {
     expect(out.offseason.raiseRequests).toEqual([]);
   });
 });
+
+describe('migration v10 → v11', () => {
+  it('ajoute la coupe (à partir de la saison suivante) et la ligne Coupe des comptes', async () => {
+    const { v10ToV11 } = await import('../src/storage/migrations/v10-to-v11');
+    const report = { income: { tickets: 1 }, expenses: {}, attendance: null };
+    const out = v10ToV11({ schemaVersion: 10, records: {}, finance: { lastWeek: null, season: report }, currentMatch: null }) as {
+      cup: unknown;
+      records: Record<string, unknown>;
+      finance: { season: { income: Record<string, number> } };
+    };
+    expect(out.cup).toBeNull();
+    expect(out.records.cups).toEqual([]);
+    expect(out.finance.season.income.cup).toBe(0);
+  });
+});

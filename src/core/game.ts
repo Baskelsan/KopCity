@@ -1,5 +1,6 @@
 import balance from '../data/balance.json';
 import { build, demolish, extendStadium, initialDistricts, upgradeBuilding } from './city';
+import { cupByes, newCup } from './cup';
 import { clampTicketFactor, emptyReport, recordOtherMoney } from './economy';
 import { resolveEvent } from './events';
 import { drawObjectives } from './objectives';
@@ -58,7 +59,8 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
   const division = start.division as DivisionId;
   const squad = startingSquad(seedToState(seed), division, start.formation as Formation, start.style as PlayStyle);
   const league = newLeague(squad.rngState, division);
-  const objectives = drawObjectives(league.rngState);
+  const cup = newCup(league.rngState, league.value, 1, cupByes(league.value));
+  const objectives = drawObjectives(cup.rngState);
   return {
     schemaVersion: SCHEMA_VERSION,
     phase: 'season',
@@ -101,6 +103,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
     offseason: null,
     effects: [],
     gameOver: null,
+    cup: cup.value,
   };
 }
 

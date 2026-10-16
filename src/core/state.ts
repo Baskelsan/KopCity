@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -311,8 +311,49 @@ export interface Records {
   /** Buts marqués pour le club en championnat, par joueur. */
   scorers: ScorerRecord[];
   history: SeasonRecord[];
+  /** Saisons où le club a gagné la coupe (ajouté en v11). */
+  cups: number[];
+  /** Parcours en coupe : dernier tour joué par le club chaque saison (ajouté en v11). */
+  cupRuns: CupRun[];
   /** Records au début de la saison, pour signaler ceux battus pendant la saison. */
   seasonStart: { bestAttendance: number; bestTreasury: number; topScorer: ScorerRecord | null };
+}
+
+export interface CupRun {
+  season: number;
+  /** Dernier tour joué (1 = 1er tour… 5 = finale). */
+  round: number;
+  won: boolean;
+}
+
+export interface CupTie {
+  home: string;
+  away: string;
+  result: {
+    homeGoals: number;
+    awayGoals: number;
+    /** Tirs au but en cas d'égalité. */
+    penalties: { home: number; away: number } | null;
+    winner: string;
+    seed: number;
+  } | null;
+  live: boolean;
+}
+
+export interface CupRound {
+  /** 1 = 1er tour, 2 = huitièmes… 5 = finale. */
+  round: number;
+  week: number;
+  ties: CupTie[];
+  played: boolean;
+}
+
+export interface Cup {
+  season: number;
+  /** Les deux clubs qui entrent au 2e tour. */
+  byes: string[];
+  rounds: CupRound[];
+  winner: string | null;
 }
 
 export type RecordKey = 'bestAttendance' | 'bestTreasury' | 'topScorer';
@@ -328,7 +369,7 @@ export interface LogEntry {
 /** Comptes d'une semaine (ou cumul de la saison), en euros. */
 export interface FinanceReport {
   /** `other` : transferts et événements en cours de saison (ajouté en v7). */
-  income: { tickets: number; bars: number; shop: number; sponsors: number; other: number };
+  income: { tickets: number; bars: number; shop: number; sponsors: number; other: number; cup: number };
   expenses: { wages: number; upkeep: number; running: number; fines: number; other: number };
   /** Affluence du match à domicile (cumul pour la saison), null sans match à domicile. */
   attendance: number | null;
@@ -350,7 +391,8 @@ export type AlertKey =
   | 'winterMarket'
   | 'event'
   | 'bankruptcy'
-  | 'eventOutcome';
+  | 'eventOutcome'
+  | 'cupResult';
 
 /** Raison pour laquelle « Avancer » s'est arrêté. Texte dans texts.fr.json (alerts). */
 export interface Alert {
@@ -386,4 +428,6 @@ export interface GameState {
   effects: ActiveEffect[];
   /** Faillite : moment où la partie s'est terminée, null tant qu'elle continue (ajouté en v7). */
   gameOver: { season: number; week: number } | null;
+  /** Coupe nationale de la saison (null avant la première, après une migration) (ajouté en v11). */
+  cup: Cup | null;
 }

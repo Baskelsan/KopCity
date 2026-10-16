@@ -100,6 +100,7 @@ export function weekFinance(state: GameState, homeOpponentId: string | null): Fi
         Math.round(E.sponsorBase[division] * sponsorCoefficient(state) * state.club.sponsorMultiplier) +
         sponsorBonusPerWeek(state),
       other: 0,
+      cup: 0,
     },
     expenses: {
       wages: weeklyWagesRounded(state),
@@ -113,14 +114,14 @@ export function weekFinance(state: GameState, homeOpponentId: string | null): Fi
 }
 
 export const totalIncome = (r: FinanceReport) =>
-  r.income.tickets + r.income.bars + r.income.shop + r.income.sponsors + r.income.other;
+  r.income.tickets + r.income.bars + r.income.shop + r.income.sponsors + r.income.other + r.income.cup;
 export const totalExpenses = (r: FinanceReport) =>
   r.expenses.wages + r.expenses.upkeep + r.expenses.running + r.expenses.fines + r.expenses.other;
 export const netResult = (r: FinanceReport) => totalIncome(r) - totalExpenses(r);
 
 export function emptyReport(): FinanceReport {
   return {
-    income: { tickets: 0, bars: 0, shop: 0, sponsors: 0, other: 0 },
+    income: { tickets: 0, bars: 0, shop: 0, sponsors: 0, other: 0, cup: 0 },
     expenses: { wages: 0, upkeep: 0, running: 0, fines: 0, other: 0 },
     attendance: null,
   };

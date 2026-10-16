@@ -378,5 +378,25 @@
     "minAverageRating": 7,
     "factor": 1.2,
     "refusedMorale": -20
+  },
+  "cup": {
+    "weeks": [
+      3,
+      7,
+      11,
+      15,
+      17
+    ],
+    "byes": 2,
+    "liveFromRound": 3,
+    "prizes": [
+      20000,
+      40000,
+      60000,
+      100000,
+      250000
+    ],
+    "penaltyGoalkeeperSlope": 1.5,
+    "attractionPerDivision": 0.2
   }
 }

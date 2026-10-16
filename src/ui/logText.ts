@@ -1,6 +1,7 @@
 import { divisionAbove, divisionBelow } from '../core/league';
 import type { Alert, BuildingType, DistrictId, DivisionId, GameState, LogEntry, Movement } from '../core/state';
 import type { KeyMatchReason } from '../core/season';
+import { describeCupResult } from './cupText';
 import { eventTexts } from './eventText';
 import { formatEuros } from './formatters';
 import { format, texts } from './i18n';
@@ -47,6 +48,8 @@ export function describeLog(entry: LogEntry, state: GameState): string {
       const t = eventTexts(String(params.eventId));
       return format(texts.log.eventResolved, { title: t.title, choice: t.choices[params.choiceId as keyof typeof t.choices] });
     }
+    case 'cupResult':
+      return describeCupResult(params, state);
     case 'matchResult': {
       const scored = Number(params.scored);
       const conceded = Number(params.conceded);
@@ -92,6 +95,8 @@ export function describeAlert(alert: Alert, state: GameState): string {
       return A.seasonOver;
     case 'winterMarket':
       return A.winterMarket;
+    case 'cupResult':
+      return describeCupResult(params, state);
     case 'event':
       return format(A.event, { title: eventTexts(String(params.eventId)).title });
     case 'bankruptcy':

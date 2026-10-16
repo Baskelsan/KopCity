@@ -1148,3 +1148,54 @@ select {
 .ticketing p {
   margin: 6px 0 0;
 }
+
+/* Coupe */
+
+.cup h2 {
+  margin-top: 12px;
+}
+
+.cup-round {
+  margin-top: 12px;
+}
+
+.cup-round h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.cup-tie {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+}
+
+.cup-tie span:last-child {
+  text-align: right;
+}
+
+.cup-tie.mine {
+  font-weight: 700;
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.cup-tie .winner {
+  color: var(--accent);
+}
+
+.cup-next {
+  margin: 6px 0;
+}
+
+.competition-label {
+  margin: 0 0 8px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--accent);
+}
