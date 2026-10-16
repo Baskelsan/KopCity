@@ -9,7 +9,7 @@ import {
   divisionLevel,
   floatBetween,
   generatePlayer,
-  monthlySalary,
+  contractSalary,
   lineRating,
   overall,
   saleValue,
@@ -27,6 +27,7 @@ import {
   type Movement,
   type Player,
   type PlayerStats,
+  type RaiseRequest,
   type RatingChange,
   type Squad,
   type Team,
@@ -138,7 +139,7 @@ export function generateProspects(
     rng = spread.rngState;
     const potential =
       AC.potentialBase + level * AC.potentialPerLevel + population * AC.potentialPerPopulation + spread.value + extraPotential;
-    const draw = generatePlayer(rng, pos.value, AC.currentLevel, {
+    const draw = generatePlayer(rng, pos.value, AC.currentLevel + level * AC.currentLevelPerLevel, {
       ageMin: AC.ageMin,
       ageMax: AC.ageMax,
       potential,
@@ -163,7 +164,8 @@ export function generateMarket(rngState: number, division: DivisionId): Draw<Mar
     const spread = floatBetween(pos.rngState, -MK.levelSpread, MK.levelSpread);
     const draw = generatePlayer(spread.rngState, pos.value, divisionLevel(division) + spread.value);
     rng = draw.rngState;
-    offers.push({ player: draw.value, price: transferValue(draw.value) });
+    const player = { ...draw.value, monthlySalary: contractSalary(draw.value, division) };
+    offers.push({ player, price: transferValue(player) });
   }
   return { value: offers, rngState: rng };
 }
@@ -227,6 +229,12 @@ export function endSeason(state: GameState): GameState {
     });
   }
 
+  const R = balance.raises;
+  const raiseRequests: RaiseRequest[] = players
+    .filter((p) => p.contractYears > 0 && p.seasonStats.apps >= R.minApps)
+    .filter((p) => p.seasonStats.ratingTotal / p.seasonStats.apps >= R.minAverageRating)
+    .map((p) => ({ playerId: p.id, salary: Math.round((p.monthlySalary * R.factor) / 100) * 100 }));
+
   const prospects = generateProspects(rng, academy, state.city.population);
   rng = prospects.rngState;
   const market = generateMarket(rng, newDivision);
@@ -271,6 +279,7 @@ export function endSeason(state: GameState): GameState {
       ratingChanges,
       objectiveResults,
       recordsBeaten: beatenRecords(records),
+      raiseRequests,
     },
     log,
     alerts,
@@ -307,8 +316,8 @@ export function squadSizeAtStart(state: GameState): number {
   return state.squad.players.length - expiringPlayers(state).length;
 }
 
-export function renewalSalary(player: Player): number {
-  return Math.round((monthlySalary(lineRating(player, player.pos)) * balance.contracts.renewalSalaryFactor) / 100) * 100;
+export function renewalSalary(player: Player, division: DivisionId): number {
+  return Math.round((contractSalary(player, division) * balance.contracts.renewalSalaryFactor) / 100) * 100;
 }
 
 export function renewContract(state: GameState, playerId: string, years: number): GameState {
@@ -317,7 +326,7 @@ export function renewContract(state: GameState, playerId: string, years: number)
   const player = state.squad.players.find((p) => p.id === playerId);
   if (!player || player.contractYears > 0) return state;
   const players = state.squad.players.map((p) =>
-    p.id === playerId ? { ...p, contractYears: years, monthlySalary: renewalSalary(p) } : p,
+    p.id === playerId ? { ...p, contractYears: years, monthlySalary: renewalSalary(p, state.league.myDivision) } : p,
   );
   return { ...state, squad: cleanLineup({ ...state.squad, players }) };
 }
@@ -375,6 +384,25 @@ export function sellPlayer(state: GameState, playerId: string): GameState {
   };
 }
 
+function refuseRaiseMorale(player: Player): Player {
+  const m = balance.morale;
+  return { ...player, morale: Math.min(m.max, Math.max(m.min, player.morale + balance.raises.refusedMorale)) };
+}
+
+/** Répondre à une demande d'augmentation : accepter (nouveau salaire) ou refuser (moral −20). */
+export function answerRaise(state: GameState, playerId: string, accept: boolean): GameState {
+  const request = state.offseason?.raiseRequests.find((r) => r.playerId === playerId);
+  if (!request || !state.offseason) return state;
+  const players = state.squad.players.map((p) =>
+    p.id !== playerId ? p : accept ? { ...p, monthlySalary: request.salary } : refuseRaiseMorale(p),
+  );
+  return {
+    ...state,
+    squad: { ...state.squad, players },
+    offseason: { ...state.offseason, raiseRequests: state.offseason.raiseRequests.filter((r) => r.playerId !== playerId) },
+  };
+}
+
 /** Peut-on lancer la saison ? L'effectif, sans les contrats non prolongés, doit compter de 16 à 22 joueurs. */
 export function canStartSeason(state: GameState): SquadCheck {
   const size = squadSizeAtStart(state);
@@ -388,8 +416,10 @@ export function startSeason(state: GameState): GameState {
   if (state.phase !== 'offseason' || !canStartSeason(state).ok) return state;
   let rng = state.meta.rngState;
   const leaving = new Set(expiringPlayers(state).map((p) => p.id));
+  const unanswered = new Set((state.offseason?.raiseRequests ?? []).map((r) => r.playerId));
   const players = state.squad.players
     .filter((p) => !leaving.has(p.id))
+    .map((p) => (unanswered.has(p.id) ? refuseRaiseMorale(p) : p))
     .map((p) => ({ ...p, seasonStats: { apps: 0, goals: 0, assists: 0, ratingTotal: 0 } }));
 
   const divisions: Division[] = [];

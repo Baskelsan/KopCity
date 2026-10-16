@@ -226,7 +226,7 @@ describe('contrats et lancement de saison', () => {
     const after = run(off, { type: 'renewContract', playerId: p.id, years: 3 });
     const renewed = after.squad.players.find((x) => x.id === p.id)!;
     expect(renewed.contractYears).toBe(3);
-    expect(renewed.monthlySalary).toBe(renewalSalary(p));
+    expect(renewed.monthlySalary).toBe(renewalSalary(p, off.league.myDivision));
     expect(expiringPlayers(after).map((x) => x.id)).not.toContain(p.id);
   });
 
@@ -261,10 +261,10 @@ describe('contrats et lancement de saison', () => {
 });
 
 describe('centre de formation', () => {
-  it('sort 1 jeune au niveau 0 et 3 au niveau 3, entre 16 et 18 ans, formés au club', () => {
+  it('sort 1 jeune au niveau 0 et 4 au niveau 3, entre 16 et 18 ans, formés au club', () => {
     expect(generateProspects(seedToState(1), 0, 20000).value).toHaveLength(1);
     const best = generateProspects(seedToState(1), 3, 20000).value;
-    expect(best).toHaveLength(3);
+    expect(best).toHaveLength(4);
     for (const p of best) {
       expect(p.age).toBeGreaterThanOrEqual(16);
       expect(p.age).toBeLessThanOrEqual(18);

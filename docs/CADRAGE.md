@@ -417,6 +417,11 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Statistiques des joueurs, pour la saison et la carrière au club : matchs, buts, passes décisives et note moyenne sur 10. Note de match : 6 de base, +0,5 victoire / −0,5 défaite, +1 par but, +0,6 par passe décisive, +0,2 par tir cadré, −0,1 par tir non cadré ; gardiens et défenseurs : +0,8 sans but encaissé, −0,3 par but encaissé ; entre 3 et 10.
 - Le rappel d'export n'apparaît plus qu'à l'intersaison, tant qu'on n'a pas exporté depuis la fin de la saison.
 
+**Après la v1 — lot A : économie et ville**
+- Prix du billet réglable de 50 % à 200 % du prix de base, par pas de 10 % ; demande × (prix de base ÷ prix)^1,2 ; au-delà de +30 %, −0,2 point de part de supporters par match à domicile.
+- Nouveaux contrats (prolongations, mercato) payés ×1 en Division 3, ×1,3 en Division 2, ×1,7 en Élite. À l'intersaison, un joueur avec une note moyenne ≥ 7 sur au moins 10 matchs demande +20 % ; refuser (ou ne pas répondre) coûte 20 de moral.
+- Bar et boutique sur 3 niveaux (prix d'achat par niveau, +50 % de recettes par niveau). Centre de formation : 1, 2, 3 ou 4 jeunes selon le niveau, note de départ +1 et potentiel +2 par niveau.
+
 ## Décisions ouvertes et risques
 
 **À trancher avant ou pendant M0**

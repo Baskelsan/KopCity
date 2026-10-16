@@ -32,6 +32,13 @@ export interface BuildingSpec {
   nuisance?: number;
   unique?: boolean;
   maxPerDistrict?: number;
+  /** Recettes en plus par niveau au-delà du premier (+50 %). */
+  revenuePerLevel?: number;
+}
+
+/** Multiplicateur de recettes d'un bâtiment selon son niveau. */
+export function levelRevenueFactor(type: BuildingType, level: number): number {
+  return 1 + (BUILDINGS[type].revenuePerLevel ?? 0) * (level - 1);
 }
 
 export interface DistrictSpec {
@@ -129,7 +136,11 @@ export function barRates(city: City): { slotId: string; perSpectator: number }[]
     .sort((a, b) => b.district.commerceFactor - a.district.commerceFactor || a.slotId.localeCompare(b.slotId))
     .map((b, i) => ({
       slotId: b.slotId,
-      perSpectator: (spec.revenuePerSpectator ?? 0) * b.district.commerceFactor * Math.pow(spec.nextBarFactor ?? 1, i),
+      perSpectator:
+        (spec.revenuePerSpectator ?? 0) *
+        b.district.commerceFactor *
+        Math.pow(spec.nextBarFactor ?? 1, i) *
+        levelRevenueFactor('bar', b.level),
     }));
 }
 
@@ -138,7 +149,7 @@ export function shopWeeklyRevenue(city: City): number {
   const perSupporter = BUILDINGS.shop.revenuePerSupporter ?? 0;
   return builtBuildings(city)
     .filter((b) => b.type === 'shop')
-    .reduce((sum, b) => sum + supporters(city) * perSupporter * b.district.commerceFactor, 0);
+    .reduce((sum, b) => sum + supporters(city) * perSupporter * b.district.commerceFactor * levelRevenueFactor('shop', b.level), 0);
 }
 
 export function academyLevel(city: City): number {

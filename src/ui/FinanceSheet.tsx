@@ -86,7 +86,7 @@ function NextHomeAttendance({ state }: { state: GameState }) {
     .filter((f) => f.week >= state.time.week && f.home === MY_TEAM_ID && !f.result)
     .sort((a, b) => a.week - b.week)[0];
   if (!next) return null;
-  const detail = attendanceFor(state.city, matchAttraction(state, opponentOf(next)));
+  const detail = attendanceFor(state.city, matchAttraction(state, opponentOf(next)), state.club.ticketPriceFactor);
   const values = {
     capacity: formatInteger(detail.capacity),
     accessCap: formatInteger(detail.accessCap),

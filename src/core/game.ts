@@ -1,6 +1,6 @@
 import balance from '../data/balance.json';
 import { build, demolish, extendStadium, initialDistricts, upgradeBuilding } from './city';
-import { emptyReport, recordOtherMoney } from './economy';
+import { clampTicketFactor, emptyReport, recordOtherMoney } from './economy';
 import { resolveEvent } from './events';
 import { drawObjectives } from './objectives';
 import { emptyRecords } from './records';
@@ -9,6 +9,7 @@ import { autoLineup, swapInLineup } from './lineup';
 import { decide, type ClubContext } from './match';
 import type { Decision } from './matchTypes';
 import {
+  answerRaise,
   buyPlayer,
   declineProspect,
   renewContract,
@@ -77,6 +78,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
       treasury: start.treasury,
       weeksInRed: 0,
       sponsorMultiplier: 1,
+      ticketPriceFactor: 1,
     },
     squad: squad.squad,
     city: {
@@ -124,6 +126,8 @@ export type Action =
   | { type: 'startSeason' }
   | { type: 'resolveEvent'; choiceId: string }
   | { type: 'markExported' }
+  | { type: 'setTicketPrice'; factor: number }
+  | { type: 'answerRaise'; playerId: string; accept: boolean }
   | { type: 'addPlayTime'; seconds: number };
 
 const clubContext = (state: GameState): ClubContext => ({
@@ -187,6 +191,10 @@ export function applyAction(state: GameState, action: Action): GameState {
       return recordOtherMoney(state, sellPlayer(state, action.playerId));
     case 'startSeason':
       return startSeason(state);
+    case 'setTicketPrice':
+      return { ...state, club: { ...state.club, ticketPriceFactor: clampTicketFactor(action.factor) } };
+    case 'answerRaise':
+      return answerRaise(state, action.playerId, action.accept);
     case 'markExported':
       return { ...state, meta: { ...state.meta, lastExport: { season: state.time.season, week: state.time.week } } };
     case 'addPlayTime': {

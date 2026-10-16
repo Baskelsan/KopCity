@@ -364,7 +364,12 @@
     "ratingsTitle": "Évolution des joueurs",
     "ratingsNone": "Aucune note n'a bougé.",
     "ratingChange": "{before} → {after}",
-    "ratingsAge": "{age} ans"
+    "ratingsAge": "{age} ans",
+    "raisesTitle": "Demandes d'augmentation",
+    "raisesHint": "Après une bonne saison, ces joueurs veulent être mieux payés. Sans réponse, la demande est refusée au lancement de la saison (moral −20).",
+    "raiseLine": "Note moyenne {rating}/10 · salaire {from} → {to} / mois",
+    "acceptRaise": "Accepter",
+    "refuseRaise": "Refuser (moral −20)"
   },
   "market": {
     "title": "Mercato",
@@ -602,5 +607,13 @@
     "value": "{minutes} min",
     "none": "–"
   },
-  "playerLabel": "{name} ({pos}, note {rating})"
+  "playerLabel": "{name} ({pos}, note {rating})",
+  "ticketing": {
+    "title": "Prix du billet",
+    "base": "{percent} % du prix de base ({base})",
+    "forecast": "Prochain match à domicile : environ {attendance} spectateurs, {revenue} de billetterie.",
+    "angry": "Les supporters trouvent le billet trop cher : leur nombre baisse un peu à chaque match à domicile.",
+    "cheaper": "Baisser le prix",
+    "dearer": "Augmenter le prix"
+  }
 }

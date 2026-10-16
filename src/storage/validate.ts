@@ -21,7 +21,7 @@ const shape: Record<string, Record<string, (v: unknown) => boolean>> = {
   },
   settings: { alwaysLiveMatches: isBoolean },
   time: { season: isNumber, week: isNumber },
-  club: { name: isString, colors: isArray, treasury: isNumber, weeksInRed: isNumber, sponsorMultiplier: isNumber },
+  club: { name: isString, colors: isArray, treasury: isNumber, weeksInRed: isNumber, sponsorMultiplier: isNumber, ticketPriceFactor: isNumber },
   squad: { formation: isString, style: isString, autoLineup: isBoolean, lineup: isArray, players: isArray },
   city: {
     stadiumLevel: isNumber,

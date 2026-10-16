@@ -47,12 +47,22 @@ export function matchAttraction(state: GameState, opponentId: string): number {
   return clamp(attraction, A.min, A.max);
 }
 
-/** Affluence = min(capacité, plafond d'accès, supporters × attrait du match). */
-export function attendanceFor(city: City, attraction: number): AttendanceDetail {
+/** Effet du prix sur la demande : plus le billet est cher, moins il y a de monde (élasticité 1,2). */
+export function priceDemandFactor(priceFactor: number): number {
+  return Math.pow(priceFactor, -balance.ticketing.elasticity);
+}
+
+/** Prix du billet en euros pour la division et le réglage choisi. */
+export function ticketPrice(state: GameState): number {
+  return Math.round(E.ticketPrice[state.league.myDivision] * state.club.ticketPriceFactor);
+}
+
+/** Affluence = min(capacité, plafond d'accès, supporters × attrait du match × effet du prix). */
+export function attendanceFor(city: City, attraction: number, priceFactor = 1): AttendanceDetail {
   const fans = supporters(city);
   const capacity = stadiumCapacity(city);
   const cap = accessCap(city);
-  const demand = Math.round(fans * attraction);
+  const demand = Math.round(fans * attraction * priceDemandFactor(priceFactor));
   const attendance = Math.min(capacity, cap, demand);
   const limitedBy: AttendanceLimit = attendance === capacity ? 'capacity' : attendance === cap ? 'accessCap' : 'demand';
   return { attendance, capacity, accessCap: cap, demand, supporters: fans, attraction, limitedBy };
@@ -76,13 +86,14 @@ export function weeklyWagesRounded(state: GameState): number {
 export function weekFinance(state: GameState, homeOpponentId: string | null): FinanceReport {
   const { city } = state;
   const division = state.league.myDivision;
+  const priceFactor = state.club.ticketPriceFactor;
   const attendance = homeOpponentId
-    ? Math.round(attendanceFor(city, matchAttraction(state, homeOpponentId)).attendance * attendanceFactor(state))
+    ? Math.round(attendanceFor(city, matchAttraction(state, homeOpponentId), priceFactor).attendance * attendanceFactor(state))
     : null;
   const barsPerSpectator = barRates(city).reduce((sum, b) => sum + b.perSpectator, 0);
   return {
     income: {
-      tickets: attendance ? attendance * E.ticketPrice[division] : 0,
+      tickets: attendance ? attendance * ticketPrice(state) : 0,
       bars: attendance ? Math.round(attendance * barsPerSpectator) : 0,
       shop: Math.round(shopWeeklyRevenue(city)),
       sponsors:
@@ -131,6 +142,19 @@ export function nextSupporterShare(share: number, outcome: 'win' | 'draw' | 'los
   const S = balance.supporters;
   const next = share + S[outcome];
   return Math.round(clamp(next, S.min, S.max) * 10000) / 10000;
+}
+
+/** Prix réglable par pas de 10 %, entre 50 % et 200 % du prix de base. */
+export function clampTicketFactor(factor: number): number {
+  const T = balance.ticketing;
+  const stepped = Math.round(factor / T.step) * T.step;
+  return Math.round(Math.min(T.maxFactor, Math.max(T.minFactor, stepped)) * 100) / 100;
+}
+
+/** Un billet trop cher fâche les supporters : un peu moins de supporters à chaque match à domicile. */
+export function ticketPriceSupporterPenalty(state: GameState, homeMatch: boolean): number {
+  const T = balance.ticketing;
+  return homeMatch && state.club.ticketPriceFactor > T.angryAbove ? T.supporterPenaltyPerMatch : 0;
 }
 
 /** La satisfaction se rapproche de sa cible de 2 points au plus par semaine. */

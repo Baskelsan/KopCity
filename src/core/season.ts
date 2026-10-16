@@ -6,6 +6,7 @@ import {
   addReports,
   netResult,
   nextSatisfaction,
+  ticketPriceSupporterPenalty,
   nextSupporterShare,
   weekFinance,
 } from './economy';
@@ -200,7 +201,10 @@ export function completeWeek(state: GameState, match: MatchState): { state: Game
     finance: { lastWeek: report, season: addReports(next.finance.season, report) },
     city: {
       ...next.city,
-      supporterShare: nextSupporterShare(next.city.supporterShare, clubOutcome(match)),
+      supporterShare: Math.max(
+        balance.supporters.min,
+        nextSupporterShare(next.city.supporterShare, clubOutcome(match)) - ticketPriceSupporterPenalty(state, home),
+      ),
       residentSatisfaction: nextSatisfaction(next.city),
     },
     squad: updateSquad(next.squad, match),

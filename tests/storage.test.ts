@@ -311,3 +311,15 @@ describe('migration v8 → v9', () => {
     expect(out.currentMatch.events[1]!.assistId).toBeUndefined();
   });
 });
+
+describe('migration v9 → v10', () => {
+  it('ajoute le prix du billet et les demandes d’augmentation', async () => {
+    const { v9ToV10 } = await import('../src/storage/migrations/v9-to-v10');
+    const out = v9ToV10({ schemaVersion: 9, club: { name: 'C' }, offseason: { prospects: [] } }) as {
+      club: Record<string, unknown>;
+      offseason: Record<string, unknown>;
+    };
+    expect(out.club.ticketPriceFactor).toBe(1);
+    expect(out.offseason.raiseRequests).toEqual([]);
+  });
+});

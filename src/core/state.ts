@@ -3,7 +3,7 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
@@ -44,6 +44,8 @@ export interface Club {
   weeksInRed: number;
   /** Multiplicateur des sponsors de la saison (1,1 si tous les objectifs de la saison précédente sont atteints) (v7). */
   sponsorMultiplier: number;
+  /** Prix du billet, en multiple du prix de base de la division (0,5 à 2) (ajouté en v10). */
+  ticketPriceFactor: number;
 }
 
 export interface PlayerStats {
@@ -217,6 +219,14 @@ export interface Offseason {
   objectiveResults: ObjectiveResult[];
   /** Records battus pendant la saison écoulée (ajouté en v7). */
   recordsBeaten: RecordKey[];
+  /** Joueurs qui demandent une augmentation après une bonne saison (ajouté en v10). */
+  raiseRequests: RaiseRequest[];
+}
+
+export interface RaiseRequest {
+  playerId: string;
+  /** Salaire mensuel demandé. */
+  salary: number;
 }
 
 export interface RatingChange {

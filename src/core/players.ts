@@ -131,6 +131,13 @@ export function weeklyWages(players: readonly Player[]): number {
   return (players.reduce((sum, p) => sum + p.monthlySalary, 0) * 12) / 52;
 }
 
+/** Salaire d'un nouveau contrat : plus cher dans les divisions supérieures (×1, ×1,3, ×1,7). */
+export function contractSalary(player: Player, division: DivisionId): number {
+  const { rounding } = P.salary;
+  const raw = monthlySalary(lineRating(player, player.pos)) * balance.salaryDivisionFactor[division];
+  return Math.max(rounding, Math.round(raw / rounding) * rounding);
+}
+
 /** Valeur de transfert : selon la note au poste et l'âge (un jeune vaut plus qu'un vétéran). */
 export function transferValue(player: Player): number {
   const M = balance.market;

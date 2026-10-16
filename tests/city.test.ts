@@ -195,7 +195,23 @@ describe('chantiers', () => {
   });
 
   it('les bâtiments à un seul niveau ne s’améliorent pas', () => {
-    const s = weeks(run(fresh(), { type: 'build', slotId: 'stade-1', building: 'bar' }), 2);
+    const s = weeks(run(fresh(), { type: 'build', slotId: 'stade-1', building: 'housing' }), buildings.housing.weeks);
+    expect(run(s, { type: 'upgradeBuilding', slotId: 'stade-1' })).toBe(s);
+  });
+
+  it('bar et boutique montent jusqu’au niveau 3, chaque niveau rapporte +50 %', () => {
+    let s = weeks(
+      run(fresh(), { type: 'build', slotId: 'stade-1', building: 'bar' }, { type: 'build', slotId: 'stade-2', building: 'shop' }),
+      3,
+    );
+    const bar1 = barRates(s.city)[0]!.perSpectator;
+    const shop1 = shopWeeklyRevenue(s.city);
+    s = weeks(run(s, { type: 'upgradeBuilding', slotId: 'stade-1' }, { type: 'upgradeBuilding', slotId: 'stade-2' }), 3);
+    expect(barRates(s.city)[0]!.perSpectator).toBeCloseTo(bar1 * 1.5);
+    expect(shopWeeklyRevenue(s.city)).toBeCloseTo(shop1 * 1.5);
+    s = weeks(run(s, { type: 'upgradeBuilding', slotId: 'stade-1' }), 3);
+    expect(barRates(s.city)[0]!.perSpectator).toBeCloseTo(bar1 * 2);
+    expect(findSlot(s.city, 'stade-1')!.slot.building).toEqual({ type: 'bar', level: 3 });
     expect(run(s, { type: 'upgradeBuilding', slotId: 'stade-1' })).toBe(s);
   });
 });

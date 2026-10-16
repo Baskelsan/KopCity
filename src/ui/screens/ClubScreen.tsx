@@ -6,6 +6,7 @@ import { exportSaveFile, readSaveFile } from '../../storage/files';
 import { format, texts } from '../i18n';
 import { isStandalone } from '../InstallHelp';
 import { PastGames, RecordsView } from '../RecordsView';
+import { TicketPriceCard } from '../TicketPriceCard';
 
 interface ClubScreenProps {
   state: GameState;
@@ -59,6 +60,7 @@ export function ClubScreen({ state, dispatch, replace, notify, onNewGame, onShow
 
   return (
     <div class="screen">
+      <TicketPriceCard state={state} dispatch={dispatch} />
       <RecordsView state={state} />
       <PastGames />
 

@@ -37,7 +37,7 @@ function expectedAttendance(state: GameState): number {
     .sort((a, b) => a.week - b.week)[0];
   const attraction =
     state.phase === 'season' && next ? matchAttraction(state, opponentOf(next)) : balance.attraction.base;
-  return attendanceFor(state.city, attraction).attendance;
+  return attendanceFor(state.city, attraction, state.club.ticketPriceFactor).attendance;
 }
 
 /** Recette d'un bar par match à domicile, avec l'affluence attendue. */

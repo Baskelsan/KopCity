@@ -59,6 +59,10 @@ export function OffseasonScreen({
   const start = canStartSeason(state);
   const addCheck = canAddPlayer(state);
   const { min, max } = balance.squadSize;
+  const raises = offseason.raiseRequests.flatMap((request) => {
+    const player = state.squad.players.find((p) => p.id === request.playerId);
+    return player ? [{ request, player }] : [];
+  });
   const changes = offseason.ratingChanges
     .filter((c) => c.after !== c.before)
     .sort((a, b) => b.after - b.before - (a.after - a.before));
@@ -149,6 +153,43 @@ export function OffseasonScreen({
         )}
       </section>
 
+      {raises.length > 0 && (
+        <section class="card">
+          <h2>{O.raisesTitle}</h2>
+          <p class="muted">{O.raisesHint}</p>
+          <ul class="plain offers">
+            {raises.map(({ request, player }) => (
+              <li key={player.id} class="offer">
+                <PlayerLine player={player} />
+                <p class="muted">
+                  {format(O.raiseLine, {
+                    rating: (player.seasonStats.ratingTotal / Math.max(1, player.seasonStats.apps)).toFixed(1).replace('.', ','),
+                    from: formatEuros(player.monthlySalary),
+                    to: formatEuros(request.salary),
+                  })}
+                </p>
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="button"
+                    onClick={() => dispatch({ type: 'answerRaise', playerId: player.id, accept: true })}
+                  >
+                    {O.acceptRaise}
+                  </button>
+                  <button
+                    type="button"
+                    class="button secondary"
+                    onClick={() => dispatch({ type: 'answerRaise', playerId: player.id, accept: false })}
+                  >
+                    {O.refuseRaise}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section class="card">
         <h2>{O.contractsTitle}</h2>
         {expiring.length === 0 ? (
@@ -162,7 +203,7 @@ export function OffseasonScreen({
                   <PlayerLine player={p} />
                   <p class="muted">
                     {format(texts.squad.age, { age: p.age })} ·{' '}
-                    {format(O.newSalary, { salary: formatEuros(renewalSalary(p)) })}
+                    {format(O.newSalary, { salary: formatEuros(renewalSalary(p, state.league.myDivision)) })}
                   </p>
                   <div class="segmented">
                     {YEARS.map((years) => (
