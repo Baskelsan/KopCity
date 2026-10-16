@@ -107,7 +107,7 @@ it(
     lines.push(
       '## Fin de partie : stratégie « à fond » sur 15 saisons',
       '',
-      `${LONG_GAMES} parties : centre de formation au maximum le plus tôt possible, toute la ville améliorée, tous les jeunes signés, les meilleurs joueurs achetés, toutes les augmentations acceptées.`,
+      `${LONG_GAMES} parties : centre de formation puis centre d'entraînement au maximum le plus tôt possible, toute la ville et le stade améliorés, staff au complet au-delà de 3 M€ (licencié sous 1 M€), tous les jeunes signés, les meilleurs joueurs et vedettes achetés s'il reste une saison de leur salaire, toutes les augmentations acceptées.`,
       '',
       '| Saison | Note moyenne du onze | Trésorerie (médiane) | En Élite | Titre d\'Élite (parmi les clubs en Élite) | Faillites cumulées |',
       '| --- | --- | --- | --- | --- | --- |',

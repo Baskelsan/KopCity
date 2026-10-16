@@ -330,7 +330,18 @@
         "factor": 0.35
       }
     ],
-    "sellFactor": 0.8
+    "sellFactor": 0.8,
+    "stars": {
+      "divisions": [
+        "D2",
+        "D1"
+      ],
+      "min": 1,
+      "max": 2,
+      "levelBonusMin": 3,
+      "levelBonusMax": 5,
+      "priceFactor": 1.5
+    }
   },
   "contracts": {
     "renewalSalaryFactor": 1.1,
@@ -409,5 +420,26 @@
   },
   "stats": {
     "minAppsForRating": 5
+  },
+  "training": {
+    "chancePerLevel": 0.1,
+    "maxAge": 29,
+    "declineReductionFromLevel": 3
+  },
+  "staff": {
+    "physio": {
+      "weeklyCost": 15000,
+      "injuryFactor": 0.6
+    },
+    "scout": {
+      "weeklyCost": 20000,
+      "offers": 10,
+      "topOffers": 2,
+      "topLevelBonus": 2
+    },
+    "analyst": {
+      "weeklyCost": 25000,
+      "strengthFactor": 1.03
+    }
   }
 }

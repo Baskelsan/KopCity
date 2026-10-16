@@ -3,14 +3,14 @@
 
 import type { MatchState } from './matchTypes';
 
-export const SCHEMA_VERSION = 13;
+export const SCHEMA_VERSION = 14;
 
 export type Position = 'GAR' | 'DEF' | 'MIL' | 'ATT';
 export type Formation = '4-4-2' | '4-3-3' | '4-2-3-1' | '3-5-2' | '5-3-2';
 export type PlayStyle = 'offensive' | 'balanced' | 'defensive';
 export type DivisionId = 'D3' | 'D2' | 'D1';
 export type DistrictId = 'stade' | 'faubourg' | 'gare' | 'nouveau';
-export type BuildingType = 'bar' | 'shop' | 'housing' | 'transport' | 'academy';
+export type BuildingType = 'bar' | 'shop' | 'housing' | 'transport' | 'academy' | 'training';
 /** Le stade n'occupe pas d'emplacement mais se construit aussi en chantier. */
 export type ConstructionType = BuildingType | 'stadium';
 
@@ -185,7 +185,14 @@ export interface League {
 export interface MarketOffer {
   player: Player;
   price: number;
+  /** Vedette du marché des stars (ajouté en v14). */
+  star?: boolean;
 }
+
+export type StaffRole = 'physio' | 'scout' | 'analyst';
+
+/** Le staff du club, payé chaque semaine (ajouté en v14). */
+export type Staff = Record<StaffRole, boolean>;
 
 export interface Market {
   offers: MarketOffer[];
@@ -391,7 +398,7 @@ export interface LogEntry {
 export interface FinanceReport {
   /** `other` : transferts et événements en cours de saison (ajouté en v7). */
   income: { tickets: number; bars: number; shop: number; sponsors: number; other: number; cup: number };
-  expenses: { wages: number; upkeep: number; running: number; fines: number; other: number };
+  expenses: { wages: number; upkeep: number; running: number; fines: number; other: number; staff: number };
   /** Affluence du match à domicile (cumul pour la saison), null sans match à domicile. */
   attendance: number | null;
 }
@@ -452,4 +459,5 @@ export interface GameState {
   gameOver: { season: number; week: number } | null;
   /** Coupe nationale de la saison (null avant la première, après une migration) (ajouté en v11). */
   cup: Cup | null;
+  staff: Staff;
 }

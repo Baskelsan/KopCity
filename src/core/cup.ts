@@ -2,6 +2,7 @@
 // Les deux meilleurs de l'Élite entrent au 2e tour ; le club de la plus petite division reçoit.
 import balance from '../data/balance.json';
 import { attendanceFor } from './economy';
+import { staffInjuryFactor, staffStrengthFactor } from './effects';
 import { standings } from './league';
 import { clubOutcome, createMatch, runMatch, simulateToEnd, type ClubContext } from './match';
 import type { MatchState, Side } from './matchTypes';
@@ -124,6 +125,8 @@ export function prepareCupMatch(state: GameState, tie: CupTie, round: number, li
     onField,
     bench: benchOf(players, onField),
     style,
+    strengthFactor: staffStrengthFactor(state),
+    clubInjuryFactor: staffInjuryFactor(state),
   });
   return {
     state: { ...state, meta: { ...state.meta, rngState: seed.rngState } },

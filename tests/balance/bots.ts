@@ -8,13 +8,14 @@ import {
   canUpgrade,
   stadiumCapacity,
 } from './cityHelpers';
+import { upkeepAt } from '../../src/core/city';
 import { choiceRefusal, eventSpec } from '../../src/core/events';
 import { applyAction, newGame, type Action } from '../../src/core/game';
 import { formationSlots } from '../../src/core/lineup';
 import { defaultDecision } from '../../src/core/match';
 import { canAddPlayer, contractedPlayers, expiringPlayers, startingElevenLevel } from '../../src/core/offseason';
 import { divisionLevel, lineRating, overall } from '../../src/core/players';
-import type { BuildingType, GameState, Position } from '../../src/core/state';
+import type { BuildingType, ConstructionType, GameState, Position } from '../../src/core/state';
 
 export type StrategyName = 'stadium' | 'players' | 'balanced' | 'max';
 
@@ -62,13 +63,14 @@ function weakestStarter(state: GameState, pos: Position): number {
 }
 
 /** Achète les joueurs du marché qui améliorent le onze, tant que l'argent (au-dessus de la réserve) le permet. */
-function buyUpgrades(state: GameState, reserve: number, minGain: number): GameState {
+function buyUpgrades(state: GameState, reserve: number, minGain: number, salaryMonthsKept = 0): GameState {
   let s = state;
   const offers = [...s.market.offers].sort((a, b) => overall(b.player) - overall(a.player));
   for (const offer of offers) {
     const gain = lineRating(offer.player, offer.player.pos) - weakestStarter(s, offer.player.pos);
     if (gain < minGain) continue;
-    if (!canAddPlayer(s, offer.price).ok || s.club.treasury - offer.price < reserve) continue;
+    const keep = reserve + salaryMonthsKept * offer.player.monthlySalary;
+    if (!canAddPlayer(s, offer.price).ok || s.club.treasury - offer.price < keep) continue;
     s = run(s, { type: 'buyPlayer', playerId: offer.player.id });
   }
   return s;
@@ -139,18 +141,31 @@ export const STRATEGIES: Record<StrategyName, Strategy> = {
     build: (state) => {
       let s = state;
       const reserve = 100000;
+      // Prudent : garde de quoi payer une demi-saison du nouvel entretien.
+      const keep = (type: ConstructionType, level: number) => reserve + 26 * (upkeepAt(type, level) - upkeepAt(type, level - 1));
       s = buildFirst(s, ['academy', 'shop', 'housing', 'transport', 'bar'], reserve);
+      s = buildFirst(s, ['training'], keep('training', 1));
       for (const { slot } of allSlots(s.city)) {
         if (!slot.building) continue;
         const up = canUpgrade(s, slot.id);
-        if (up.ok && s.club.treasury - up.cost >= reserve) s = run(s, { type: 'upgradeBuilding', slotId: slot.id });
+        if (up.ok && s.club.treasury - up.cost >= keep(slot.building.type, slot.building.level + 1)) {
+          s = run(s, { type: 'upgradeBuilding', slotId: slot.id });
+        }
       }
       const d = attendanceForCheck(s);
       const check = canExtendStadium(s);
-      if (d.limitedBy === 'capacity' && check.ok && s.club.treasury - check.cost >= reserve) s = run(s, { type: 'extendStadium' });
+      const stadiumKeep = keep('stadium', s.city.stadiumLevel + 1);
+      if (d.limitedBy === 'capacity' && check.ok && s.club.treasury - check.cost >= stadiumKeep) s = run(s, { type: 'extendStadium' });
+      // Staff au complet au-delà de 3 M€, licencié sous 1 M€.
+      const hire = s.club.treasury > 3_000_000;
+      const fire = s.club.treasury < 1_000_000;
+      for (const role of ['physio', 'scout', 'analyst'] as const) {
+        if ((hire && !s.staff[role]) || (fire && s.staff[role])) s = run(s, { type: 'setStaff', role, hired: hire });
+      }
       return s;
     },
-    recruit: (state) => buyUpgrades(state, 100000, 0.5),
+    // Achète seulement s'il reste de quoi payer une saison de salaire du joueur.
+    recruit: (state) => buyUpgrades(state, 100000, 0.5, 12),
     eventChoice: (state) => (state.events.pending!.eventId === 'playerOffer' ? 'refuse' : firstAllowedChoice(state)),
     acceptRaises: true,
   },

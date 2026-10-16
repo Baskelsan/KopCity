@@ -15,7 +15,7 @@ import { autoLineup, benchOf, effectiveLineup } from './lineup';
 import { clubOutcome, createMatch, runMatch, simulateToEnd, type ClubContext } from './match';
 import type { MatchState, Side } from './matchTypes';
 import { completeCupRound, cupRoundThisWeek, playCupRound } from './cup';
-import { homeStrengthFactor, wearEffects } from './effects';
+import { homeStrengthFactor, staffInjuryFactor, staffStrengthFactor, wearEffects } from './effects';
 import { rollEvent, settleCommitments } from './events';
 import { endSeason, generateMarket } from './offseason';
 import { applyMatchStats } from './playerStats';
@@ -102,7 +102,8 @@ function prepareMyMatch(state: GameState, live: boolean): { state: GameState; ma
     onField,
     bench: benchOf(players, onField),
     style,
-    strengthFactor: clubSide === 'home' ? homeStrengthFactor(state) : 1,
+    strengthFactor: (clubSide === 'home' ? homeStrengthFactor(state) : 1) * staffStrengthFactor(state),
+    clubInjuryFactor: staffInjuryFactor(state),
   });
   return { state: { ...state, meta: { ...state.meta, rngState: seed.rngState } }, match };
 }
@@ -277,7 +278,7 @@ export function advance(state: GameState): GameState {
     s = rollEvent(s);
     if (s.events.pending) return { ...s, alerts: [{ key: 'event', params: { eventId: s.events.pending.eventId } }] };
     if (s.time.week === balance.market.winterWeek && s.market.lastWinterSeason !== s.time.season) {
-      const offers = generateMarket(s.meta.rngState, s.league.myDivision);
+      const offers = generateMarket(s.meta.rngState, s.league.myDivision, s.staff.scout);
       return {
         ...s,
         meta: { ...s.meta, rngState: offers.rngState },

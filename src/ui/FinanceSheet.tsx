@@ -29,6 +29,7 @@ function Report({ title, report, homeMatches }: { title: string; report: Finance
     [F.wages, report.expenses.wages],
     [F.upkeep, report.expenses.upkeep],
     [F.running, report.expenses.running],
+    [F.staff, report.expenses.staff],
     [F.fines, report.expenses.fines],
     [F.otherExpenses, report.expenses.other],
   ];

@@ -108,6 +108,7 @@ export function weekFinance(state: GameState, homeOpponentId: string | null): Fi
       running: E.runningCosts,
       fines: city.residentSatisfaction < E.fineBelowSatisfaction ? E.finePerWeek : 0,
       other: 0,
+      staff: staffWeeklyCost(state),
     },
     attendance,
   };
@@ -116,13 +117,13 @@ export function weekFinance(state: GameState, homeOpponentId: string | null): Fi
 export const totalIncome = (r: FinanceReport) =>
   r.income.tickets + r.income.bars + r.income.shop + r.income.sponsors + r.income.other + r.income.cup;
 export const totalExpenses = (r: FinanceReport) =>
-  r.expenses.wages + r.expenses.upkeep + r.expenses.running + r.expenses.fines + r.expenses.other;
+  r.expenses.wages + r.expenses.upkeep + r.expenses.running + r.expenses.fines + r.expenses.other + r.expenses.staff;
 export const netResult = (r: FinanceReport) => totalIncome(r) - totalExpenses(r);
 
 export function emptyReport(): FinanceReport {
   return {
     income: { tickets: 0, bars: 0, shop: 0, sponsors: 0, other: 0, cup: 0 },
-    expenses: { wages: 0, upkeep: 0, running: 0, fines: 0, other: 0 },
+    expenses: { wages: 0, upkeep: 0, running: 0, fines: 0, other: 0, staff: 0 },
     attendance: null,
   };
 }
@@ -143,6 +144,16 @@ export function nextSupporterShare(share: number, outcome: 'win' | 'draw' | 'los
   const S = balance.supporters;
   const next = share + S[outcome];
   return Math.round(clamp(next, S.min, S.max) * 10000) / 10000;
+}
+
+/** Salaire hebdomadaire du staff embauché. */
+export function staffWeeklyCost(state: GameState): number {
+  const S = balance.staff;
+  return (
+    (state.staff.physio ? S.physio.weeklyCost : 0) +
+    (state.staff.scout ? S.scout.weeklyCost : 0) +
+    (state.staff.analyst ? S.analyst.weeklyCost : 0)
+  );
 }
 
 /** Prix réglable par pas de 10 %, entre 50 % et 200 % du prix de base. */

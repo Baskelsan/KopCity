@@ -3,9 +3,34 @@
     "cost": 400000,
     "upkeep": 5000,
     "weeks": 6,
-    "maxLevel": 3,
+    "maxLevel": 5,
     "capacity": 2000,
-    "satisfaction": -5
+    "satisfaction": -5,
+    "levelCosts": [
+      400000,
+      400000,
+      400000,
+      2000000,
+      4000000
+    ],
+    "levelUpkeeps": [
+      5000,
+      5000,
+      5000,
+      15000,
+      25000
+    ],
+    "levelCapacities": [
+      2000,
+      2000,
+      2000,
+      3000,
+      3000
+    ],
+    "levelMinDivision": {
+      "4": "D1",
+      "5": "D1"
+    }
   },
   "bar": {
     "cost": 60000,
@@ -49,5 +74,23 @@
     "weeks": 6,
     "maxLevel": 3,
     "unique": true
+  },
+  "training": {
+    "cost": 1000000,
+    "levelCosts": [
+      1000000,
+      2000000,
+      4000000
+    ],
+    "upkeep": 25000,
+    "levelUpkeeps": [
+      25000,
+      25000,
+      50000
+    ],
+    "weeks": 8,
+    "maxLevel": 3,
+    "unique": true,
+    "minDivision": "D2"
   }
 }

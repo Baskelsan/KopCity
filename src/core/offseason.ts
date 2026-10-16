@@ -1,7 +1,7 @@
 // Fin de saison et intersaison : montées et descentes, prime, évolution des équipes et des joueurs,
 // contrats, jeunes du centre de formation, mercato, puis lancement de la saison suivante.
 import balance from '../data/balance.json';
-import { academyLevel, unlockDistricts } from './city';
+import { academyLevel, trainingLevel, unlockDistricts } from './city';
 import { emptyReport, netResult } from './economy';
 import { divisionAbove, divisionBelow, DIVISIONS, newSeasonDivision, pickRival, rankOf, standings } from './league';
 import { autoLineup } from './lineup';
@@ -100,7 +100,7 @@ export function startingElevenLevel(state: GameState): number {
 // ——— Joueurs ———
 
 /** Vieillissement : progression des jeunes vers leur potentiel, stabilité, puis déclin. */
-export function agePlayer(rngState: number, player: Player, academy: number): Draw<Player> {
+export function agePlayer(rngState: number, player: Player, academy: number, training = 0): Draw<Player> {
   let rng = rngState;
   const age = player.age + 1;
   const stats = { ...player.stats };
@@ -128,11 +128,25 @@ export function agePlayer(rngState: number, player: Player, academy: number): Dr
       }
     }
   } else if (age >= AG.declineFromAge) {
+    const TR = balance.training;
+    const reduction = training >= TR.declineReductionFromLevel ? 1 : 0;
     for (const key of STAT_KEYS) {
       const loss = nextInt(rng, AG.declineMin, AG.declineMax);
       rng = loss.rngState;
-      stats[key] = clamp(stats[key] - loss.value, 1, 20);
+      stats[key] = clamp(stats[key] - Math.max(0, loss.value - reduction), 1, 20);
     }
+  }
+  // Centre d'entraînement : jusqu'à 29 ans, chance de +1 sur chaque stat (10 % par niveau), sans dépasser le potentiel.
+  if (training > 0 && age <= balance.training.maxAge) {
+    const chance = training * balance.training.chancePerLevel;
+    const before = { ...stats };
+    for (const key of STAT_KEYS) {
+      const lucky = nextChance(rng, chance);
+      rng = lucky.rngState;
+      if (lucky.value) stats[key] = clamp(stats[key] + 1, 1, 20);
+    }
+    const ceiling = Math.max(player.potential, lineRating({ ...player, stats: before }, player.pos));
+    if (lineRating({ ...player, stats }, player.pos) > ceiling) Object.assign(stats, before);
   }
   return { value: { ...player, age, stats }, rngState: rng };
 }
@@ -177,19 +191,39 @@ export function generateProspects(
   return { value: prospects, rngState: rng };
 }
 
-/** Joueurs proposés au mercato, au niveau de la division du club. */
-export function generateMarket(rngState: number, division: DivisionId): Draw<MarketOffer[]> {
+/**
+ * Joueurs proposés au mercato, au niveau de la division du club. Avec un recruteur : 10 joueurs, dont 2 d'un
+ * niveau au-dessus, et des étoiles exactes. En Division 2 et en Élite, 1 ou 2 vedettes en plus, vendues 1,5 fois leur valeur.
+ */
+export function generateMarket(rngState: number, division: DivisionId, scout = false): Draw<MarketOffer[]> {
+  const SC = balance.staff.scout;
+  const ST = MK.stars;
   let rng = rngState;
-  const count = nextInt(rng, MK.offersMin, MK.offersMax);
+  const count = scout ? { value: SC.offers, rngState: rng } : nextInt(rng, MK.offersMin, MK.offersMax);
   rng = count.rngState;
   const offers: MarketOffer[] = [];
+  const options = { starsErrorFactor: scout ? 0 : 1 };
   for (let i = 0; i < count.value; i++) {
     const pos = weightedPosition(rng, balance.players.squadComposition);
     const spread = floatBetween(pos.rngState, -MK.levelSpread, MK.levelSpread);
-    const draw = generatePlayer(spread.rngState, pos.value, divisionLevel(division) + spread.value);
+    const bonus = scout && i < SC.topOffers ? SC.topLevelBonus : 0;
+    const draw = generatePlayer(spread.rngState, pos.value, divisionLevel(division) + spread.value + bonus, options);
     rng = draw.rngState;
     const player = { ...draw.value, monthlySalary: contractSalary(draw.value, division) };
     offers.push({ player, price: transferValue(player) });
+  }
+  if (ST.divisions.includes(division)) {
+    const stars = nextInt(rng, ST.min, ST.max);
+    rng = stars.rngState;
+    for (let i = 0; i < stars.value; i++) {
+      const pos = weightedPosition(rng, balance.players.squadComposition);
+      const bonus = floatBetween(pos.rngState, ST.levelBonusMin, ST.levelBonusMax);
+      const draw = generatePlayer(bonus.rngState, pos.value, divisionLevel(division) + bonus.value, options);
+      rng = draw.rngState;
+      const player = { ...draw.value, monthlySalary: contractSalary(draw.value, division) };
+      const price = Math.round((transferValue(player) * ST.priceFactor) / MK.valueRounding) * MK.valueRounding;
+      offers.push({ player, price, star: true });
+    }
   }
   return { value: offers, rngState: rng };
 }
@@ -231,11 +265,12 @@ export function endSeason(state: GameState): GameState {
 
   // Joueurs : âge, progression, retraite ; contrats qui avancent d'une saison.
   const academy = academyLevel(state.city);
+  const training = trainingLevel(state.city);
   const retired: string[] = [];
   const ratingChanges: RatingChange[] = [];
   const players: Player[] = [];
   for (const p of state.squad.players) {
-    const aged = agePlayer(rng, p, academy);
+    const aged = agePlayer(rng, p, academy, training);
     rng = aged.rngState;
     ratingChanges.push({ playerId: p.id, name: p.name, age: aged.value.age, before: overall(p), after: overall(aged.value) });
     const retire = retires(rng, aged.value);
@@ -270,7 +305,7 @@ export function endSeason(state: GameState): GameState {
 
   const prospects = generateProspects(rng, academy, state.city.population);
   rng = prospects.rngState;
-  const market = generateMarket(rng, newDivision);
+  const market = generateMarket(rng, newDivision, state.staff.scout);
   rng = market.rngState;
 
   const unlock = unlockDistricts(state.city, newDivision);

@@ -34,6 +34,43 @@ export interface BuildingSpec {
   maxPerDistrict?: number;
   /** Recettes en plus par niveau au-delà du premier (+50 %). */
   revenuePerLevel?: number;
+  /** Coût de chaque niveau (sinon `cost` à chaque niveau). */
+  levelCosts?: number[];
+  /** Entretien ajouté par chaque niveau (sinon `upkeep` par niveau). */
+  levelUpkeeps?: number[];
+  /** Places ajoutées par chaque palier du stade (sinon `capacity`). */
+  levelCapacities?: number[];
+  /** Division minimale pour construire ce bâtiment. */
+  minDivision?: string;
+  /** Division minimale pour certains niveaux (paliers 4 et 5 du stade : Élite). */
+  levelMinDivision?: Record<string, string>;
+}
+
+const DIVISION_ORDER: Record<string, number> = { D3: 1, D2: 2, D1: 3 };
+
+/** Coût du niveau donné (1 = construction). */
+export function levelCost(type: ConstructionType, level: number): number {
+  const spec = BUILDINGS[type];
+  return spec.levelCosts?.[level - 1] ?? spec.cost;
+}
+
+/** Entretien d'un bâtiment à un niveau donné (somme des niveaux). */
+export function upkeepAt(type: ConstructionType, level: number): number {
+  const spec = BUILDINGS[type];
+  let total = 0;
+  for (let i = 0; i < level; i++) total += spec.levelUpkeeps?.[i] ?? spec.upkeep;
+  return total;
+}
+
+/** Total investi pour atteindre un niveau. */
+export function investedIn(type: ConstructionType, level: number): number {
+  let total = 0;
+  for (let l = 1; l <= level; l++) total += levelCost(type, l);
+  return total;
+}
+
+function divisionAllows(division: string, required: string | undefined): boolean {
+  return required === undefined || (DIVISION_ORDER[division] ?? 0) >= (DIVISION_ORDER[required] ?? 0);
 }
 
 /** Multiplicateur de recettes d'un bâtiment selon son niveau. */
@@ -52,7 +89,7 @@ export interface DistrictSpec {
 
 export const BUILDINGS = buildingsData as Record<ConstructionType, BuildingSpec>;
 export const DISTRICTS = districtsData as DistrictSpec[];
-export const SLOT_BUILDINGS: BuildingType[] = ['bar', 'shop', 'housing', 'transport', 'academy'];
+export const SLOT_BUILDINGS: BuildingType[] = ['bar', 'shop', 'housing', 'transport', 'academy', 'training'];
 
 const DIVISION_RANK: Record<DivisionId, number> = { D3: 1, D2: 2, D1: 3 };
 
@@ -93,7 +130,10 @@ const countIn = (city: City, type: BuildingType, filter: (d: DistrictSpec) => bo
 // ——— Valeurs calculées ———
 
 export function stadiumCapacity(city: City): number {
-  return C.baseCapacity + city.stadiumLevel * (BUILDINGS.stadium.capacity ?? 0);
+  const spec = BUILDINGS.stadium;
+  let capacity = C.baseCapacity;
+  for (let i = 0; i < city.stadiumLevel; i++) capacity += spec.levelCapacities?.[i] ?? spec.capacity ?? 0;
+  return capacity;
 }
 
 /** Plafond d'accès : base + chaque parking ou arrêt (compte double dans le quartier de la gare). */
@@ -121,8 +161,8 @@ export function satisfactionTarget(city: City): number {
 
 /** Entretien hebdomadaire : stade (base + paliers) et bâtiments (par niveau). */
 export function weeklyUpkeep(city: City): number {
-  const stadium = C.stadiumBaseUpkeep + city.stadiumLevel * BUILDINGS.stadium.upkeep;
-  return builtBuildings(city).reduce((sum, b) => sum + BUILDINGS[b.type].upkeep * b.level, stadium);
+  const stadium = C.stadiumBaseUpkeep + upkeepAt('stadium', city.stadiumLevel);
+  return builtBuildings(city).reduce((sum, b) => sum + upkeepAt(b.type, b.level), stadium);
 }
 
 /**
@@ -152,6 +192,10 @@ export function shopWeeklyRevenue(city: City): number {
     .reduce((sum, b) => sum + supporters(city) * perSupporter * b.district.commerceFactor * levelRevenueFactor('shop', b.level), 0);
 }
 
+export function trainingLevel(city: City): number {
+  return builtBuildings(city).find((b) => b.type === 'training')?.level ?? 0;
+}
+
 export function academyLevel(city: City): number {
   return builtBuildings(city).find((b) => b.type === 'academy')?.level ?? 0;
 }
@@ -168,6 +212,7 @@ export type BuildRefusal =
   | 'onePerDistrict'
   | 'maxLevel'
   | 'lowSatisfaction'
+  | 'divisionTooLow'
   | 'unknownSlot';
 
 export type BuildCheck = { ok: true; cost: number } | { ok: false; reason: BuildRefusal; cost: number };
@@ -182,13 +227,14 @@ function commonChecks(state: GameState, cost: number): BuildCheck | null {
 
 /** Peut-on lancer ce bâtiment sur cet emplacement libre ? */
 export function canBuild(state: GameState, slotId: string, type: BuildingType): BuildCheck {
-  const cost = BUILDINGS[type].cost;
+  const cost = levelCost(type, 1);
   const found = findSlot(state.city, slotId);
   if (!found) return { ok: false, reason: 'unknownSlot', cost };
   if (!found.district.unlocked) return { ok: false, reason: 'districtLocked', cost };
   if (found.slot.building) return { ok: false, reason: 'slotOccupied', cost };
   if (isBusy(state.city, slotId)) return { ok: false, reason: 'underConstruction', cost };
   const spec = BUILDINGS[type];
+  if (!divisionAllows(state.league.myDivision, spec.minDivision)) return { ok: false, reason: 'divisionTooLow', cost };
   if (spec.unique) {
     const exists = countIn(state.city, type) > 0 || state.city.constructions.some((c) => c.type === type);
     if (exists) return { ok: false, reason: 'uniqueBuilding', cost };
@@ -209,25 +255,31 @@ export function canUpgrade(state: GameState, slotId: string): BuildCheck {
   const building = found?.slot.building;
   if (!found || !building) return { ok: false, reason: 'unknownSlot', cost: 0 };
   const spec = BUILDINGS[building.type];
-  if (building.level >= spec.maxLevel) return { ok: false, reason: 'maxLevel', cost: spec.cost };
-  if (isBusy(state.city, slotId)) return { ok: false, reason: 'underConstruction', cost: spec.cost };
-  return commonChecks(state, spec.cost) ?? { ok: true, cost: spec.cost };
+  const cost = levelCost(building.type, building.level + 1);
+  if (building.level >= spec.maxLevel) return { ok: false, reason: 'maxLevel', cost };
+  if (isBusy(state.city, slotId)) return { ok: false, reason: 'underConstruction', cost };
+  return commonChecks(state, cost) ?? { ok: true, cost };
 }
 
 /** Peut-on lancer le palier suivant du stade ? */
 export function canExtendStadium(state: GameState): BuildCheck {
   const spec = BUILDINGS.stadium;
-  if (state.city.stadiumLevel >= spec.maxLevel) return { ok: false, reason: 'maxLevel', cost: spec.cost };
-  if (isBusy(state.city, null)) return { ok: false, reason: 'underConstruction', cost: spec.cost };
-  if (state.city.residentSatisfaction < C.stadiumExtensionMinSatisfaction) {
-    return { ok: false, reason: 'lowSatisfaction', cost: spec.cost };
+  const next = state.city.stadiumLevel + 1;
+  const cost = levelCost('stadium', next);
+  if (state.city.stadiumLevel >= spec.maxLevel) return { ok: false, reason: 'maxLevel', cost };
+  if (isBusy(state.city, null)) return { ok: false, reason: 'underConstruction', cost };
+  if (!divisionAllows(state.league.myDivision, spec.levelMinDivision?.[String(next)])) {
+    return { ok: false, reason: 'divisionTooLow', cost };
   }
-  return commonChecks(state, spec.cost) ?? { ok: true, cost: spec.cost };
+  if (state.city.residentSatisfaction < C.stadiumExtensionMinSatisfaction) {
+    return { ok: false, reason: 'lowSatisfaction', cost };
+  }
+  return commonChecks(state, cost) ?? { ok: true, cost };
 }
 
 /** Remboursement à la démolition : 25 % de tout ce qui a été investi (tous niveaux). */
 export function demolitionRefund(type: BuildingType, level: number): number {
-  return Math.round(BUILDINGS[type].cost * level * C.demolitionRefund);
+  return Math.round(investedIn(type, level) * C.demolitionRefund);
 }
 
 // ——— Actions ———

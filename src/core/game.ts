@@ -29,6 +29,7 @@ import {
   type GameState,
   type PlayStyle,
   type Squad,
+  type StaffRole,
 } from './state';
 
 export interface NewGameOptions {
@@ -104,6 +105,7 @@ export function newGame({ seed, now, clubName, clubColors }: NewGameOptions): Ga
     effects: [],
     gameOver: null,
     cup: cup.value,
+    staff: { physio: false, scout: false, analyst: false },
   };
 }
 
@@ -131,6 +133,7 @@ export type Action =
   | { type: 'markExported' }
   | { type: 'setTicketPrice'; factor: number }
   | { type: 'answerRaise'; playerId: string; accept: boolean }
+  | { type: 'setStaff'; role: StaffRole; hired: boolean }
   | { type: 'addPlayTime'; seconds: number };
 
 const clubContext = (state: GameState): ClubContext => ({
@@ -196,6 +199,8 @@ export function applyAction(state: GameState, action: Action): GameState {
       return startSeason(state);
     case 'setTicketPrice':
       return { ...state, club: { ...state.club, ticketPriceFactor: clampTicketFactor(action.factor) } };
+    case 'setStaff':
+      return { ...state, staff: { ...state.staff, [action.role]: action.hired } };
     case 'answerRaise':
       return answerRaise(state, action.playerId, action.accept);
     case 'markExported':

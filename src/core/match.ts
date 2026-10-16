@@ -38,6 +38,8 @@ export interface NewMatchOptions {
   style: PlayStyle;
   /** Multiplicateur de force du club (1 par défaut). */
   strengthFactor?: number;
+  /** Préparateur physique : blessures du club moins fréquentes et plus courtes (1 par défaut). */
+  clubInjuryFactor?: number;
 }
 
 const sigmoid = (x: number) => 1 / (1 + Math.exp(-x));
@@ -45,7 +47,7 @@ const safe = (x: number) => Math.max(x, 0.01);
 const other = (side: Side): Side => (side === 'home' ? 'away' : 'home');
 
 /** Tire le déroulé du match (minutes des occasions, cartons, blessures) au coup d'envoi. */
-function drawPlan(rngState: number): { plan: MatchPlan; rngState: number } {
+function drawPlan(rngState: number, clubSide: Side, clubInjuryFactor: number): { plan: MatchPlan; rngState: number } {
   let rng = rngState;
   const int = (min: number, max: number) => {
     const draw = nextInt(rng, min, max);
@@ -69,10 +71,11 @@ function drawPlan(rngState: number): { plan: MatchPlan; rngState: number } {
 
   const injuries: MatchPlan['injuries'] = [];
   for (const injuredSide of ['home', 'away'] as const) {
-    const happens = float() < M.injuryChancePerTeam;
+    const factor = injuredSide === clubSide ? clubInjuryFactor : 1;
+    const happens = float() < M.injuryChancePerTeam * factor;
     const minute = int(1, M.fullTimeMinute);
     const weeks = int(M.injuryWeeksMin, M.injuryWeeksMax);
-    if (happens) injuries.push({ minute, side: injuredSide, weeks });
+    if (happens) injuries.push({ minute, side: injuredSide, weeks: Math.max(1, Math.round(weeks * factor)) });
   }
   injuries.sort((a, b) => a.minute - b.minute);
 
@@ -80,7 +83,7 @@ function drawPlan(rngState: number): { plan: MatchPlan; rngState: number } {
 }
 
 export function createMatch(options: NewMatchOptions): MatchState {
-  const { plan, rngState } = drawPlan(seedToState(options.seed));
+  const { plan, rngState } = drawPlan(seedToState(options.seed), options.clubSide, options.clubInjuryFactor ?? 1);
   return {
     week: options.week ?? 0,
     competition: 'league',

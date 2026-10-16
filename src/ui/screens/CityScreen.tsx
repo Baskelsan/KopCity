@@ -10,6 +10,7 @@ import {
   demolitionRefund,
   districtSpec,
   findSlot,
+  levelCost,
   satisfactionTarget,
   shopWeeklyRevenue,
   SLOT_BUILDINGS,
@@ -174,6 +175,11 @@ function EffectList({ before, after, slotId, type, level }: { before: City; afte
   }
   if (type === 'shop') lines.push(format(E.shopRevenue, { amount: formatEuros(shopWeeklyRevenue(after) - shopWeeklyRevenue(before)) }));
   if (type === 'academy') lines.push(format(E.academy, { level }));
+  if (type === 'training') {
+    const chance = `${Math.round(level * balance.training.chancePerLevel * 100)} %`;
+    lines.push(format(E.training, { level, chance }));
+    if (level >= balance.training.declineReductionFromLevel) lines.push(E.trainingVeterans);
+  }
   diff(E.population, before.population, after.population);
   diff(E.accessCap, accessCap(before), accessCap(after));
   diff(E.satisfaction, satisfactionTarget(before), satisfactionTarget(after));
@@ -235,7 +241,7 @@ function StadiumSheet({ state, onClose, onAct }: { state: GameState; onClose: ()
               <li>{format(E.satisfaction, { before: satisfactionTarget(city), after: satisfactionTarget(after) })}</li>
               <li>{format(E.upkeep, { before: formatEuros(weeklyUpkeep(city)), after: formatEuros(weeklyUpkeep(after)) })}</li>
             </ul>
-            <Facts cost={spec.cost} weeks={spec.weeks} />
+            <Facts cost={check.cost} weeks={spec.weeks} />
             <CheckButton
               check={check}
               label={format(T.launch, { cost: formatEuros(check.cost) })}
@@ -316,7 +322,7 @@ function SlotSheet({
                 type={building.type}
                 level={nextLevel}
               />
-              <Facts cost={spec.cost} weeks={spec.weeks} />
+              <Facts cost={upgrade.cost} weeks={spec.weeks} />
               <CheckButton
                 check={upgrade}
                 label={format(T.upgrade, { level: nextLevel, cost: formatEuros(upgrade.cost) })}
@@ -355,7 +361,7 @@ function SlotSheet({
             <section key={type} class={`build-option b-${type}`}>
               <h3>{texts.buildings[type]}</h3>
               <EffectList before={city} after={withBuilding(city, slotId, type, 1)} slotId={slotId} type={type} level={1} />
-              <Facts cost={spec.cost} weeks={spec.weeks} />
+              <Facts cost={levelCost(type, 1)} weeks={spec.weeks} />
               <CheckButton
                 check={check}
                 label={format(T.launch, { cost: formatEuros(check.cost) })}

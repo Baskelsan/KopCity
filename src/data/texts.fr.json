@@ -171,7 +171,8 @@
     "shop": "Boutique du club",
     "housing": "Logements",
     "transport": "Parking / arrêt de transport",
-    "academy": "Centre de formation"
+    "academy": "Centre de formation",
+    "training": "Centre d'entraînement"
   },
   "city": {
     "summary": "La ville",
@@ -225,7 +226,9 @@
       "barRate": "{rate} par spectateur à chaque match à domicile",
       "shopRevenue": "Boutique : {amount} par semaine",
       "academy": "Centre de formation niveau {level} : meilleurs jeunes, progression plus rapide",
-      "upkeep": "Entretien : {before} → {after} / sem."
+      "upkeep": "Entretien : {before} → {after} / sem.",
+      "training": "Centre d'entraînement niveau {level} : chaque joueur de 29 ans ou moins a {chance} de chances de gagner +1 par stat à chaque intersaison",
+      "trainingVeterans": "Au niveau 3, les plus de 31 ans perdent 1 point de moins par saison"
     },
     "refusals": {
       "districtLocked": "Ce quartier n'est pas encore débloqué.",
@@ -237,7 +240,8 @@
       "maxLevel": "Niveau maximum atteint.",
       "lowSatisfaction": "Riverains trop mécontents (moins de 40) pour agrandir le stade.",
       "unknownSlot": "Emplacement introuvable.",
-      "onePerDistrict": "Un seul par quartier."
+      "onePerDistrict": "Un seul par quartier.",
+      "divisionTooLow": "Pas encore disponible : il faut monter de division (Division 2 pour le centre d'entraînement, Élite pour les paliers 4 et 5 du stade)."
     },
     "shopRevenue": "Recettes de la boutique",
     "barsRevenue": "Recettes des bars",
@@ -326,7 +330,8 @@
     "seasonAttendance": "{total} spectateurs sur {matches} match(s) à domicile, soit {average} en moyenne",
     "otherIncome": "Transferts et événements",
     "otherExpenses": "Transferts et événements",
-    "cup": "Coupe (billetterie et primes)"
+    "cup": "Coupe (billetterie et primes)",
+    "staff": "Staff"
   },
   "league": {
     "calendar": "Calendrier",
@@ -396,7 +401,9 @@
       "notEnoughMoney": "Trésorerie insuffisante.",
       "marketClosed": "Le mercato est fermé.",
       "unknown": "Action impossible."
-    }
+    },
+    "star": "Vedette",
+    "starHint": "Joueur d'exception, vendu {factor} fois sa valeur."
   },
   "events": {
     "starInjured": {
@@ -794,5 +801,23 @@
         "body": "Si la trésorerie reste négative 4 semaines de suite, c'est la faillite et la partie s'arrête ; son palmarès est gardé dans les parties précédentes. La partie est sauvegardée automatiquement, mais iOS peut effacer les données : exporte ta sauvegarde de temps en temps (onglet Club, ou au rappel de fin de saison)."
       }
     ]
+  },
+  "staff": {
+    "title": "Staff",
+    "intro": "Embauche ou licencie quand tu veux. Le salaire est payé chaque semaine.",
+    "roles": {
+      "physio": "Préparateur physique",
+      "scout": "Recruteur",
+      "analyst": "Analyste vidéo"
+    },
+    "effects": {
+      "physio": "Blessures {percent} % moins fréquentes et plus courtes.",
+      "scout": "Mercato : {offers} joueurs dont {top} d'un niveau au-dessus, et étoiles exactes.",
+      "analyst": "+{percent} % de force à chaque match."
+    },
+    "hire": "Embaucher · {cost} / sem.",
+    "fire": "Licencier",
+    "hired": "En poste",
+    "total": "Total : {amount} / sem."
   }
 }

@@ -1,4 +1,5 @@
 // Effets temporaires laissés par les événements : lus par le match et l'économie, usés chaque semaine.
+import balance from '../data/balance.json';
 import type { ActiveEffect, GameState } from './state';
 
 /** Multiplicateur de force du club pour un match à domicile (pelouse abîmée). */
@@ -25,4 +26,14 @@ export function wearEffects(effects: readonly ActiveEffect[], homeMatch: boolean
       return e;
     })
     .filter((e) => !('matchesLeft' in e && e.matchesLeft <= 0) && !('weeksLeft' in e && e.weeksLeft <= 0));
+}
+
+/** Analyste vidéo : un peu plus de force à chaque match. */
+export function staffStrengthFactor(state: GameState): number {
+  return state.staff.analyst ? balance.staff.analyst.strengthFactor : 1;
+}
+
+/** Préparateur physique : blessures moins fréquentes et plus courtes. */
+export function staffInjuryFactor(state: GameState): number {
+  return state.staff.physio ? balance.staff.physio.injuryFactor : 1;
 }

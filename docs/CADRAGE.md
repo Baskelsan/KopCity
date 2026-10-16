@@ -131,12 +131,13 @@ La ville est faite de 4 quartiers, chacun avec un nombre fixe d'emplacements. On
 
 | Bâtiment | Coût (€) | Entretien (€/sem.) | Chantier | Effet | Contrepartie |
 | --- | --- | --- | --- | --- | --- |
-| Stade (3 paliers, sans emplacement) | 400 000 par palier | 5 000 par palier | 6 semaines | +2 000 places par palier | Riverains −5 par palier |
+| Stade (3 paliers, puis 2 en Élite, sans emplacement) | 400 000 par palier (4e : 2 M€, 5e : 4 M€) | 5 000 par palier (4e : 15 000, 5e : 25 000) | 6 semaines | +2 000 places par palier (4e et 5e : +3 000) | Riverains −5 par palier |
 | Bar / brasserie (un par quartier) | 60 000 | 800 | 2 semaines | affluence × 1,5 € par match à domicile | Riverains −2 s'il est dans le quartier du stade |
 | Boutique du club (une seule) | 90 000 | 1 200 | 3 semaines | supporters × 1 € par semaine | Aucune |
 | Logements | 150 000 | 1 500 | 4 semaines | +2 000 habitants | Riverains −2 s'ils sont dans le quartier du stade |
 | Parking / arrêt de transport | 200 000 | 2 000 | 4 semaines | +2 500 au plafond d'accès | Occupe un emplacement |
 | Centre de formation (3 niveaux, un seul) | 250 000 par niveau | 3 000 par niveau | 6 semaines | Meilleurs jeunes, progression plus rapide | Aucune |
+| Centre d'entraînement (3 niveaux, un seul, dès la Division 2) | 1 M€, 2 M€, 4 M€ | 25 000, 50 000, 100 000 au total | 8 semaines | Progression de tout l'effectif (voir plan B) | Aucune |
 
 **Règles de construction**
 
@@ -438,6 +439,14 @@ Règles que le cadrage ne fixait pas, validées pendant les jalons. Les valeurs 
 - Salaire juste = celui du marché pour la note et la division. Un joueur payé moins de 75 % de ce salaire le réclame ; après une bonne saison, il demande au moins +20 %. Refuser coûte 20 de moral ; au 2e refus d'affilée, le joueur part au lancement de la saison, vendu à sa valeur.
 - En Élite, les clubs visent le niveau du onze du joueur moins 1,5 (au moins 16, au plus 19) : plus il domine, plus ils recrutent.
 - Mesuré sur 15 saisons avec une stratégie « à fond » : note moyenne du onze autour de 14, titres d'Élite rares (environ 10 % des saisons en Élite). Reste à traiter : la trésorerie continue de grimper faute de dépenses utiles en fin de partie.
+
+**Fin de partie — plan B : donner un usage à l'argent**
+- Centre d'entraînement (un seul, à partir de la Division 2) : 3 niveaux à 1 M€, 2 M€ et 4 M€, 8 semaines de chantier, entretien 25 000, 50 000 puis 100 000 € par semaine. À chaque intersaison, chaque joueur de 29 ans ou moins a 10 % de chance par niveau de gagner +1 sur chaque stat, sans dépasser son potentiel. Au niveau 3, les plus de 31 ans perdent 1 point de moins par stat.
+- Stade : paliers 4 et 5 réservés à l'Élite, 2 M€ puis 4 M€, +3 000 places chacun (18 000 places au total), entretien +15 000 puis +25 000 € par semaine, riverains −5 par palier.
+- Staff, embauché ou licencié à tout moment depuis l'onglet Club, payé chaque semaine (ligne « Staff » dans les comptes) : préparateur physique (15 000 €/sem., blessures 40 % moins fréquentes et plus courtes), recruteur (20 000 €/sem., 10 joueurs au mercato dont 2 d'un niveau au-dessus, étoiles exactes), analyste vidéo (25 000 €/sem., +3 % de force à chaque match).
+- Vedettes : en Division 2 et en Élite, 1 ou 2 joueurs en plus à chaque mercato, au niveau de la division +3 à +5 (20 au plus), vendus 1,5 fois leur valeur, payés au salaire du marché.
+- Sauvegarde en version 14 (staff, ligne Staff des comptes).
+- Mesuré sur 15 saisons avec une stratégie « à fond » : la trésorerie plafonne autour de 2 à 3 M€ (au lieu de 12,7 M€), note du onze autour de 14, titres d'Élite toujours rares. La stratégie équilibrée reste à 1 % de faillites. Le bot « à fond » fait faillite dans 20 % des parties sur 15 saisons (10 % avant) : il garde 22 joueurs, accepte toutes les augmentations et ne vend jamais, et ses charges fixes (centre d'entraînement) restent après une descente.
 
 ## Décisions ouvertes et risques
 

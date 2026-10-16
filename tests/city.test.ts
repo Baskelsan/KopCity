@@ -149,7 +149,8 @@ describe('chantiers', () => {
     s = weeks(run(s, { type: 'extendStadium' }), 6);
     s = weeks(run(s, { type: 'extendStadium' }), 6);
     expect(s.city.stadiumLevel).toBe(3);
-    expect(canExtendStadium(s)).toMatchObject({ ok: false, reason: 'maxLevel' });
+    // Les paliers 4 et 5 sont réservés à l'Élite.
+    expect(canExtendStadium(s)).toMatchObject({ ok: false, reason: 'divisionTooLow' });
   });
 
   it('le stade ne s’agrandit plus quand les riverains sont sous 40', () => {

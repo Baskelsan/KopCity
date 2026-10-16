@@ -9,6 +9,7 @@ import { AchievementsView } from '../AchievementsView';
 import { isStandalone } from '../InstallHelp';
 import { RulesView } from '../RulesView';
 import { PastGames, RecordsView } from '../RecordsView';
+import { StaffCard } from '../StaffCard';
 import { TicketPriceCard } from '../TicketPriceCard';
 
 interface ClubScreenProps {
@@ -66,6 +67,7 @@ export function ClubScreen({ state, dispatch, replace, notify, onNewGame, onShow
     <div class="screen">
       <RulesView />
       <TicketPriceCard state={state} dispatch={dispatch} />
+      <StaffCard state={state} dispatch={dispatch} />
       <RecordsView state={state} />
       <AchievementsView unlocked={achievements} />
       <PastGames />

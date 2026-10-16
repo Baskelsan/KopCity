@@ -974,6 +974,38 @@ select {
   gap: 8px;
 }
 
+.star-offer {
+  border-color: var(--accent);
+}
+
+.tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 13px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* Staff */
+
+.staff-list {
+  display: grid;
+  gap: 10px;
+}
+
+.staff-role {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.staff-role p {
+  margin: 4px 0 8px;
+}
+
 .offer .actions {
   padding: 0;
 }

@@ -32,15 +32,22 @@ export function MarketSheet({
       </p>
       {offers.length === 0 && <p class="muted">{MK.empty}</p>}
       <ul class="plain offers">
-        {offers.map(({ player, price }) => {
+        {offers.map(({ player, price, star }) => {
           const check = canAddPlayer(state, price);
           return (
-            <li key={player.id} class="offer">
+            <li key={player.id} class={star ? 'offer star-offer' : 'offer'}>
               <div class="offer-head">
                 <span class={`pos pos-${player.pos}`}>{texts.positions[player.pos]}</span>
-                <strong>{player.name}</strong>
+                <strong>
+                  {player.name} {star && <span class="tag star-tag">{MK.star}</span>}
+                </strong>
                 <span class="rating">{overall(player)}</span>
               </div>
+              {star && (
+                <p class="muted">
+                  {format(MK.starHint, { factor: String(balance.market.stars.priceFactor).replace('.', ',') })}
+                </p>
+              )}
               <p class="muted">
                 {format(texts.squad.age, { age: player.age })} · {formatStars(player.potentialStarsShown)} ·{' '}
                 {format(MK.salary, { salary: formatEuros(player.monthlySalary) })}
